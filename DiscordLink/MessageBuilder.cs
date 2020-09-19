@@ -68,7 +68,7 @@ namespace Eco.Plugins.DiscordLink
 
             if (flag.HasFlag(EcoStatusComponentFlag.Name))
             {
-                builder.WithTitle($"**{FirstNonEmptyString(pluginConfig.ServerName, serverInfo.Name)} " + (isLiveMessage ? "Live Server Status" : "Server Status") + "**\n" + DateTime.Now.ToShortDateString() + " : " + DateTime.Now.ToShortTimeString());
+                builder.WithTitle($"**{FirstNonEmptyString(pluginConfig.ServerName, serverInfo.Name)} " + "\n" + (isLiveMessage ? "Live Server Status" : "Server Status") + " - " + DateTime.Now.ToShortDateString() + " : " + DateTime.Now.ToShortTimeString());
             }
             else
             {
