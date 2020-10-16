@@ -1,6 +1,10 @@
 {
   "PlayerConfigs": [],
   "BotToken": "NjggMDg3MjIDOTg2MFg5MDQx.Xlmuqw.ZYhFUjNFZ8IUYQTR7ng2CxFAy4Q",
+<<<<<<< HEAD
+=======
+  "EcoBotName": "DiscordLink",
+>>>>>>> upstream/master
   "DiscordCommandPrefix": "?",
   "EcoStatusDiscordChannels": [
     {
@@ -28,7 +32,12 @@
       "EcoChannel": "General",
       "AllowUserMentions": true,
       "AllowRoleMentions": true,
+<<<<<<< HEAD
       "AllowChannelMentions": true
+=======
+      "AllowChannelMentions": true,
+      "HereAndEveryoneMentionPermission": "Forbidden"
+>>>>>>> upstream/master
     },
   ],
   "Debug": false,

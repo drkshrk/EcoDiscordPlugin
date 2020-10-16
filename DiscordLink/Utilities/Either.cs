@@ -34,4 +34,8 @@
             return (_value != null ? _value.GetHashCode() : 0);
         }
     }
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> upstream/master

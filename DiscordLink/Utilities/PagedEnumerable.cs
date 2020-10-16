@@ -2,7 +2,11 @@
 using System.Collections;
 using System.Collections.Generic;
 
+<<<<<<< HEAD
 namespace Eco.Plugins.DiscordLink
+=======
+namespace Eco.Plugins.DiscordLink.Utilities
+>>>>>>> upstream/master
 {
     /*
      * Adds Paging to an IEnumerable.
@@ -37,7 +41,11 @@ namespace Eco.Plugins.DiscordLink
             return GetEnumerator();
         }
     }
+<<<<<<< HEAD
     
+=======
+
+>>>>>>> upstream/master
     public class PagedEnumerator<T> : IEnumerator<T>
     {
         private IEnumerator<T> _wrappedEnumerator;
@@ -107,4 +115,8 @@ namespace Eco.Plugins.DiscordLink
             while (MoveNext()) { action(Current); }
         }
     }
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> upstream/master

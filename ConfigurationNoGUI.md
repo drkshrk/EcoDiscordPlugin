@@ -6,7 +6,6 @@ The config file is named "DiscordLink.eco" is generated inside the _"Config"_ di
 * [Sample Config](#sample-config)
 * [Bot Token](#bot-token)
 * [Linking Channels](#linking-channels)
-* [Eco Status](#eco-status)
 * [Chat Log](#chat-log)
 * [Command Settings](#command-settings)
 * [Server Details](#server-details)
@@ -26,18 +25,36 @@ Once you have a bot token, copy the _"BotToken"_ field in the sample config and 
 4. Set the _"EcoChannel"_ field to the name of the Eco channel you wish to synchronize with the Discord channel in the previous step.
 5. **Optional**: Configure the three flags for Discord mention tag permissions according to your preference of allowing role, user and Channel mentions to be used from Eco.
 
-## Eco Status
-1. Copy the _"EcoStatusDiscordChannels"_ section of the sample config into your config file.
-2. Set _"DiscordGuild"_ field to the name or ID of your Discord Server.
-3. Set the _"DiscordChannel"_ field to the name or ID of the Discord channel you want the status message to be posted in.
-4. **Optional**: Configure the usage flags according to your preferences.  
-
-**Note**: Only one message will be posted and that message will then be kept up to date by DiscordLink through frequent automatic edits.
-
 ## Chat Log
 To enable/disable logging of the chat, set the _"Log Chat"_ option to true/false.  
 **Optional**: Select where the log should be stored by entering an **absolute** file path.  
 Keeping it in the mod directory is recommended in order to make sure the mod has permissions to write to files at the location and to keep it excluded from actions taken by the Eco server.
+
+## Logging
+The _Log Level_ and _Backend Log Level_ should generally be kept at their defaults unless you are troubleshooting an issue or want to turn off the output in the Eco server log.
+
+All non-verbose and non-backend log messages are written to a separate log in "Mods/DiscordLink/Pluginlog.txt", regardless of log settings.
+
+The potential values for Log Level is:
+* Debug Verbose
+* Debug
+* Warning
+* Information
+* Error
+* Silent
+
+The potential values for Backend Log Level is:
+* Trace
+* Debug
+* Information
+* Warning
+* Error
+* Critical
+* None
+
+**Notes**
+* All message types below the selected one will be printed as well.
+* All non-verbose and non-backend log messages are written to a separate log in "Mods/DiscordLink/Pluginlog.txt", regardless of log settings.
 
 ## Command Settings
 **Discord Command Prefix**  

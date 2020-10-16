@@ -5,7 +5,6 @@ From here, you can manipulate all configuration options available and most of th
 #### Sections
 * [Bot Token](#bot-token)
 * [Linking Channels](#linking-channels)
-* [Eco Status](#eco-status)
 * [Chat Log](#chat-log)
 * [Command Settings](#command-settings)
 * [Server Details](#server-details)
@@ -15,7 +14,7 @@ See the [installation guide](Installation.md)
 
 ## Linking Channels
 
-1. The box you're interested in is called "ChatChannelLinks". Click on the three dots next to the box saying "(Collection)". This may be hidden until you mouse over it.
+1. The box you're interested in is called "Chat Channel Links" and it is located in the subcategory "Feeds". Click on the three dots next to the box saying "(Collection)". This may be hidden until you mouse over it.
 
 ![Opening Collection Window](images/configuration/channellinking/1.png)
 
@@ -47,10 +46,25 @@ See the [installation guide](Installation.md)
 
 ![Opening Collection Window](images/configuration/ecostatus/3.png)
 
+![Configure Link](images/configuration/channellinking/3.png)
+
+4. You're done! All messages sent into the configured Discord channel and Eco chat channel should now be cross posting all player messages.
+
+## Eco Bot Name
+The name the bot should use when posting in Eco.
+Note that the bot user is created when the server starts for the first time after a world reset and therefore, changing this will only take effect after the next world reset.
+
 ## Chat Log
 To enable/disable logging of the chat, toggle the _"Log Chat"_ option in the _"ChatLog Configuration"_ section of the DiscordLink configuration options.
 **Optional**: Select where the log should be stored.  
 Keeping it in the mod directory is recommended in order to make sure the mod has permissions to write to files at the location and to keep it excluded from actions taken by the Eco server.
+
+## Logging
+The _Log Level_ and _Backend Log Level_ should generally be kept at their defaults unless you are troubleshooting an issue or want to turn off the output in the Eco server log.
+
+**Notes**
+* All message types below the selected one will be printed as well.
+* All non-verbose and non-backend log messages are written to a separate log in "Mods/DiscordLink/Pluginlog.txt", regardless of log settings.
 
 ## Command Settings
 **Discord Command Prefix**  

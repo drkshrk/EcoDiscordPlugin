@@ -1,3 +1,7 @@
+<<<<<<< HEAD
+=======
+
+>>>>>>> upstream/master
 ![DiscordLink Logo](images/DiscordLinkLogo_Nameless_Small.png)
 # DiscordLink
 
@@ -8,16 +12,29 @@ This Eco Global Survival plugin connects Discord servers to the game server.
 ### Features
 * `Seamless communication`  
 Connect your Eco chat to one or multiple Discord servers and channels for seamless and automated communication between Eco and Discord.
+<<<<<<< HEAD
 * `Live Eco Server Status Display`  
 Display live updates of online players, remaining time, your server logo and more in a Discord channel.
+=======
+* `Discord Displays`  
+See live updated information on Server Status, Elections and Work parties in Discord.  
+* `Discord Feeds` 
+See feeds of ingame events in Discord.  
+* `Discord Inputs` 
+Add predefined messages in Discord and invoke them ingame using the /Snippet command.
+>>>>>>> upstream/master
 * `Chat logging`  
 Record the combined Discord and Eco chat in a chat log that persists between server restarts.
 * `Assisted Configuration`  
 DiscordLink will run verification passes on your configuration upon startup and configuration changes and output the result in the server log, helping you diagnose configuration errors.
 * `Helpful Commands`  
 DiscordLink features a number of helpful commands both from within the game and from Discord.
+<<<<<<< HEAD
 _/DiscordInvite_ will help you invite players ingame to your Discord server, while _?Trade_ will help you figure out who has the best deal on those yummy 
 huckleberry muffins!
+=======
+_/DiscordLink Invite_ will help you invite players ingame to your Discord server, while _?Trade_ will help you figure out who has the best deal on those yummy huckleberry muffins!
+>>>>>>> upstream/master
 
 ## Usage
 
@@ -25,6 +42,7 @@ huckleberry muffins!
 In order to synchronize the ingame chat with a Discord channel, you will need to set up a Discord bot and connect it to your Eco server via the DiscordLink config.
 See [installation guide](Installation.md) for information on how to do this.
 
+<<<<<<< HEAD
 ### Commands
 ##### From Discord:
 * `?Help` - Lists available commands.
@@ -44,6 +62,13 @@ See [installation guide](Installation.md) for information on how to do this.
 * `/DiscordMessage [message]` - Sends a message to the default server and channel.
 * `/DiscordSendToChannel [guildname], [channelname], [message]` - Sends a message to a specific server and channel.
 * `/DiscordInvite` - Displays Discord invite message.
+=======
+### Integration Features
+See [Integration Feature List](IntegrationTypes.md) for more information.
+
+### Commands
+See [command list](Commands.md) for available commands and how to use them.
+>>>>>>> upstream/master
 
 ### Notes:
 1. **Emojis**  
@@ -61,11 +86,19 @@ See the [installation guide](Installation.md)
 
 ## Configuration
 
+<<<<<<< HEAD
 ### Server GUI
 [configuration guide](ConfigurationGUI.md) for self hosted servers with access to the server GUI.
 
 ### Config file
 [configuration guide](ConfigurationNoGUI.md) for servers hosted by third parties, where you lack access to the server GUI.
+=======
+### Server GUI  
+See this [configuration guide](ConfigurationGUI.md) for self hosted servers with access to the server GUI.
+
+### Config file
+See this [configuration guide](ConfigurationNoGUI.md) for servers hosted by third parties, where you lack access to the server GUI.
+>>>>>>> upstream/master
 
 ## Discord
 Do you have suggestions, questions or maybe a problem you need help with?
