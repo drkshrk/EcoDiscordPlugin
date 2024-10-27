@@ -747,6 +747,30 @@ namespace Eco.Plugins.DiscordLink
             return await Task.FromResult<DiscordRole>(null);
         }
 
+        public async Task DeleteRoleAsync(DiscordRole role)
+        {
+            if (role == null)
+                return;
+
+            try
+            {
+                Logger.Trace($"Deleting role \"{role.Name}\"");
+                await role.DeleteAsync("Deleted by DiscordLink");
+            }
+            catch (UnauthorizedException e)
+            {
+                Logger.Exception($"DiscordLink was not allowed to delete the role \"{role.Name}\". Ensure that your bot user is assigned a role with higher permission level than all roles it manages.", e);
+            }
+            catch (ServerErrorException e)
+            {
+                Logger.DebugException($"ServerErrorException occurred while deleting role \"{role.Name}\"", e);
+            }
+            catch (Exception e)
+            {
+                Logger.Exception($"Failed to delete role \"{role.Name}\"", e);
+            }
+        }
+
         public DiscordRole GetRoleById(ulong roleId)
         {
             return Guild.GetRoleById(roleId);
@@ -757,17 +781,17 @@ namespace Eco.Plugins.DiscordLink
             return Guild.GetRoleByName(roleName);
         }
 
-        public async Task AddRoleAsync(DiscordMember member, DiscordLinkRole dlRole)
+        public async Task GrantRoleAsync(DiscordMember member, DiscordLinkRole dlRole)
         {
             DiscordRole discordRole = Guild.GetRoleByName(dlRole.Name);
             if (discordRole == null)
                 discordRole = await CreateRoleAsync(dlRole);
 
             if (discordRole != null)
-                await AddRoleAsync(member, discordRole);
+                await GrantRoleAsync(member, discordRole);
         }
 
-        public async Task AddRoleAsync(DiscordMember member, DiscordRole role)
+        public async Task GrantRoleAsync(DiscordMember member, DiscordRole role)
         {
             if (member == null || role == null)
                 return;
@@ -793,7 +817,7 @@ namespace Eco.Plugins.DiscordLink
             }
         }
 
-        public async Task RemoveRoleAsync(DiscordMember member, string roleName)
+        public async Task RevokeRoleAsync(DiscordMember member, string roleName)
         {
             DiscordRole role = Guild.GetRoleByName(roleName);
             if (role == null)
@@ -802,10 +826,10 @@ namespace Eco.Plugins.DiscordLink
                 return;
             }
 
-            await RemoveRoleAsync(member, role);
+            await RevokeRoleAsync(member, role);
         }
 
-        public async Task RemoveRoleAsync(DiscordMember member, DiscordRole role)
+        public async Task RevokeRoleAsync(DiscordMember member, DiscordRole role)
         {
             if (member == null || role == null)
                 return;
@@ -828,30 +852,6 @@ namespace Eco.Plugins.DiscordLink
             catch (Exception e)
             {
                 Logger.Exception($"Failed to revoke role \"{role.Name}\" from member \"{member.Username}\"", e);
-            }
-        }
-
-        public async Task DeleteRoleAsync(DiscordRole role)
-        {
-            if (role == null)
-                return;
-
-            try
-            {
-                Logger.Trace($"Deleting role \"{role.Name}\"");
-                await role.DeleteAsync("Deleted by DiscordLink");
-            }
-            catch (UnauthorizedException e)
-            {
-                Logger.Exception($"DiscordLink was not allowed to delete the role \"{role.Name}\". Ensure that your bot user is assigned a role with higher permission level than all roles it manages.", e);
-            }
-            catch (ServerErrorException e)
-            {
-                Logger.DebugException($"ServerErrorException occurred while deleting role \"{role.Name}\"", e);
-            }
-            catch (Exception e)
-            {
-                Logger.Exception($"Failed to delete role \"{role.Name}\"", e);
             }
         }
 
