@@ -127,7 +127,7 @@ namespace Eco.Plugins.DiscordLink.Modules
 
                 string authorName;
                 string referenceContent;
-                if (refMessage.Author == DiscordLink.Obj.Client.BotMember)
+                if (DiscordLink.Obj.Client.IsUserDiscordLinkBot(refMessage.Author))
                 {
                     const string subStringStartComparison = "**: ";
                     authorName = MessageUtils.DiscordBoldRegex.Match(refMessage.Content).Groups[0].Value.Strip('*'); // Pull the original sender name from the reference message
