@@ -163,7 +163,7 @@ namespace Eco.Plugins.DiscordLink.Extensions
 
         #region DiscordMessage
 
-        public static DiscordChannel GetChannel(this DiscordMessage message) => message.Channel ?? DiscordLink.Obj.Client.DSharpClient.GetChannelAsync(message.ChannelId).Result;
+        public static DiscordChannel GetChannel(this DiscordMessage message) => message.Channel ?? DiscordLink.Obj.Client.GetChannelById(message.ChannelId);
         public static string FormatForLog(this DiscordMessage message) => $"Channel: {message.GetChannel()}\nAuthor: {message.Author}\nMessage: {message.Content}\nAttachments ({message.Attachments.Count}): {string.Join(", ", message.Attachments.Select(a => $"{a.FileName} ({a.FileSize} bytes)"))}";
 
         #endregion
