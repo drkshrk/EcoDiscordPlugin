@@ -10,6 +10,7 @@ using Eco.Plugins.DiscordLink.Extensions;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using static System.Collections.Specialized.BitVector32;
 
 namespace Eco.Plugins.DiscordLink.Modules
 {
@@ -53,14 +54,12 @@ namespace Eco.Plugins.DiscordLink.Modules
                         {
                             if (member.HasRoleWithName(specialty.DisplayName))
                             {
-                                ++_opsCount;
-                                await client.RevokeRoleAsync(member, specialty.DisplayName);
+                                await RevokeSpecialtyRole(client, linkedUser.DiscordMember, specialty.DisplayName);
                             }
                         }
                         else if (!member.HasRoleWithName(specialty.DisplayName) && linkedUser.EcoUser.HasSpecialization(specialty.Type))
                         {
-                            ++_opsCount;
-                            await AddSpecialtyRole(client, linkedUser.DiscordMember, specialty.DisplayName);
+                            await GrantSpecialtyRole(client, linkedUser.DiscordMember, specialty.DisplayName);
                         }
                     }
                 }
@@ -89,16 +88,14 @@ namespace Eco.Plugins.DiscordLink.Modules
                     {
                         if (member.HasRoleWithName(specialty.DisplayName))
                         {
-                            ++_opsCount;
-                            await client.RevokeRoleAsync(member, specialty.DisplayName);
+                            await RevokeSpecialtyRole(client, linkedUser.DiscordMember, specialty.DisplayName);
                         }
                     }
                     else if (trigger == DlEventType.AccountLinkVerified)
                     {
                         if (!member.HasRoleWithName(specialty.DisplayName) && linkedUser.EcoUser.HasSpecialization(specialty.Type))
                         {
-                            ++_opsCount;
-                            await AddSpecialtyRole(client, member, specialty.DisplayName);
+                            await GrantSpecialtyRole(client, member, specialty.DisplayName);
                         }
                     }
                 }
@@ -122,19 +119,25 @@ namespace Eco.Plugins.DiscordLink.Modules
                 if (trigger == DlEventType.GainedSpecialty)
                 {
                     ++_opsCount;
-                    await AddSpecialtyRole(client, linkedUser.DiscordMember, action.Specialty.DisplayName);
+                    await GrantSpecialtyRole(client, linkedUser.DiscordMember, action.Specialty.DisplayName);
                 }
                 else if (trigger == DlEventType.LostSpecialty)
                 {
-                    ++_opsCount;
-                    await client.RevokeRoleAsync(linkedUser.DiscordMember, action.Specialty.DisplayName);
+                   await RevokeSpecialtyRole(client, linkedUser.DiscordMember, action.Specialty.DisplayName);
                 }
             }
         }
 
-        private async Task AddSpecialtyRole(DiscordClient client, DiscordMember member, string specialtyName)
+        private async Task GrantSpecialtyRole(DiscordClient client, DiscordMember member, string specialtyName)
         {
+            ++_opsCount;
             await client.GrantRoleAsync(member, new DiscordLinkRole(specialtyName, null, SpecialtyColor, false, true, $"User has the {specialtyName} specialty"));
+        }
+
+        private async Task RevokeSpecialtyRole(DiscordClient client, DiscordMember member, string specialtyName)
+        {
+            ++_opsCount;
+            await client.RevokeRoleAsync(member, specialtyName);
         }
     }
 }
