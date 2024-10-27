@@ -318,6 +318,16 @@ namespace Eco.Plugins.DiscordLink
 
             IEnumerable<DiscordRole> revokedRoles = args.RolesBefore.Except(args.RolesAfter);
             IEnumerable<DiscordRole> grantedRoles = args.RolesAfter.Except(args.RolesBefore);
+
+            if (revokedRoles.Count() > 0)
+            {
+                await DiscordLink.Obj.HandleEvent(DlEventType.DiscordRolesRevoked, args.Member, revokedRoles);
+            }
+            if (grantedRoles.Count() > 0)
+            {
+                await DiscordLink.Obj.HandleEvent(DlEventType.DiscordRolesGranted, args.Member, grantedRoles);
+            }
+
             // Recache if needed
             if (grantedRoles.Count() > 0 || revokedRoles.Count() > 0)
             {
