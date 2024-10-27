@@ -49,14 +49,12 @@ namespace Eco.Plugins.DiscordLink.Modules
                         {
                             if (member.HasRoleWithName(demographicName))
                             {
-                                ++_opsCount;
-                                await client.RevokeRoleAsync(member, demographicName);
+                                await RevokeDemographicRole(client, linkedUser.DiscordMember, demographicName);
                             }
                         }
                         else if (!member.HasRoleWithName(demographicName) && demographic.ContainsUser(linkedUser.EcoUser))
                         {
-                            ++_opsCount;
-                            await AddDemographicRole(client, member, demographicName);
+                            await GrantDemographicRole(client, member, demographicName);
                         }
                     }
                 }
@@ -83,16 +81,14 @@ namespace Eco.Plugins.DiscordLink.Modules
                     {
                         if (member.HasRoleWithName(demographicName))
                         {
-                            ++_opsCount;
-                            await client.RevokeRoleAsync(member, demographicName);
+                            await RevokeDemographicRole(client, linkedUser.DiscordMember, demographicName);
                         }
                     }
                     else if (trigger == DlEventType.AccountLinkVerified)
                     {
                         if (!member.HasRoleWithName(demographicName) && demographic.ContainsUser(linkedUser.EcoUser))
                         {
-                            ++_opsCount;
-                            await AddDemographicRole(client, linkedUser.DiscordMember, demographicName);
+                            await GrantDemographicRole(client, linkedUser.DiscordMember, demographicName);
                         }
                     }
                 }
@@ -117,13 +113,11 @@ namespace Eco.Plugins.DiscordLink.Modules
                     if (!demographic.IsSpecial && settlement == null && !settlement.Founded) // Settlement is null for special demographics
                         return;
 
-                    ++_opsCount;
-                    await AddDemographicRole(client, linkedUser.DiscordMember, demographicName);
+                    await GrantDemographicRole(client, linkedUser.DiscordMember, demographicName);
                 }
                 else if (trigger == DlEventType.LeftDemographic)
                 {
-                    ++_opsCount;
-                    await client.RevokeRoleAsync(linkedUser.DiscordMember, demographicName);
+                    await RevokeDemographicRole(client, linkedUser.DiscordMember, demographicName);
                 }
             }
         }
@@ -137,9 +131,16 @@ namespace Eco.Plugins.DiscordLink.Modules
                 : demographic.Name;
         }
 
-        private async Task AddDemographicRole(DiscordClient client, DiscordMember member, string demographicName)
+        private async Task GrantDemographicRole(DiscordClient client, DiscordMember member, string demographicName)
         {
+            ++_opsCount;
             await client.GrantRoleAsync(member, new DiscordLinkRole(demographicName, null, DemographicColor, false, true, $"User is in the {demographicName} demographic"));
+        }
+
+        private async Task RevokeDemographicRole(DiscordClient client, DiscordMember member, string demographicName)
+        {
+            ++_opsCount;
+            await client.RevokeRoleAsync(member, demographicName);
         }
     }
 }

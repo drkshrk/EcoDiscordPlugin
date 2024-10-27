@@ -46,14 +46,12 @@ namespace Eco.Plugins.DiscordLink.Modules
                         {
                             if (member.HasRoleWithName(titleName))
                             {
-                                ++_opsCount;
-                                await client.RevokeRoleAsync(member, titleName);
+                                await RevokeElectedTitleRole(client, member, titleName);
                             }
                         }
                         else if (!member.HasRoleWithName(titleName) && title.ContainsUser(linkedUser.EcoUser))
                         {
-                            ++_opsCount;
-                            await AddElectedTitleRole(client, linkedUser.DiscordMember, titleName);
+                            await GrantElectedTitleRole(client, linkedUser.DiscordMember, titleName);
                         }
                     }
                 }
@@ -80,16 +78,14 @@ namespace Eco.Plugins.DiscordLink.Modules
                     {
                         if (member.HasRoleWithName(titleName))
                         {
-                            ++_opsCount;
-                            await client.RevokeRoleAsync(member, titleName);
+                            await RevokeElectedTitleRole(client, member, titleName);
                         }
                     }
                     else if (trigger == DlEventType.AccountLinkVerified)
                     {
                         if (!member.HasRoleWithName(titleName) && title.ContainsUser(linkedUser.EcoUser))
                         {
-                            ++_opsCount;
-                            await AddElectedTitleRole(client, member, titleName);
+                            await GrantElectedTitleRole(client, member, titleName);
                         }
                     }
                 }
@@ -116,8 +112,7 @@ namespace Eco.Plugins.DiscordLink.Modules
                     if (linkedUser == null)
                         continue;
 
-                    ++_opsCount;
-                    await AddElectedTitleRole(client, linkedUser.DiscordMember, title.Name);
+                    await GrantElectedTitleRole(client, linkedUser.DiscordMember, title.Name);
                 }
 
             }
@@ -138,15 +133,21 @@ namespace Eco.Plugins.DiscordLink.Modules
                     if (linkedUser == null)
                         continue;
 
-                    ++_opsCount;
-                    await AddElectedTitleRole(client, linkedUser.DiscordMember, settlement.Leader.Name);
+                    await GrantElectedTitleRole(client, linkedUser.DiscordMember, settlement.Leader.Name);
                 }
             }
         }
 
-        private async Task AddElectedTitleRole(DiscordClient client, DiscordMember member, string titleName)
+        private async Task GrantElectedTitleRole(DiscordClient client, DiscordMember member, string titleName)
         {
+            ++_opsCount;
             await client.GrantRoleAsync(member, new DiscordLinkRole(titleName, null, DemographicColor, false, true, $"User has been elected as {titleName}"));
+        }
+
+        private async Task RevokeElectedTitleRole(DiscordClient client, DiscordMember member, string titleName)
+        {
+            ++_opsCount;
+            await client.RevokeRoleAsync(member, titleName);
         }
     }
 }
