@@ -157,6 +157,15 @@ namespace Eco.Plugins.DiscordLink
             }
         }
 
+        public static void UpdateMemberCache(DiscordMember member)
+        {
+            LinkedUser userLink = LinkedUserByDiscordId(member.Id, requireValid: false);
+            if (userLink == null)
+                return;
+
+            userLink.UpdateMemberCache(member);
+        }
+
         public static async Task HandleEvent(DlEventType eventType, params object[] data)
         {
             switch (eventType)
@@ -279,6 +288,11 @@ namespace Eco.Plugins.DiscordLink
             this.SteamId = steamId;
             this.DiscordId = discordId;
             this.GuildId = guildId;
+        }
+
+        public void UpdateMemberCache(DiscordMember member)
+        {
+            DiscordMember = member;
         }
 
         public async Task LoadDiscordMember()
