@@ -37,12 +37,15 @@ namespace Eco.Plugins.DiscordLink
             ConnectionAborted,
         }
 
-        public DSharpPlus.DiscordClient DSharpClient { get; private set; }
         public DateTime LastConnectionTime { get; private set; } = DateTime.MinValue;
         public bool IsConnected => ConnectionStatus == ConnectionState.Connected;
         public ConnectionState ConnectionStatus { get; private set; } = ConnectionState.Disconnected;
         public ConnectionError LastConnectionError { get; private set; } = ConnectionError.None;
 
+        public string BotName => BotMember?.DisplayName ?? "Unknown - Disconnected";
+        public string DSharpVersion => DSharpClient?.VersionString ?? "Unknown - Disconnected";
+
+        private DSharpPlus.DiscordClient DSharpClient { get; set; } = null;
         private DiscordGuild Guild { get; set; } = null;
         private DiscordMember BotMember { get; set; } = null;
 
@@ -587,6 +590,11 @@ namespace Eco.Plugins.DiscordLink
             }
         }
 
+        public DiscordEmoji GetEmojiByName(string emojiName)
+        {
+            return DiscordEmoji.FromName(DSharpClient, emojiName);
+        }
+
         #endregion
 
         #region Manipulation
@@ -922,6 +930,11 @@ namespace Eco.Plugins.DiscordLink
             {
                 Logger.Exception($"Failed to revoke role \"{role.Name}\" from member \"{member.Username}\"", e);
             }
+        }
+
+        public async Task SetActivityStringAsync(string activityString, ActivityType activityType)
+        {
+            await DSharpClient.UpdateStatusAsync(new DiscordActivity(activityString, activityType));
         }
 
         #endregion

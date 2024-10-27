@@ -104,12 +104,13 @@ namespace Eco.Plugins.DiscordLink
         {
             try
             {
-                ACCEPT_EMOJI = DiscordEmoji.FromName(DiscordLink.Obj.Client.DSharpClient, ":white_check_mark:");
-                DENY_EMOJI = DiscordEmoji.FromName(DiscordLink.Obj.Client.DSharpClient, ":x:");
-                DEBUG_LOG_EMOJI = DiscordEmoji.FromName(DiscordLink.Obj.Client.DSharpClient, ":exclamation:");
-                WARNING_LOG_EMOJI = DiscordEmoji.FromName(DiscordLink.Obj.Client.DSharpClient, ":small_orange_diamond:");
-                INFO_LOG_EMOJI = DiscordEmoji.FromName(DiscordLink.Obj.Client.DSharpClient, ":white_small_square:");
-                ERROR_LOG_EMOJI = DiscordEmoji.FromName(DiscordLink.Obj.Client.DSharpClient, ":small_red_triangle:");
+                DiscordClient client = DiscordLink.Obj.Client;
+                ACCEPT_EMOJI = client.GetEmojiByName(":white_check_mark:");
+                DENY_EMOJI = client.GetEmojiByName(":x:");
+                DEBUG_LOG_EMOJI = client.GetEmojiByName(":exclamation:");
+                WARNING_LOG_EMOJI = client.GetEmojiByName(":small_orange_diamond:");
+                INFO_LOG_EMOJI = client.GetEmojiByName(":white_small_square:");
+                ERROR_LOG_EMOJI = client.GetEmojiByName(":small_red_triangle:");
                 return true;
             }
             catch (Exception e)

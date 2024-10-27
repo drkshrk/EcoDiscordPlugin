@@ -491,15 +491,15 @@ namespace Eco.Plugins.DiscordLink
             UpdateActivityString(DlEventType.Timer);
         }
 
-        private void UpdateActivityString(DlEventType trigger)
+        private async void UpdateActivityString(DlEventType trigger)
         {
             try
             {
-                if (Client.ConnectionStatus != DiscordClient.ConnectionState.Connected
+                if (!Client.IsConnected
                     || (trigger & (DlEventType.Join | DlEventType.Login | DlEventType.Logout | DlEventType.Timer)) == 0)
                     return;
 
-                Client.DSharpClient.UpdateStatusAsync(new DiscordActivity(MessageBuilder.Discord.GetActivityString(), ActivityType.Watching));
+                await Client.SetActivityStringAsync(MessageBuilder.Discord.GetActivityString(), ActivityType.Watching);
             }
             catch (Exception e)
             {

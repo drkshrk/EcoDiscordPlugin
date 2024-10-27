@@ -183,7 +183,7 @@ namespace Eco.Plugins.DiscordLink.Utilities
                     builder.AppendLine($"Server Name: {MessageUtils.FirstNonEmptyString(DLConfig.Data.ServerName, NetworkManager.Config.Name.StripTags(), "[Server Title Missing]")}");
                     builder.AppendLine($"Server Version: {EcoVersion.VersionNumber}");
                     if (client.ConnectionStatus == DiscordClient.ConnectionState.Connected)
-                        builder.AppendLine($"D# Version: {client.DSharpClient.VersionString}");
+                        builder.AppendLine($"D# Version: {client.DSharpVersion}");
                 }
                 builder.AppendLine($"Plugin Status: {plugin.GetStatus()}");
                 builder.AppendLine($"Discord Client Status: {client.Status}");
@@ -216,7 +216,7 @@ namespace Eco.Plugins.DiscordLink.Utilities
                 {
                     builder.AppendLine();
                     builder.AppendLine("--- Configuration ---");
-                    builder.AppendLine($"Bot Name: {client.DSharpClient.CurrentUser.Username}");
+                    builder.AppendLine($"Bot Name: {client.BotName}");
                 }
                 return builder.ToString();
             }
