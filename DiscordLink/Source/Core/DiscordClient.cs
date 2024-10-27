@@ -328,12 +328,7 @@ namespace Eco.Plugins.DiscordLink
                 await DiscordLink.Obj.HandleEvent(DlEventType.DiscordRolesGranted, args.Member, grantedRoles);
             }
 
-            // Recache if needed
-            if (grantedRoles.Count() > 0 || revokedRoles.Count() > 0)
-            {
-                DiscordMember updatedMember = await GetMemberAsync(args.Member.Id, updateCache: true);
-                UserLinkManager.UpdateMemberCache(updatedMember);
-            }
+            UserLinkManager.UpdateMemberCache(args.MemberAfter);
         }
 
         private async Task HandleClientError(DSharpPlus.DiscordClient client, ClientErrorEventArgs args)
