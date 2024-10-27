@@ -50,7 +50,7 @@ namespace Eco.Plugins.DiscordLink.Modules
                             if (member.HasRoleWithName(demographicName))
                             {
                                 ++_opsCount;
-                                await client.RemoveRoleAsync(member, demographicName);
+                                await client.RevokeRoleAsync(member, demographicName);
                             }
                         }
                         else if (!member.HasRoleWithName(demographicName) && demographic.ContainsUser(linkedUser.EcoUser))
@@ -84,7 +84,7 @@ namespace Eco.Plugins.DiscordLink.Modules
                         if (member.HasRoleWithName(demographicName))
                         {
                             ++_opsCount;
-                            await client.RemoveRoleAsync(member, demographicName);
+                            await client.RevokeRoleAsync(member, demographicName);
                         }
                     }
                     else if (trigger == DlEventType.AccountLinkVerified)
@@ -123,7 +123,7 @@ namespace Eco.Plugins.DiscordLink.Modules
                 else if (trigger == DlEventType.LeftDemographic)
                 {
                     ++_opsCount;
-                    await client.RemoveRoleAsync(linkedUser.DiscordMember, demographicName);
+                    await client.RevokeRoleAsync(linkedUser.DiscordMember, demographicName);
                 }
             }
         }
@@ -139,7 +139,7 @@ namespace Eco.Plugins.DiscordLink.Modules
 
         private async Task AddDemographicRole(DiscordClient client, DiscordMember member, string demographicName)
         {
-            await client.AddRoleAsync(member, new DiscordLinkRole(demographicName, null, DemographicColor, false, true, $"User is in the {demographicName} demographic"));
+            await client.GrantRoleAsync(member, new DiscordLinkRole(demographicName, null, DemographicColor, false, true, $"User is in the {demographicName} demographic"));
         }
     }
 }

@@ -56,13 +56,13 @@ namespace Eco.Plugins.DiscordLink.Modules
                         if (member.HasRole(_linkedAccountRole))
                         {
                             ++_opsCount;
-                            await client.RemoveRoleAsync(member, _linkedAccountRole);
+                            await client.RevokeRoleAsync(member, _linkedAccountRole);
                         }
                     }
                     else if (linkedUser.Valid && !member.HasRole(_linkedAccountRole))
                     {
                         ++_opsCount;
-                        await client.AddRoleAsync(member, _linkedAccountRole);
+                        await client.GrantRoleAsync(member, _linkedAccountRole);
                     }
                 }
             }
@@ -84,12 +84,12 @@ namespace Eco.Plugins.DiscordLink.Modules
                 if (trigger == DlEventType.AccountLinkRemoved)
                 {
                     ++_opsCount;
-                    await client.RemoveRoleAsync(member, _linkedAccountRole);
+                    await client.RevokeRoleAsync(member, _linkedAccountRole);
                 }
                 else if (trigger == DlEventType.AccountLinkVerified)
                 {
                     ++_opsCount;
-                    await client.AddRoleAsync(member, _linkedAccountRole);
+                    await client.GrantRoleAsync(member, _linkedAccountRole);
                 }
 
             }

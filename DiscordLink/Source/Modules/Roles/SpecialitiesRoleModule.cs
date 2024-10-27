@@ -54,7 +54,7 @@ namespace Eco.Plugins.DiscordLink.Modules
                             if (member.HasRoleWithName(specialty.DisplayName))
                             {
                                 ++_opsCount;
-                                await client.RemoveRoleAsync(member, specialty.DisplayName);
+                                await client.RevokeRoleAsync(member, specialty.DisplayName);
                             }
                         }
                         else if (!member.HasRoleWithName(specialty.DisplayName) && linkedUser.EcoUser.HasSpecialization(specialty.Type))
@@ -90,7 +90,7 @@ namespace Eco.Plugins.DiscordLink.Modules
                         if (member.HasRoleWithName(specialty.DisplayName))
                         {
                             ++_opsCount;
-                            await client.RemoveRoleAsync(member, specialty.DisplayName);
+                            await client.RevokeRoleAsync(member, specialty.DisplayName);
                         }
                     }
                     else if (trigger == DlEventType.AccountLinkVerified)
@@ -127,14 +127,14 @@ namespace Eco.Plugins.DiscordLink.Modules
                 else if (trigger == DlEventType.LostSpecialty)
                 {
                     ++_opsCount;
-                    await client.RemoveRoleAsync(linkedUser.DiscordMember, action.Specialty.DisplayName);
+                    await client.RevokeRoleAsync(linkedUser.DiscordMember, action.Specialty.DisplayName);
                 }
             }
         }
 
         private async Task AddSpecialtyRole(DiscordClient client, DiscordMember member, string specialtyName)
         {
-            await client.AddRoleAsync(member, new DiscordLinkRole(specialtyName, null, SpecialtyColor, false, true, $"User has the {specialtyName} specialty"));
+            await client.GrantRoleAsync(member, new DiscordLinkRole(specialtyName, null, SpecialtyColor, false, true, $"User has the {specialtyName} specialty"));
         }
     }
 }
