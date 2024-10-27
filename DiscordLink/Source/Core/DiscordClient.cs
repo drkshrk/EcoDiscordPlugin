@@ -247,6 +247,7 @@ namespace Eco.Plugins.DiscordLink
             DSharpClient.MessageReactionAdded += HandleDiscordReactionAdded;
             DSharpClient.MessageReactionRemoved += HandleDiscordReactionRemoved;
             DSharpClient.GuildMemberRemoved += HandleMemberRemoved;
+            DSharpClient.GuildMemberUpdated += HandleMemberUpdated;
         }
 
         private void UnregisterEventListeners()
@@ -259,6 +260,7 @@ namespace Eco.Plugins.DiscordLink
             DSharpClient.MessageReactionAdded -= HandleDiscordReactionAdded;
             DSharpClient.MessageReactionRemoved -= HandleDiscordReactionRemoved;
             DSharpClient.GuildMemberRemoved -= HandleMemberRemoved;
+            DSharpClient.GuildMemberUpdated += HandleMemberUpdated;
         }
 
         #endregion
@@ -308,6 +310,20 @@ namespace Eco.Plugins.DiscordLink
         private async Task HandleMemberRemoved(DSharpPlus.DiscordClient client, GuildMemberRemoveEventArgs args)
         {
             await DiscordLink.Obj.HandleEvent(DlEventType.DiscordMemberRemoved, args.Member);
+        }
+
+        private async Task HandleMemberUpdated(DSharpPlus.DiscordClient client, GuildMemberUpdateEventArgs args)
+        {
+            Logger.Trace($"Received member update event for {args.Member.DisplayName} ({args.Member.Id})");
+
+            IEnumerable<DiscordRole> revokedRoles = args.RolesBefore.Except(args.RolesAfter);
+            IEnumerable<DiscordRole> grantedRoles = args.RolesAfter.Except(args.RolesBefore);
+            // Recache if needed
+            if (grantedRoles.Count() > 0 || revokedRoles.Count() > 0)
+            {
+                DiscordMember updatedMember = await GetMemberAsync(args.Member.Id, updateCache: true);
+                UserLinkManager.UpdateMemberCache(updatedMember);
+            }
         }
 
         private async Task HandleClientError(DSharpPlus.DiscordClient client, ClientErrorEventArgs args)
