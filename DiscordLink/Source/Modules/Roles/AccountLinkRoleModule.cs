@@ -23,7 +23,7 @@ namespace Eco.Plugins.DiscordLink.Modules
 
         public override void Setup()
         {
-            _linkedAccountRole = DiscordLink.Obj.Client.Guild.GetRoleByName(DLConstants.ROLE_LINKED_ACCOUNT.Name);
+            _linkedAccountRole = DiscordLink.Obj.Client.GetRoleByName(DLConstants.ROLE_LINKED_ACCOUNT.Name);
             if (_linkedAccountRole == null)
                 SetupLinkRole();
 
@@ -36,7 +36,7 @@ namespace Eco.Plugins.DiscordLink.Modules
             if (!client.BotHasPermission(Permissions.ManageRoles))
                 return;
 
-            if (_linkedAccountRole == null || client.Guild.GetRoleById(_linkedAccountRole.Id) == null)
+            if (_linkedAccountRole == null || client.GetRoleById(_linkedAccountRole.Id) == null)
                 SetupLinkRole();
 
             if (_linkedAccountRole == null)

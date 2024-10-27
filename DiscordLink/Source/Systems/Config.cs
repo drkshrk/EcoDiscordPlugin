@@ -1,6 +1,5 @@
 ﻿using DSharpPlus.Entities;
 using Eco.Core.Plugins;
-using Eco.Gameplay.Systems.Messaging.Chat.Channels;
 using Eco.Moose.Tools.Logger;
 using Eco.Moose.Utils.Message;
 using Eco.Plugins.DiscordLink.Extensions;
@@ -105,13 +104,6 @@ namespace Eco.Plugins.DiscordLink
 
         public void PostConnectionInit()
         {
-            // Guild
-            if (DiscordLink.Obj.Client.Guild == null)
-            {
-                Logger.Error($"Failed to find a Discord server with the ID \"{Data.DiscordServerId}\"");
-                return;
-            }
-
             // Channel Links
             BuildChanneLinkList();
             VerifyLinks();
@@ -236,7 +228,7 @@ namespace Eco.Plugins.DiscordLink
                 if (chatLink.IsValid())
                 {
                     // Ensure that the chat channel exists
-                    if(!Message.ChatChannelExists(chatLink.EcoChannel))
+                    if (!Message.ChatChannelExists(chatLink.EcoChannel))
                     {
                         Message.CreateChatChannel(chatLink.EcoChannel);
                         Message.SendChatToChannel(null, chatLink.EcoChannel, "Created by DiscordLink");

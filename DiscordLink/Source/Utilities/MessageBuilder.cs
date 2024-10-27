@@ -257,8 +257,7 @@ namespace Eco.Plugins.DiscordLink.Utilities
 
                 if (DiscordLink.Obj.Client.ConnectionStatus == DiscordClient.ConnectionState.Connected)
                 {
-                    // Discord guild and channel information isn't available the first time this function is called
-                    if (DiscordLink.Obj.Client.Guild != null && DLConfig.GetChannelLinks(verifiedLinksOnly: false).Count > 0)
+                    if (DiscordLink.Obj.Client.IsConnected && DLConfig.GetChannelLinks(verifiedLinksOnly: false).Count > 0)
                     {
                         foreach (ChannelLink link in DLConfig.GetChannelLinks(verifiedLinksOnly: false))
                         {

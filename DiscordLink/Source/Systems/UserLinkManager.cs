@@ -297,15 +297,39 @@ namespace Eco.Plugins.DiscordLink
 
         public async Task LoadDiscordMember()
         {
+            ulong memberId = 0;
             try
             {
-                DiscordMember = await DiscordLink.Obj.Client.Guild.GetMemberAsync(ulong.Parse(DiscordId));
-                FailedInitializationCount = 0;
+                memberId = ulong.Parse(DiscordId);
             }
-            catch (DSharpPlus.Exceptions.NotFoundException)
+            catch (Exception e)
+            {
+                Logger.Exception($"Failed to parse DiscordId of UserLink while attempting to fetch Discord member. ID string = \"{DiscordId}\"", e);
+                return;
+            }
+
+            DiscordMember = DiscordLink.Obj.Client.GetMemberById(memberId);
+            if (DiscordMember == null) // Attempt to fetch if not found in cache
+            {
+                try
+                {
+                    DiscordMember = await DiscordLink.Obj.Client.GetMemberAsync(memberId);
+                }
+                catch (DSharpPlus.Exceptions.NotFoundException)
+                {
+                    return;
+
+                }
+            }
+
+            if (DiscordMember == null)
             {
                 ++FailedInitializationCount;
                 Logger.Debug($"Failed to load linked Discord member with ID: {DiscordId}. Fail count = {FailedInitializationCount}");
+            }
+            else
+            {
+                FailedInitializationCount = 0;
             }
         }
 

@@ -31,7 +31,7 @@ namespace Eco.Plugins.DiscordLink
             if (DiscordChannelId == 0)
                 return false;
 
-            DiscordChannel channel = DiscordLink.Obj.Client.Guild.GetChannel(DiscordChannelId);
+            DiscordChannel channel = DiscordLink.Obj.Client.GetChannelById(DiscordChannelId);
             if (channel == null)
                 return false;
 
