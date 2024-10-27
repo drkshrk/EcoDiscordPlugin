@@ -314,10 +314,10 @@ namespace Eco.Plugins.DiscordLink
 
         private async Task HandleMemberUpdated(DSharpPlus.DiscordClient client, GuildMemberUpdateEventArgs args)
         {
-            Logger.Trace($"Received member update event for {args.Member.DisplayName} ({args.Member.Id})");
-
             IEnumerable<DiscordRole> revokedRoles = args.RolesBefore.Except(args.RolesAfter);
             IEnumerable<DiscordRole> grantedRoles = args.RolesAfter.Except(args.RolesBefore);
+
+            Logger.Trace($"Received member update event for {args.Member.DisplayName} ({args.Member.Id})\nGranted roles: {string.Join(", ", grantedRoles)}\nRevoked roles:{string.Join(", ", revokedRoles)}");
 
             if (revokedRoles.Count() > 0)
             {
