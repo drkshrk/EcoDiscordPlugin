@@ -21,7 +21,7 @@ namespace Eco.Plugins.DiscordLink
 
         public override StandardValuesCollection GetStandardValues(ITypeDescriptorContext context)
         {
-            var foundChannelIds = DiscordLink.Obj?.Client?.GetCachedChannels(ChannelType.Text)
+            var foundChannelIds = DiscordLink.Obj?.Client?.GetChannelsOfType(ChannelType.Text)
                 .OrderBy(channel => channel.Position)
                 .Select(c => c.Id)
                 .ToList();
@@ -74,13 +74,13 @@ namespace Eco.Plugins.DiscordLink
         {
             if (value != null && destinationType == typeof(string) && value.GetType() == typeof(ulong))
             {
-                if (DiscordLink.Obj?.Client?.Guild?.Channels?.Values == null)
+                if (DiscordLink.Obj.Client.ConnectionStatus != DiscordClient.ConnectionState.Connected)
                     return "No Connection";
 
                 if ((ulong)value == 0)
                     return "Select a Channel";
 
-                var channels = DiscordLink.Obj.Client.Guild.Channels.Values;
+                var channels = DiscordLink.Obj.Client.GetChannelsOfType(ChannelType.Text);
                 return channels.Where(channel => channel.Id == (ulong)value).Select(FormatChannelString).FirstOrDefault() ?? $"<Unknown Channel> ({value})";
             }
             return base.ConvertFrom(context, culture, value);

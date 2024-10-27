@@ -300,7 +300,7 @@ namespace Eco.Plugins.DiscordLink
             DLConstants.PostConnectionInit();
 
             DLConfig.Instance.PostConnectionInit();
-            if (Client.Guild == null)
+            if (!Client.IsConnected)
             {
                 Status = StatusState.ServerConnectionFailed;
                 CanRestart = true;

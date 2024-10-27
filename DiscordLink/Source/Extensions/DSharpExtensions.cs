@@ -78,12 +78,12 @@ namespace Eco.Plugins.DiscordLink.Extensions
         public static async Task<DiscordMember> LookupMember(this DiscordUser user)
         {
             DiscordClient client = DiscordLink.Obj.Client;
-            DiscordMember member = client.Guild.Members.FirstOrDefault(m => m.Key == user.Id).Value;
+            DiscordMember member = client.GetMemberById(user.Id);
             if (member == null)
             {
                 try
                 {
-                    member = await client.Guild.GetMemberAsync(user.Id);
+                    member = await client.GetMemberAsync(user.Id);
                 }
                 catch (NotFoundException)
                 {

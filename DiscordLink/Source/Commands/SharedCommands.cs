@@ -188,8 +188,7 @@ namespace Eco.Plugins.DiscordLink
             DiscordClient client = plugin.Client;
             foreach (ulong roleId in DLStorage.PersistentData.RoleIds)
             {
-                DiscordRole role = client.Guild.GetRoleById(roleId);
-                await client.DeleteRoleAsync(role);
+                await client.DeleteRoleAsync(roleId);
             }
             DLStorage.PersistentData.RoleIds.Clear();
             DLStorage.Instance.Write();

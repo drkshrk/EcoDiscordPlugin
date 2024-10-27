@@ -39,9 +39,10 @@ namespace Eco.Plugins.DiscordLink
 
         public DSharpPlus.DiscordClient DSharpClient { get; private set; }
         public DateTime LastConnectionTime { get; private set; } = DateTime.MinValue;
+        public bool IsConnected => ConnectionStatus == ConnectionState.Connected;
         public ConnectionState ConnectionStatus { get; private set; } = ConnectionState.Disconnected;
         public ConnectionError LastConnectionError { get; private set; } = ConnectionError.None;
-        public DiscordGuild Guild { get; private set; } = null;
+        private DiscordGuild Guild { get; set; } = null;
         public DiscordMember BotMember { get; private set; } = null;
 
         public string Status
@@ -359,7 +360,7 @@ namespace Eco.Plugins.DiscordLink
 
         #region Information Fetching
 
-        public IEnumerable<DiscordChannel> GetCachedChannels(params ChannelType[] channelTypes)
+        public IEnumerable<DiscordChannel> GetChannelsOfType(params ChannelType[] channelTypes)
         {
             return Guild.Channels.Values.Where(channel => channelTypes.Any(type => type == channel.Type));
         }
@@ -373,8 +374,18 @@ namespace Eco.Plugins.DiscordLink
         public DiscordChannel ChannelByNameOrId(string channelNameOrId)
         {
             return channelNameOrId.TryParseSnowflakeId(out ulong channelId)
-                ? Guild.Channels.Values.FirstOrDefault(channel => channel.Id == channelId)
-                : Guild.Channels.Values.FirstOrDefault(guild => guild.Name.EqualsCaseInsensitive(channelNameOrId));
+                ? GetChannelById(channelId)
+                : GetChannelByName(channelNameOrId);
+        }
+
+        public DiscordChannel GetChannelById(ulong channelId)
+        {
+            return Guild.Channels.Values.FirstOrDefault(channel => channel.Id == channelId);
+        }
+
+        public DiscordChannel GetChannelByName(string channelName)
+        {
+            return Guild.Channels.Values.FirstOrDefault(guild => guild.Name.EqualsCaseInsensitive(channelName));
         }
 
         public bool ChannelHasPermission(DiscordChannel channel, Permissions permission)
@@ -461,6 +472,17 @@ namespace Eco.Plugins.DiscordLink
                     missingIntents.Add(intent);
             }
             return missingIntents;
+        }
+
+        public IEnumerable<DiscordMember> GetMembers()
+        {
+            return Guild.Members.Values;
+        }
+
+        public DiscordMember GetMemberById(ulong memberId)
+        {
+            Guild.Members.TryGetValue(memberId, out DiscordMember member);
+            return member;
         }
 
         public async Task<DiscordMember> GetMemberAsync(string memberIdStr, bool updateCache = false)
@@ -773,10 +795,25 @@ namespace Eco.Plugins.DiscordLink
             return await Task.FromResult<DiscordRole>(null);
         }
 
+        public async Task DeleteRoleAsync(ulong roleId)
+        {
+            DiscordRole role = GetRoleById(roleId);
+            if (role == null)
+            {
+                Logger.Error($"Failed to delete role - No role with ID \"{roleId}\" could be found");
+                return;
+            }
+
+            await DeleteRoleAsync(role);
+        }
+
         public async Task DeleteRoleAsync(DiscordRole role)
         {
             if (role == null)
+            {
+                Logger.Error($"Failed to delete role - Role was null");
                 return;
+            }
 
             try
             {

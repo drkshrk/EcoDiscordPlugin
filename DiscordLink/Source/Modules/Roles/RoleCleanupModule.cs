@@ -5,7 +5,6 @@ using Eco.Gameplay.Skills;
 using Eco.Moose.Tools.Logger;
 using Eco.Moose.Utils.Lookups;
 using Eco.Plugins.DiscordLink.Events;
-using Eco.Plugins.DiscordLink.Extensions;
 using Eco.Shared.Utils;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -39,12 +38,12 @@ namespace Eco.Plugins.DiscordLink.Modules
 
             if (trigger == DlEventType.WorldReset)
             {
-                DiscordRole AccountLinkRole = client.Guild.GetRoleByName(DLConstants.ROLE_LINKED_ACCOUNT.Name);
+                DiscordRole AccountLinkRole = client.GetRoleByName(DLConstants.ROLE_LINKED_ACCOUNT.Name);
 
                 List<DiscordRole> removeRoles = new List<DiscordRole>();
                 foreach (ulong roleId in DLStorage.PersistentData.RoleIds)
                 {
-                    DiscordRole role = client.Guild.GetRoleById(roleId);
+                    DiscordRole role = client.GetRoleById(roleId);
                     if (role == null)
                     {
                         // Unregister roles that have been removed by others
