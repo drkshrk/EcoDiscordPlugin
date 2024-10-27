@@ -42,8 +42,9 @@ namespace Eco.Plugins.DiscordLink
         public bool IsConnected => ConnectionStatus == ConnectionState.Connected;
         public ConnectionState ConnectionStatus { get; private set; } = ConnectionState.Disconnected;
         public ConnectionError LastConnectionError { get; private set; } = ConnectionError.None;
+
         private DiscordGuild Guild { get; set; } = null;
-        public DiscordMember BotMember { get; private set; } = null;
+        private DiscordMember BotMember { get; set; } = null;
 
         public string Status
         {
@@ -510,6 +511,11 @@ namespace Eco.Plugins.DiscordLink
                 Logger.Exception($"Error occurred when attempting to fetch member with ID \"{memberId}\"", e);
                 return null;
             }
+        }
+
+        public bool IsUserDiscordLinkBot(DiscordUser user)
+        {
+            return user == BotMember;
         }
 
         public async Task<DiscordMessage> GetMessageAsync(DiscordChannel channel, ulong messageId)
