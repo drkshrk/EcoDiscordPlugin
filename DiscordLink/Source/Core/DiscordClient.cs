@@ -442,24 +442,29 @@ namespace Eco.Plugins.DiscordLink
             return missingIntents;
         }
 
-        public async Task<DiscordMember> GetMemberAsync(string memberIdStr)
+        public async Task<DiscordMember> GetMemberAsync(string memberIdStr, bool updateCache = false)
         {
             if (!memberIdStr.TryParseSnowflakeId(out ulong memberId))
                 return null;
 
+            return await GetMemberAsync(memberId, updateCache);
+        }
+
+        public async Task<DiscordMember> GetMemberAsync(ulong memberId, bool updateCache = false)
+        {
             try
             {
                 Logger.Trace($"Fetching member with ID \"{memberId}\"");
-                return await Guild.GetMemberAsync(memberId);
+                return await Guild.GetMemberAsync(memberId, updateCache);
             }
             catch (ServerErrorException e)
             {
-                Logger.DebugException($"ServerErrorException occurred when attempting to fetch member with ID \"{memberIdStr}\"", e);
+                Logger.DebugException($"ServerErrorException occurred when attempting to fetch member with ID \"{memberId}\"", e);
                 return null;
             }
             catch (Exception e)
             {
-                Logger.Exception($"Error occurred when attempting to fetch member with ID \"{memberIdStr}\"", e);
+                Logger.Exception($"Error occurred when attempting to fetch member with ID \"{memberId}\"", e);
                 return null;
             }
         }
