@@ -63,13 +63,18 @@ namespace Eco.Plugins.DiscordLink.Extensions
             return this;
         }
 
-        public DiscordLinkEmbed AddField(string title, string text, bool? allowAutoLineBreak = null, bool inline = false)
+        public DiscordLinkEmbed AddField(string title, string text, bool? allowAutoLineBreak = null, bool inline = false, bool useCodeBlockBackground = false)
         {
             if (string.IsNullOrWhiteSpace(title))
                 title = INVISIBLE_EMBED_CHAR;
 
             if (string.IsNullOrWhiteSpace(text))
                 text = INVISIBLE_EMBED_CHAR;
+
+            if(useCodeBlockBackground)
+            {
+                text = $"```\n{text}\n```";
+            }
 
             // Default auto line break allowing to opposite value of inline
             if (!allowAutoLineBreak == null)
