@@ -587,7 +587,7 @@ namespace Eco.Plugins.DiscordLink.Utilities
                     else if (!string.IsNullOrEmpty(serverConfig.IPAddress))
                         fieldText = serverConfig.IPAddress;
 
-                    embed.AddField("Connection Info", fieldText);
+                    embed.AddField("Connection Info", fieldText, useCodeBlockBackground: true);
                 }
 
                 if (flag.HasFlag(ServerInfoComponentFlag.WebServerAddress))
