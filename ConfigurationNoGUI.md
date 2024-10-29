@@ -160,17 +160,18 @@ The config data needs to match your Eco server, Discord server and Discord bot.
   "BackendLogLevel": "Error",  
   "TraceFileLogging": false,  
   "UseVerboseDisplay": false,  
-  "EmoteIconSubstitutions": [
+  "EmoteIconSubstitutions": [  
     {
-      "DiscordEmoteKey": "DiscordLink",
-      "EcoIconKey": "DiscordLinkLogo"
+      "DiscordEmoteKey": "DiscordLink",  
+      "EcoIconKey": "DiscordLinkLogo"  
     },
     {
-      "DiscordEmoteKey": "meow_pat",
-      "EcoIconKey": "meow_pat"
+      "DiscordEmoteKey": "meow_pat",  
+      "EcoIconKey": "meow_pat"  
     }
   ],
-  "MinEmbedSizeForFooter": "Medium"
+  "MinEmbedSizeForFooter": "Medium",  
+  "EmbedColorHex": "#7289da"  
 }  
 ```  
 
@@ -184,9 +185,6 @@ See the [installation guide](Installation.md).
 **Admin Roles**  
 Names of Discord roles which DiscordLink should consider as having admin privileges.
 The admin role names are not case sensitive.
-
-**Min Embed Size for Footer**  
-Determines for what sizes of embeds to show the footer containing meta information about posted embeds. All embeds of sizes bigger than the selected one will have footers as well.
 
 ## Base Configuration - Eco
 **Server Name and Server Description**  
@@ -278,3 +276,8 @@ Determines if Discord roles matching ingame specialties will be granted to users
 
 **UseElectedTitleRoles**
 Determines if Discord roles matching ingame elected titles will be granted to users who have linked their accounts.
+
+## Style
+
+**MinEmbedSizeForFooter**
+Determines for what sizes of embeds to show the footer containing meta information about posted embeds. All embeds of sizes bigger than the selected one will have footers as well.
