@@ -281,3 +281,6 @@ Determines if Discord roles matching ingame elected titles will be granted to us
 
 **MinEmbedSizeForFooter**
 Determines for what sizes of embeds to show the footer containing meta information about posted embeds. All embeds of sizes bigger than the selected one will have footers as well.
+
+**EmbedColorHex**
+Determines the color of the left outline of embeds. Must be a valid hexadecimal color string.

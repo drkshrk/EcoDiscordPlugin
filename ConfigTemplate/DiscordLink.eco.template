@@ -47,5 +47,6 @@
   "TraceFileLogging": false,
   "UseVerboseDisplay": false,
   "EmoteIconSubstitutions": [],
-  "MinEmbedSizeForFooter": "Medium"
+  "MinEmbedSizeForFooter": "Medium",
+  "EmbedColorHex": "#7289da"
 }

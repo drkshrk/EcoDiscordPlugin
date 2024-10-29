@@ -14,7 +14,6 @@ namespace Eco.Plugins.DiscordLink
         public static readonly Permissions[] REQUESTED_CHANNEL_PERMISSIONS = { Permissions.AccessChannels, Permissions.SendMessages, Permissions.EmbedLinks, Permissions.AddReactions, Permissions.MentionEveryone, Permissions.ManageMessages, Permissions.ReadMessageHistory };
         public static readonly DiscordIntents[] REQUESTED_INTENTS = { DiscordIntents.AllUnprivileged, DiscordIntents.GuildMembers, DiscordIntents.MessageContents };
 
-        public static readonly DiscordColor DISCORD_EMBED_COLOR = DiscordColor.Green;
         public const string DISCORD_COLOR = "7289DAFF";
 
         public const string INVISIBLE_EMBED_CHAR = "\u200e";

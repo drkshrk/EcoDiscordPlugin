@@ -4,6 +4,7 @@ using Eco.Moose.Tools.Logger;
 using Eco.Moose.Utils.Message;
 using Eco.Plugins.DiscordLink.Extensions;
 using Eco.Plugins.Networking;
+using Eco.Shared.Serialization;
 using Eco.Shared.Utils;
 using System;
 using System.Collections.Generic;
@@ -35,6 +36,7 @@ namespace Eco.Plugins.DiscordLink
             public const bool UseDemographicRoles = true;
             public const bool UseSpecialtyRoles = true;
             public const bool UseElectedTitleRoles = true;
+            public static readonly string EmbedColor = "#7289da";
             public static readonly DemographicRoleSubstitution[] DemographicRoleReplacements = { new DemographicRoleSubstitution("everyone", "Eco Everyone"), new DemographicRoleSubstitution("admins", "Eco Admins") };
             public static readonly EmoteIconSubstitution[] EmoteSubstitutions = { new EmoteIconSubstitution("DiscordLink", "DiscordLinkLogo") };
         }
@@ -266,6 +268,7 @@ namespace Eco.Plugins.DiscordLink
                 BotToken = this.BotToken,
                 DiscordServerId = this.DiscordServerId,
                 MinEmbedSizeForFooter = this.MinEmbedSizeForFooter,
+                EmbedColorHex = this.EmbedColorHex,
                 ServerName = this.ServerName,
                 ServerDescription = this.ServerDescription,
                 ConnectionInfo = this.ConnectionInfo,
@@ -401,5 +404,12 @@ namespace Eco.Plugins.DiscordLink
 
         [Description("Determines for what sizes of embeds to show the footer containing meta information about posted embeds. All embeds of sizes bigger than the selected one will have footers as well. This setting can be changed while the server is running."), Category("Style - Discord")]
         public DiscordLinkEmbed.EmbedSize MinEmbedSizeForFooter { get; set; } = DLConfig.DefaultValues.MinEmbedSizeForFooter;
+
+        [Description("Determines the color of the left outline of embeds. Must be a valid hexadecimal color string. This setting can be changed while the server is running."), Category("Style - Discord")]
+        public string EmbedColorHex { get { return _embedColorHex; } set { EmbedColor = new DiscordColor(value); _embedColorHex = value; } }
+        private string _embedColorHex = DLConfig.DefaultValues.EmbedColor;
+
+        [Browsable(false), JsonIgnore]
+        public DiscordColor EmbedColor { get; set; } = new DiscordColor(DLConfig.DefaultValues.EmbedColor);
     }
 }

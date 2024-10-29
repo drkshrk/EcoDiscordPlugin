@@ -184,7 +184,7 @@ namespace Eco.Plugins.DiscordLink.Utilities
             builder.WithTitle(embedData.Title);
             builder.WithDescription(embedData.Description);
             builder.WithFooter(embedData.Footer);
-            builder.WithColor(DLConstants.DISCORD_EMBED_COLOR);
+            builder.WithColor(DLConfig.Data.EmbedColor);
 
             if (!string.IsNullOrEmpty(embedData.Thumbnail))
             {
