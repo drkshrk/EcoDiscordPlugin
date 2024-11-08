@@ -54,7 +54,7 @@ namespace Eco.Plugins.DiscordLink.Modules
                         {
                             if (member.HasRoleWithName(specialty.DisplayName))
                             {
-                                await RevokeSpecialtyRole(client, linkedUser.DiscordMember, specialty.DisplayName);
+                                await RevokeSpecialtyRole(client, member, specialty.DisplayName);
                             }
                         }
                         else if (!member.HasRoleWithName(specialty.DisplayName) && linkedUser.EcoUser.HasSpecialization(specialty.Type))

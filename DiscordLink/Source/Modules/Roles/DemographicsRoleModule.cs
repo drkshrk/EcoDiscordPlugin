@@ -49,7 +49,7 @@ namespace Eco.Plugins.DiscordLink.Modules
                         {
                             if (member.HasRoleWithName(demographicName))
                             {
-                                await RevokeDemographicRole(client, linkedUser.DiscordMember, demographicName);
+                                await RevokeDemographicRole(client, member, demographicName);
                             }
                         }
                         else if (!member.HasRoleWithName(demographicName) && demographic.ContainsUser(linkedUser.EcoUser))
