@@ -233,7 +233,7 @@ This allows for Discord icons to be sent directly to Eco, provided that the icon
 Controls what type of DiscordLink log messages are printed to the console. This should generally be kept at the default unless you are troubleshooting an issue or want to turn off the output in the Eco server log.
 
 The potential values for Log Level are:
-* Debug Verbose
+* Trace
 * Debug
 * Warning
 * Information (Default)
