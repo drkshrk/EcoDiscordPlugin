@@ -318,7 +318,6 @@ namespace Eco.Plugins.DiscordLink
                 catch (DSharpPlus.Exceptions.NotFoundException)
                 {
                     return;
-
                 }
             }
 
@@ -354,7 +353,7 @@ namespace Eco.Plugins.DiscordLink
 
         public bool HasAnyId(string strangeId, string steamId)
         {
-            return (!string.IsNullOrEmpty(this.SteamId) && this.SteamId == this.SteamId) || (!string.IsNullOrEmpty(this.StrangeId) && this.StrangeId == strangeId);
+            return (!string.IsNullOrEmpty(this.SteamId) && this.SteamId == steamId) || (!string.IsNullOrEmpty(this.StrangeId) && this.StrangeId == strangeId);
         }
 
         [JsonIgnore]
