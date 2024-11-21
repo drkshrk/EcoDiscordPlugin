@@ -969,7 +969,7 @@ namespace Eco.Plugins.DiscordLink.Utilities
                 if (tradesCount <= 0 && string.IsNullOrWhiteSpace(topAccounts))
                     return null;
 
-                string backededItemName = currency.Backed ? $"{currency.BackingItem.DisplayName}" : "Personal";
+                string backededItemName = currency.Backed ? $"{currency.BackingItem?.DisplayName ?? "Unknown"}" : "Personal";
 
                 // Build message
                 if (useTradeCount)
