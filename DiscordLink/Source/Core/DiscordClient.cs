@@ -265,7 +265,7 @@ namespace Eco.Plugins.DiscordLink
             DSharpClient.MessageReactionAdded -= HandleDiscordReactionAdded;
             DSharpClient.MessageReactionRemoved -= HandleDiscordReactionRemoved;
             DSharpClient.GuildMemberRemoved -= HandleMemberRemoved;
-            DSharpClient.GuildMemberUpdated += HandleMemberUpdated;
+            DSharpClient.GuildMemberUpdated -= HandleMemberUpdated;
         }
 
         #endregion
