@@ -803,8 +803,8 @@ namespace Eco.Plugins.DiscordLink
             await Trades(interaction, searchName);
         }
 
-        [SlashCommand("AddTradeWatcherDisplay", "Creates a live updated display of available trades by player, tag, item or store.")]
-        public async Task AddTradeWatcherDisplay(InteractionContext interaction,
+        [SlashCommand("WatchTradeDisplay", "Creates a live updated display of available trades by player, tag, item or store.")]
+        public async Task WatchTradeDisplay(InteractionContext interaction,
             [Option("SearchName", "The player name or item name for which to display trades.")] string searchName)
         {
             DiscordCommandContext ctx = new DiscordCommandContext(interaction, ResponseTiming.Immediate);
@@ -814,8 +814,8 @@ namespace Eco.Plugins.DiscordLink
             });
         }
 
-        [SlashCommand("RemoveTradeWatcherDisplay", "Removes the live updated display of available trades for a player, tag, item or store.")]
-        public async Task RemoveTradeWatcherDisplay(InteractionContext interaction,
+        [SlashCommand("UnwatchTradeDisplay", "Removes the live updated display of available trades for a player, tag, item or store.")]
+        public async Task UnwatchTradeDisplay(InteractionContext interaction,
             [Option("SearchName", "The player, tag, item or store name for which to display trades.")] string searchName)
         {
             DiscordCommandContext ctx = new DiscordCommandContext(interaction, ResponseTiming.Immediate);
@@ -825,8 +825,8 @@ namespace Eco.Plugins.DiscordLink
             });
         }
 
-        [SlashCommand("AddTradeWatcherFeed", "Creates a trade feed filtered by a search query.")]
-        public async Task AddTradeWatcherFeed(InteractionContext interaction,
+        [SlashCommand("WatchTradeFeed", "Creates a trade feed filtered by a search query.")]
+        public async Task WatchTradeFeed(InteractionContext interaction,
             [Option("SearchName", "The player, tag, item or store name for which to post trades.")] string searchName)
         {
             DiscordCommandContext ctx = new DiscordCommandContext(interaction, ResponseTiming.Immediate);
@@ -836,8 +836,8 @@ namespace Eco.Plugins.DiscordLink
             });
         }
 
-        [SlashCommand("RemoveTradeWatcherFeed", "Removes the trade watcher feed for a player, tag, item or store.")]
-        public async Task RemoveTradeWatcherFeed(InteractionContext interaction,
+        [SlashCommand("UnwatchTradeFeed", "Removes the trade watcher feed for a player, tag, item or store.")]
+        public async Task UnwatchTradeFeed(InteractionContext interaction,
             [Option("SearchName", "The player, tag item or store name for which to remove trades.")] string searchName)
         {
             DiscordCommandContext ctx = new DiscordCommandContext(interaction, ResponseTiming.Immediate);
