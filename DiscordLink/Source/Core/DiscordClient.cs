@@ -778,6 +778,19 @@ namespace Eco.Plugins.DiscordLink
             return result;
         }
 
+        public async Task<DiscordDmChannel> GetOrCreateDmChannelAsync(DiscordMember member)
+        {
+            try
+            {
+                return await member.CreateDmChannelAsync();
+            }
+            catch(Exception e)
+            {
+                Logger.Exception($"Failed to get or create DM channel for member \"{member.Id}\"", e);
+                return null;
+            }
+        }
+
         public async Task<DiscordRole> CreateRoleAsync(DiscordLinkRole dlRole)
         {
             try

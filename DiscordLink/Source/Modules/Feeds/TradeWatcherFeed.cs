@@ -55,7 +55,7 @@ namespace Eco.Plugins.DiscordLink.Modules
                 || accumulatedTrades.SelectMany(tradeList => tradeList).Any(trade => trade.ItemUsed.HasTagWithName(entry.Key)))) // Tag
                     {
                         DiscordLinkEmbed content = MessageBuilder.Discord.GetAccumulatedTradeReport(accumulatedTradeList);
-                        await DiscordLink.Obj.Client.SendMessageAsync(await linkedUser.DiscordMember.CreateDmChannelAsync(), string.Empty, content);
+                        await DiscordLink.Obj.Client.SendMessageAsync(await plugin.Client.GetOrCreateDmChannelAsync(linkedUser.DiscordMember), string.Empty, content);
                         ++_opsCount;
                     }
                 }

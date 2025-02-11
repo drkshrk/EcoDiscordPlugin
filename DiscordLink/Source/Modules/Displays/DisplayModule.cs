@@ -169,7 +169,7 @@ namespace Eco.Plugins.DiscordLink.Modules
                 if (channelLink != null && channelLink.IsValid())
                     targetChannel = channelLink.Channel;
                 else if (userLink != null)
-                    targetChannel = await userLink.Member.CreateDmChannelAsync();
+                    targetChannel = await plugin.Client.GetOrCreateDmChannelAsync(userLink.Member);
                 else
                     continue;
 
@@ -280,7 +280,7 @@ namespace Eco.Plugins.DiscordLink.Modules
                 }
                 else if (userLink != null)
                 {
-                    DiscordDmChannel dmChannel = await userLink.Member.CreateDmChannelAsync();
+                    DiscordDmChannel dmChannel = await plugin.Client.GetOrCreateDmChannelAsync(userLink.Member);
                     targetMessages = await plugin.Client.GetMessagesAsync(dmChannel);
                 }
 
