@@ -497,7 +497,7 @@ namespace Eco.Plugins.DiscordLink
             return await GetMemberAsync(memberId, updateCache);
         }
 
-        public async Task<DiscordMember> GetMemberAsync(ulong memberId, bool updateCache = false)
+        public async Task<DiscordMember> GetMemberAsync(ulong memberId, bool updateCache = false, bool expect404 = false)
         {
             try
             {
@@ -511,7 +511,9 @@ namespace Eco.Plugins.DiscordLink
             }
             catch (Exception e)
             {
-                Logger.Exception($"Error occurred when attempting to fetch member with ID \"{memberId}\"", e);
+                if(!expect404)
+                    Logger.Exception($"Error occurred when attempting to fetch member with ID \"{memberId}\"", e);
+
                 return null;
             }
         }
