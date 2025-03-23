@@ -36,8 +36,14 @@ namespace Eco.Plugins.DiscordLink
             Timing = timing;
         }
 
+        public void MarkResponded()
+        {
+            HasRespondedToUser = true;
+        }
+
         public InteractionContext Interaction { get; private set; }
         public ResponseTiming Timing { get; private set; }
+        public bool HasRespondedToUser { get; private set; } = false;
     }
 
     public class DiscordCommands : ApplicationCommandModule
@@ -120,6 +126,7 @@ namespace Eco.Plugins.DiscordLink
                     if (builderEmbeds.Count > 0)
                         builder.AddEmbed(builderEmbeds.First());
 
+                    ctx.MarkResponded();
                     await ctx.Interaction.CreateResponseAsync(InteractionResponseType.ChannelMessageWithSource, builder);
                 }
                 else if (ctx.Timing == ResponseTiming.Delayed)
@@ -129,6 +136,7 @@ namespace Eco.Plugins.DiscordLink
                     if (builderEmbeds.Count > 0)
                         builder.AddEmbed(builderEmbeds.First());
 
+                    ctx.MarkResponded();
                     await ctx.Interaction.EditResponseAsync(builder);
                 }
 
@@ -243,6 +251,11 @@ namespace Eco.Plugins.DiscordLink
             {
                 RemoteEcoCommandClient Client = new RemoteEcoCommandClient(ctx);
                 await ServiceHolder<IChatManager>.Obj.ExecuteCommandAsync(Client, command);
+
+                if(!ctx.HasRespondedToUser) // Some commands may defer their response and some may not respond at all => Explain to the user that it's the Eco command that's at fault
+                {
+                    await ReportCommandInfo(ctx, "Awaiting Eco command response...");
+                }
             });
         }
 
