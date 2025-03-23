@@ -478,6 +478,8 @@ namespace Eco.Plugins.DiscordLink
 
         public static async Task<bool> AddTradeWatcher(CommandContext ctx, string searchName, Modules.ModuleArchetype type)
         {
+            searchName = searchName.StripTags();
+
             if (string.IsNullOrWhiteSpace(searchName))
             {
                 await ReportCommandInfo(ctx, "Please provide the name of a player, tag, item or store to watch trades for.");
