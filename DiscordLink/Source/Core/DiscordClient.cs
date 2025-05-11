@@ -433,6 +433,9 @@ namespace Eco.Plugins.DiscordLink
 
         public bool MemberIsAdmin(DiscordMember member)
         {
+            if (DLConfig.Data.DiscordServerOwnerIsAdmin && member.IsOwner)
+                return true;
+
             foreach (string adminRole in DLConfig.Data.AdminRoles)
             {
                 if (adminRole.TryParseSnowflakeId(out ulong adminRoleId) && member.Roles.Any(role => role.Id == adminRoleId))

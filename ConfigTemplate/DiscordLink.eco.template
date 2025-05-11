@@ -1,6 +1,7 @@
 {
   "BotToken": "",
   "DiscordServerId": 0,
+  "DiscordServerOwnerIsAdmin": true,
   "AdminRoles": [
     "Admin",
     "Administrator",

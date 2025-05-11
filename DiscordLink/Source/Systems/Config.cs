@@ -23,6 +23,7 @@ namespace Eco.Plugins.DiscordLink
             public static Logger.LogLevel PluginLogLevel = Logger.LogLevel.Information;
             public static Microsoft.Extensions.Logging.LogLevel BackendLogLevel = Microsoft.Extensions.Logging.LogLevel.None;
             public static bool UseVerboseDisplay = false;
+            public static bool DiscordServerOwnerIsAdmin = true;
             public static readonly string[] AdminRoles = { "Admin", "Eco Admins", "Administrator", "Moderator" };
             public const string InviteMessage = "Join us on Discord!\\n" + DLConstants.INVITE_COMMAND_TOKEN;
             public const ChatSyncMode ChatSynchronizationMode = ChatSyncMode.OptOut;
@@ -306,8 +307,11 @@ namespace Eco.Plugins.DiscordLink
         [Description("The ID if the Discord Server. This setting can be changed while the server is running but will require a plugin restart to take effect."), Category("Base Configuration - Discord")]
         public ulong DiscordServerId { get; set; }
 
-        [Description("The roles recognized as having admin permissions on Discord. This setting requires a plugin restart to take effect."), Category("Base Configuration - Discord")]
+        [Description("The roles recognized as having admin permissions in DiscordLink. This setting requires a plugin restart to take effect."), Category("Base Configuration - Discord")]
         public ObservableCollection<string> AdminRoles { get; set; } = new ObservableCollection<string>(DLConfig.DefaultValues.AdminRoles);
+
+        [Description("Determines if the owner of the Discord server should have admin permissions in DiscordLink. This setting requires a plugin restart to take effect."), Category("Base Configuration - Discord")]
+        public bool DiscordServerOwnerIsAdmin { get; set; } = DLConfig.DefaultValues.DiscordServerOwnerIsAdmin;
 
         [Description("The name of the Eco server, overriding the name configured within Eco. This setting can be changed while the server is running."), Category("Base Configuration - Eco")]
         public string ServerName { get; set; }

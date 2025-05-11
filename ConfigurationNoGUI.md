@@ -25,7 +25,8 @@ The config data needs to match your Eco server, Discord server and Discord bot.
 {  
   "BotToken": "xxXXxxxXxXXxxxxxxXxxxxXXXXxxx.XxxXxx.xXXXxxxxXXxxxxXxxxXXXXXXXxxxxxxxX",  
   "DiscordServerId": 112233445566778899,  
-    "AdminRoles": [  
+  "DiscordServerOwnerIsAdmin": true,  
+  "AdminRoles": [  
     "Admin",  
     "Administrator",  
     "Moderator",  
@@ -181,6 +182,9 @@ The config data needs to match your Eco server, Discord server and Discord bot.
 ## Base Configuration - Discord
 **Discord Server ID and Bot Token**  
 See the [installation guide](Installation.md).
+
+**Discord Server Owner Is Admin**  
+Determines if the owner of the Discord server should have admin permissions in DiscordLink.  
 
 **Admin Roles**  
 Names of Discord roles which DiscordLink should consider as having admin privileges.
