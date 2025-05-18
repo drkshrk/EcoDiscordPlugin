@@ -35,7 +35,6 @@ namespace Eco.Plugins.DiscordLink.Modules
             displayContent = new List<DisplayContent>();
             if (!(target is LayerChannelLink layerTarget) || !layerTarget.IsValid())
                 return;
-                return;
 
             string output = layerTarget.UseTerrainComparison
                 ? $"{LayerUtils.GetLayerLink($"{layerTarget.LayerName}Latest")}\n{LayerUtils.GetLayerLink("TerrainLatest")}"

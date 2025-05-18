@@ -1,4 +1,7 @@
 DiscordLink.dll
 DSharpPlus.dll
-DSharpPlus.SlashCommands.dll
-Emzi0767.Common.dll
+DSharpPlus.Commands.dll
+Polly.Core.dll
+Ulid.dll
+CommunityToolkit.HighPerformance.dll
+System.Linq.Async.dll

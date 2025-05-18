@@ -1,13 +1,13 @@
-﻿using DSharpPlus.SlashCommands;
+﻿using DSharpPlus.Commands.Processors.SlashCommands.ArgumentModifiers;
 
 namespace Eco.Plugins.DiscordLink
 {
     #region Non-Game
     public enum ApplicationInterfaceType
     {
-        [ChoiceName("Eco")]
+        [ChoiceDisplayName("Eco")]
         Eco,
-        [ChoiceName("Discord")]
+        [ChoiceDisplayName("Discord")]
         Discord
     }
 
@@ -43,11 +43,11 @@ namespace Eco.Plugins.DiscordLink
 
     public enum CurrencyType
     {
-        [ChoiceName("All")]
+        [ChoiceDisplayName("All")]
         All,
-        [ChoiceName("Personal")]
+        [ChoiceDisplayName("Personal")]
         Personal,
-        [ChoiceName("Minted")]
+        [ChoiceDisplayName("Minted")]
         Minted
     }
 
@@ -61,9 +61,9 @@ namespace Eco.Plugins.DiscordLink
 
     public enum MapRepresentationType
     {
-        [ChoiceName("Preview")]
+        [ChoiceDisplayName("Preview")]
         Preview,
-        [ChoiceName("Terrain")]
+        [ChoiceDisplayName("Terrain")]
         Terrain
     }
 

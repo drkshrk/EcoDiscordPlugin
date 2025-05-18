@@ -17,7 +17,7 @@ using static Eco.Plugins.DiscordLink.Utilities.MessageBuilder;
 
 namespace Eco.Plugins.DiscordLink
 {
-    public class EcoCommandContext : CommandContext
+    public class EcoCommandContext : DiscordLinkCommandContext
     {
         public EcoCommandContext(IChatClient client)
         {

@@ -12,7 +12,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DSharpPlus", "..\DSharpPlus\DSharpPlus\DSharpPlus.csproj", "{177AF367-EA8A-4552-9686-CEC4D0E4452C}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DSharpPlus.SlashCommands", "..\DSharpPlus\DSharpPlus.SlashCommands\DSharpPlus.SlashCommands.csproj", "{ECAF333B-DFF8-4720-93A1-61669C96FEEE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DSharpPlus.Commands", "..\DSharpPlus\DSharpPlus.Commands\DSharpPlus.Commands.csproj", "{95E354CB-9FF0-45C2-957F-8C56FFC6BFE4}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -28,10 +28,10 @@ Global
 		{177AF367-EA8A-4552-9686-CEC4D0E4452C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{177AF367-EA8A-4552-9686-CEC4D0E4452C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{177AF367-EA8A-4552-9686-CEC4D0E4452C}.Release|Any CPU.Build.0 = Release|Any CPU
-		{ECAF333B-DFF8-4720-93A1-61669C96FEEE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{ECAF333B-DFF8-4720-93A1-61669C96FEEE}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{ECAF333B-DFF8-4720-93A1-61669C96FEEE}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{ECAF333B-DFF8-4720-93A1-61669C96FEEE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{95E354CB-9FF0-45C2-957F-8C56FFC6BFE4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{95E354CB-9FF0-45C2-957F-8C56FFC6BFE4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{95E354CB-9FF0-45C2-957F-8C56FFC6BFE4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{95E354CB-9FF0-45C2-957F-8C56FFC6BFE4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

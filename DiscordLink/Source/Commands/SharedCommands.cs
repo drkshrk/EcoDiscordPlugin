@@ -25,7 +25,7 @@ using static Eco.Plugins.DiscordLink.Utilities.MessageBuilder;
 
 namespace Eco.Plugins.DiscordLink
 {
-    public class CommandContext
+    public class DiscordLinkCommandContext
     {
         public ApplicationInterfaceType Interface { get; protected set; }
     }
@@ -37,7 +37,7 @@ namespace Eco.Plugins.DiscordLink
     {
         #region Commands Base
 
-        private static async Task ReportCommandError(CommandContext ctx, string message)
+        private static async Task ReportCommandError(DiscordLinkCommandContext ctx, string message)
         {
             if (ctx is EcoCommandContext ecoCtx)
                 EcoCommands.ReportCommandError(ecoCtx, message);
@@ -45,7 +45,7 @@ namespace Eco.Plugins.DiscordLink
                 await DiscordCommands.ReportCommandError(discordCtx, message);
         }
 
-        private static async Task ReportCommandInfo(CommandContext ctx, string message)
+        private static async Task ReportCommandInfo(DiscordLinkCommandContext ctx, string message)
         {
             if (ctx is EcoCommandContext ecoCtx)
                 EcoCommands.ReportCommandInfo(ecoCtx, message);
@@ -53,7 +53,7 @@ namespace Eco.Plugins.DiscordLink
                 await DiscordCommands.ReportCommandInfo(discordCtx, message);
         }
 
-        private static async Task DisplayCommandData(CommandContext ctx, string title, object data, string panelInstance = "")
+        private static async Task DisplayCommandData(DiscordLinkCommandContext ctx, string title, object data, string panelInstance = "")
         {
             if (ctx is EcoCommandContext ecoCtx)
             {
@@ -90,7 +90,7 @@ namespace Eco.Plugins.DiscordLink
 
         #region Plugin Management
 
-        public static async Task<bool> Update(CommandContext ctx)
+        public static async Task<bool> Update(DiscordLinkCommandContext ctx)
         {
             if (DiscordLink.Obj.Client.ConnectionStatus != DiscordClient.ConnectionState.Connected)
             {
@@ -105,7 +105,7 @@ namespace Eco.Plugins.DiscordLink
             return true;
         }
 
-        public static async Task<bool> RestartPlugin(CommandContext ctx)
+        public static async Task<bool> RestartPlugin(DiscordLinkCommandContext ctx)
         {
             DiscordLink plugin = DiscordLink.Obj;
             Logger.Info("Restart command executed - Restarting");
@@ -123,7 +123,7 @@ namespace Eco.Plugins.DiscordLink
                 else if (ctx is DiscordCommandContext discordCtx)
                 {
                     // Special handling since the call context is broken by the restart and can't be used to respond to the command
-                    DiscordChannel channel = plugin.Client.ChannelByNameOrId(discordCtx.Interaction.Channel.Id.ToString());
+                    DiscordChannel channel = plugin.Client.ChannelByNameOrId(discordCtx.Command.Channel.Id.ToString());
                     _ = plugin.Client.SendMessageAsync(channel, result);
                 }
             }
@@ -137,7 +137,7 @@ namespace Eco.Plugins.DiscordLink
             return restarted;
         }
 
-        public static async Task<bool> ReloadConfig(CommandContext ctx)
+        public static async Task<bool> ReloadConfig(DiscordLinkCommandContext ctx)
         {
             var resultAndMessage = await PluginUtils.ReloadConfig(DiscordLink.Obj);
             if (resultAndMessage.Item1)
@@ -151,7 +151,7 @@ namespace Eco.Plugins.DiscordLink
             return resultAndMessage.Item1;
         }
 
-        public static async Task<bool> ResetPersistentData(CommandContext ctx)
+        public static async Task<bool> ResetPersistentData(DiscordLinkCommandContext ctx)
         {
             Logger.Info("ResetPersistentData command invoked - Resetting persistent storage data");
             DLStorage.Instance.ResetPersistentData();
@@ -159,7 +159,7 @@ namespace Eco.Plugins.DiscordLink
             return true;
         }
 
-        public static async Task<bool> ResetWorldData(CommandContext ctx)
+        public static async Task<bool> ResetWorldData(DiscordLinkCommandContext ctx)
         {
             Logger.Info("ResetWorldData command invoked - Resetting world storage data");
             DLStorage.Instance.ResetWorldData();
@@ -167,21 +167,21 @@ namespace Eco.Plugins.DiscordLink
             return true;
         }
 
-        public static async Task<bool> PersistentStorageData(CommandContext ctx)
+        public static async Task<bool> PersistentStorageData(DiscordLinkCommandContext ctx)
         {
             DiscordLinkEmbed embed = await DLStorage.PersistentData.GetDataDescription();
             await DisplayCommandData(ctx, "Persistent Storage Data", embed, DLConstants.ECO_PANEL_COMPLEX_LIST);
             return true;
         }
 
-        public static async Task<bool> WorldStorageData(CommandContext ctx)
+        public static async Task<bool> WorldStorageData(DiscordLinkCommandContext ctx)
         {
             DiscordLinkEmbed embed = await DLStorage.WorldData.GetDataDescription();
             await DisplayCommandData(ctx, "World Storage Data", embed, DLConstants.ECO_PANEL_COMPLEX_LIST);
             return true;
         }
 
-        public static async Task<bool> ClearRoles(CommandContext ctx)
+        public static async Task<bool> ClearRoles(DiscordLinkCommandContext ctx)
         {
             Logger.Info("ClearRoles command invoked - Deleting all created roles");
             DiscordLink plugin = DiscordLink.Obj;
@@ -200,7 +200,7 @@ namespace Eco.Plugins.DiscordLink
 
         #region Server Management
 
-        public static async Task<bool> ServerShutdown(CommandContext ctx)
+        public static async Task<bool> ServerShutdown(DiscordLinkCommandContext ctx)
         {
             Logger.Info("Server shutdown command issued");
             await ReportCommandInfo(ctx, "Shutdown command issued");
@@ -212,25 +212,25 @@ namespace Eco.Plugins.DiscordLink
 
         #region Troubleshooting
 
-        public static async Task<bool> ListChannelLinks(CommandContext ctx)
+        public static async Task<bool> ListChannelLinks(DiscordLinkCommandContext ctx)
         {
             await DisplayCommandData(ctx, "List of Linked Channels", MessageBuilder.Shared.GetChannelLinkList());
             return true;
         }
 
-        public static async Task<bool> VerifyConfig(CommandContext ctx)
+        public static async Task<bool> VerifyConfig(DiscordLinkCommandContext ctx)
         {
             await DisplayCommandData(ctx, "Config Verification Report", MessageBuilder.Shared.GetConfigVerificationReport());
             return true;
         }
 
-        public static async Task<bool> VerifyPermissions(CommandContext ctx, MessageBuilder.PermissionReportComponentFlag flag)
+        public static async Task<bool> VerifyPermissions(DiscordLinkCommandContext ctx, MessageBuilder.PermissionReportComponentFlag flag)
         {
             await DisplayCommandData(ctx, "Permission Verification Report", MessageBuilder.Shared.GetPermissionsReport(flag));
             return true;
         }
 
-        public static async Task<bool> VerifyPermissionsForChannel(CommandContext ctx, string channelNameOrId)
+        public static async Task<bool> VerifyPermissionsForChannel(DiscordLinkCommandContext ctx, string channelNameOrId)
         {
             DiscordChannel channel = DiscordLink.Obj.Client.ChannelByNameOrId(channelNameOrId);
             if (channel == null)
@@ -243,7 +243,7 @@ namespace Eco.Plugins.DiscordLink
             return true;
         }
 
-        public static async Task<bool> VerifyPermissionsForChannel(CommandContext ctx, DiscordChannel channel)
+        public static async Task<bool> VerifyPermissionsForChannel(DiscordLinkCommandContext ctx, DiscordChannel channel)
         {
             await DisplayCommandData(ctx, $"Permission Verification Report for {channel.Name}", MessageBuilder.Shared.GetPermissionsReportForChannel(channel));
             return true;
@@ -253,7 +253,7 @@ namespace Eco.Plugins.DiscordLink
 
         #region Lookups
 
-        public static async Task<bool> PlayerReport(CommandContext ctx, string playerNameOrId, PlayerReportComponentFlag ReportType)
+        public static async Task<bool> PlayerReport(DiscordLinkCommandContext ctx, string playerNameOrId, PlayerReportComponentFlag ReportType)
         {
             User user = Lookups.UserByNameOrId(playerNameOrId);
             if (user == null)
@@ -270,7 +270,7 @@ namespace Eco.Plugins.DiscordLink
             return true;
         }
 
-        public static async Task<bool> CurrencyReport(CommandContext ctx, string currencyNameOrId, int maxTopHoldersCount, bool useBackingInfo, bool useTradeCount)
+        public static async Task<bool> CurrencyReport(DiscordLinkCommandContext ctx, string currencyNameOrId, int maxTopHoldersCount, bool useBackingInfo, bool useTradeCount)
         {
             Currency currency = Lookups.CurrencyByNameOrId(currencyNameOrId);
             if (currency == null)
@@ -293,7 +293,7 @@ namespace Eco.Plugins.DiscordLink
             return true;
         }
 
-        public static async Task<bool> CurrenciesReport(CommandContext ctx, CurrencyType currencyType, int maxCurrenciesPerType, int holdersPerCurrency)
+        public static async Task<bool> CurrenciesReport(DiscordLinkCommandContext ctx, CurrencyType currencyType, int maxCurrenciesPerType, int holdersPerCurrency)
         {
             if (maxCurrenciesPerType <= 0)
             {
@@ -353,7 +353,7 @@ namespace Eco.Plugins.DiscordLink
             return true;
         }
 
-        public static async Task<bool> ElectionReport(CommandContext ctx, string electionNameOrId)
+        public static async Task<bool> ElectionReport(DiscordLinkCommandContext ctx, string electionNameOrId)
         {
             Election election = Lookups.ActiveElectionByNameOrId(electionNameOrId);
             if (election == null)
@@ -370,7 +370,7 @@ namespace Eco.Plugins.DiscordLink
             return true;
         }
 
-        public static async Task<bool> ElectionsReport(CommandContext ctx)
+        public static async Task<bool> ElectionsReport(DiscordLinkCommandContext ctx)
         {
             IEnumerable<Election> elections = Lookups.ActiveElections;
             if (elections.Count() <= 0)
@@ -401,7 +401,7 @@ namespace Eco.Plugins.DiscordLink
             return true;
         }
 
-        public static async Task<bool> WorkPartyReport(CommandContext ctx, string workPartyNameOrId)
+        public static async Task<bool> WorkPartyReport(DiscordLinkCommandContext ctx, string workPartyNameOrId)
         {
             WorkParty workParty = Lookups.ActiveWorkPartyByNameOrId(workPartyNameOrId);
             if (workParty == null)
@@ -419,7 +419,7 @@ namespace Eco.Plugins.DiscordLink
             return true;
         }
 
-        public static async Task<bool> WorkPartiesReport(CommandContext ctx)
+        public static async Task<bool> WorkPartiesReport(DiscordLinkCommandContext ctx)
         {
             IEnumerable<WorkParty> workParties = Lookups.ActiveWorkParties;
             if (workParties.Count() <= 0)
@@ -446,7 +446,7 @@ namespace Eco.Plugins.DiscordLink
 
         #region Invites
 
-        public static async Task<bool> PostInviteMessage(CommandContext ctx)
+        public static async Task<bool> PostInviteMessage(DiscordLinkCommandContext ctx)
         {
             DLConfigData config = DLConfig.Data;
             string discordAddress = NetworkManager.Config.DiscordAddress;
@@ -476,7 +476,7 @@ namespace Eco.Plugins.DiscordLink
 
         #region Trades
 
-        public static async Task<bool> AddTradeWatcher(CommandContext ctx, string searchName, Modules.ModuleArchetype type)
+        public static async Task<bool> AddTradeWatcher(DiscordLinkCommandContext ctx, string searchName, Modules.ModuleArchetype type)
         {
             searchName = searchName.StripTags();
 
@@ -488,7 +488,7 @@ namespace Eco.Plugins.DiscordLink
 
             LinkedUser linkedUser = ctx.Interface == ApplicationInterfaceType.Eco
                 ? UserLinkManager.LinkedUserByEcoUser(((EcoCommandContext)ctx).User, ((EcoCommandContext)ctx).User, "Trade Watcher Registration")
-                : UserLinkManager.LinkedUserByDiscordUser(((DiscordCommandContext)ctx).Interaction.User, ((DiscordCommandContext)ctx).Interaction.Member, "Trade Watcher Registration");
+                : UserLinkManager.LinkedUserByDiscordUser(((DiscordCommandContext)ctx).Command.User, ((DiscordCommandContext)ctx).Command.Member, "Trade Watcher Registration");
             if (linkedUser == null)
                 return false;
 
@@ -540,7 +540,7 @@ namespace Eco.Plugins.DiscordLink
             }
         }
 
-        public static async Task<bool> RemoveTradeWatcher(CommandContext ctx, string searchName, Modules.ModuleArchetype type)
+        public static async Task<bool> RemoveTradeWatcher(DiscordLinkCommandContext ctx, string searchName, Modules.ModuleArchetype type)
         {
             if (string.IsNullOrWhiteSpace(searchName))
             {
@@ -550,7 +550,7 @@ namespace Eco.Plugins.DiscordLink
 
             LinkedUser linkedUser = ctx.Interface == ApplicationInterfaceType.Eco
                 ? UserLinkManager.LinkedUserByEcoUser(((EcoCommandContext)ctx).User, ((EcoCommandContext)ctx).User, "Trade Watcher Unregistration")
-                : UserLinkManager.LinkedUserByDiscordUser(((DiscordCommandContext)ctx).Interaction.User, ((DiscordCommandContext)ctx).Interaction.Member, "Trade Watcher Unregistration");
+                : UserLinkManager.LinkedUserByDiscordUser(((DiscordCommandContext)ctx).Command.User, ((DiscordCommandContext)ctx).Command.Member, "Trade Watcher Unregistration");
             if (linkedUser == null)
                 return false;
 
@@ -569,11 +569,11 @@ namespace Eco.Plugins.DiscordLink
             }
         }
 
-        public static async Task<bool> ListTradeWatchers(CommandContext ctx)
+        public static async Task<bool> ListTradeWatchers(DiscordLinkCommandContext ctx)
         {
             LinkedUser linkedUser = ctx.Interface == ApplicationInterfaceType.Eco
                 ? UserLinkManager.LinkedUserByEcoUser(((EcoCommandContext)ctx).User, ((EcoCommandContext)ctx).User, "Trade Watchers Listing")
-                : UserLinkManager.LinkedUserByDiscordUser(((DiscordCommandContext)ctx).Interaction.User, ((DiscordCommandContext)ctx).Interaction.Member, "Trade Watchers Listing");
+                : UserLinkManager.LinkedUserByDiscordUser(((DiscordCommandContext)ctx).Command.User, ((DiscordCommandContext)ctx).Command.Member, "Trade Watchers Listing");
             if (linkedUser == null)
                 return false;
 
@@ -585,7 +585,7 @@ namespace Eco.Plugins.DiscordLink
 
         #region Snippets
 
-        public static async Task Snippet(CommandContext ctx, ApplicationInterfaceType target, string userName, string snippetKey)
+        public static async Task Snippet(DiscordLinkCommandContext ctx, ApplicationInterfaceType target, string userName, string snippetKey)
         {
             var snippets = DLStorage.Instance.Snippets;
             if (string.IsNullOrWhiteSpace(snippetKey)) // List all snippets if no key is given

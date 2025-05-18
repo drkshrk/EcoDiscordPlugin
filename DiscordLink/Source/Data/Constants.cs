@@ -10,8 +10,8 @@ namespace Eco.Plugins.DiscordLink
 {
     public static class DLConstants
     {
-        public static readonly Permissions[] REQUESTED_GUILD_PERMISSIONS = { Permissions.AccessChannels, Permissions.ManageRoles };
-        public static readonly Permissions[] REQUESTED_CHANNEL_PERMISSIONS = { Permissions.AccessChannels, Permissions.SendMessages, Permissions.EmbedLinks, Permissions.AddReactions, Permissions.MentionEveryone, Permissions.ManageMessages, Permissions.ReadMessageHistory };
+        public static readonly DiscordPermissions[] REQUESTED_GUILD_PERMISSIONS = { DiscordPermissions.AccessChannels, DiscordPermissions.ManageRoles };
+        public static readonly DiscordPermissions[] REQUESTED_CHANNEL_PERMISSIONS = { DiscordPermissions.AccessChannels, DiscordPermissions.SendMessages, DiscordPermissions.EmbedLinks, DiscordPermissions.AddReactions, DiscordPermissions.MentionEveryone, DiscordPermissions.ManageMessages, DiscordPermissions.ReadMessageHistory };
         public static readonly DiscordIntents[] REQUESTED_INTENTS = { DiscordIntents.AllUnprivileged, DiscordIntents.GuildMembers, DiscordIntents.MessageContents };
 
         public const string DISCORD_COLOR = "7289DAFF";
@@ -47,8 +47,6 @@ namespace Eco.Plugins.DiscordLink
         public const int DISCORD_REFERENCE_MESSAGE_CONTENT_PREVIEW_LENGTH = 15;
 
         public const int USER_LINK_FAILED_LOOKUP_REMOVAL_THRESHOLD = 3;
-
-        public const int POST_SERVER_CONNECTION_WAIT_MS = 3000;
 
         public const string ECO_PANEL_NOTIFICATION = "DLNotification";
         public const string ECO_PANEL_SIMPLE_LIST = "DLSimpleList";

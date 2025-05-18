@@ -1,6 +1,6 @@
 ﻿using DSharpPlus;
+using DSharpPlus.Commands.Processors.SlashCommands.ArgumentModifiers;
 using DSharpPlus.Entities;
-using DSharpPlus.SlashCommands;
 using Eco.Core.Utils;
 using Eco.Gameplay.Civics;
 using Eco.Gameplay.Civics.Demographics;
@@ -79,19 +79,19 @@ namespace Eco.Plugins.DiscordLink.Utilities
         [Flags]
         public enum PlayerReportComponentFlag
         {
-            [ChoiceName("Online")]          OnlineStatus    = 1 << 0,
-            [ChoiceName("Playtime")]        PlayTime        = 1 << 1,
-            [ChoiceName("Exhaustion")]      Exhaustion      = 1 << 2,
-            [ChoiceName("Permissions")]     Permissions     = 1 << 3,
-            [ChoiceName("Access")]          AccessLists     = 1 << 4,
-            [ChoiceName("Discord")]         DiscordInfo     = 1 << 5,
-            [ChoiceName("Reputation")]      Reputation      = 1 << 6,
-            [ChoiceName("Experience")]      Experience      = 1 << 7,
-            [ChoiceName("Skills")]          Skills          = 1 << 8,
-            [ChoiceName("Demographics")]    Demographics    = 1 << 9,
-            [ChoiceName("Titles")]          Titles          = 1 << 10,
-            [ChoiceName("Properties")]      Properties      = 1 << 11,
-            [ChoiceName("All")]             All             = ~0
+            [ChoiceDisplayName("Online")]          OnlineStatus    = 1 << 0,
+            [ChoiceDisplayName("Playtime")]        PlayTime        = 1 << 1,
+            [ChoiceDisplayName("Exhaustion")]      Exhaustion      = 1 << 2,
+            [ChoiceDisplayName("Permissions")]     Permissions     = 1 << 3,
+            [ChoiceDisplayName("Access")]          AccessLists     = 1 << 4,
+            [ChoiceDisplayName("Discord")]         DiscordInfo     = 1 << 5,
+            [ChoiceDisplayName("Reputation")]      Reputation      = 1 << 6,
+            [ChoiceDisplayName("Experience")]      Experience      = 1 << 7,
+            [ChoiceDisplayName("Skills")]          Skills          = 1 << 8,
+            [ChoiceDisplayName("Demographics")]    Demographics    = 1 << 9,
+            [ChoiceDisplayName("Titles")]          Titles          = 1 << 10,
+            [ChoiceDisplayName("Properties")]      Properties      = 1 << 11,
+            [ChoiceDisplayName("All")]             All             = ~0
         }
 
         [Flags]
@@ -295,7 +295,7 @@ namespace Eco.Plugins.DiscordLink.Utilities
 
                 if (flag.HasFlag(PermissionReportComponentFlag.ServerPermissions))
                 {
-                    foreach (Permissions permission in DLConstants.REQUESTED_GUILD_PERMISSIONS)
+                    foreach (DiscordPermissions permission in DLConstants.REQUESTED_GUILD_PERMISSIONS)
                     {
                         if (!client.BotHasPermission(permission))
                         {
@@ -308,7 +308,7 @@ namespace Eco.Plugins.DiscordLink.Utilities
                 {
                     foreach (ChannelLink link in DLConfig.GetChannelLinks().GroupBy(link => link.Channel.Id).Select(group => group.First())) // Only perform the check once per link
                     {
-                        foreach (Permissions permission in DLConstants.REQUESTED_CHANNEL_PERMISSIONS)
+                        foreach (DiscordPermissions permission in DLConstants.REQUESTED_CHANNEL_PERMISSIONS)
                         {
                             if (!client.ChannelHasPermission(link.Channel, permission))
                             {
@@ -333,7 +333,7 @@ namespace Eco.Plugins.DiscordLink.Utilities
             public static string GetPermissionsReportForChannel(DiscordChannel channel)
             {
                 StringBuilder builder = new StringBuilder();
-                foreach (Permissions permission in DLConstants.REQUESTED_CHANNEL_PERMISSIONS)
+                foreach (DiscordPermissions permission in DLConstants.REQUESTED_CHANNEL_PERMISSIONS)
                 {
                     if (!DiscordLink.Obj.Client.ChannelHasPermission(channel, permission))
                     {

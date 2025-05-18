@@ -173,7 +173,7 @@ namespace Eco.Plugins.DiscordLink.Modules
                 else
                     continue;
 
-                if (!plugin.Client.ChannelHasPermission(targetChannel, Permissions.ReadMessageHistory))
+                if (!plugin.Client.ChannelHasPermission(targetChannel, DiscordPermissions.ReadMessageHistory))
                     continue;
 
                 GetDisplayContent(target, out List<DisplayContent> displayContent);

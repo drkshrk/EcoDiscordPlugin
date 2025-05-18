@@ -499,7 +499,7 @@ namespace Eco.Plugins.DiscordLink
                     || (trigger & (DlEventType.Join | DlEventType.Login | DlEventType.Logout | DlEventType.Timer)) == 0)
                     return;
 
-                await Client.SetActivityStringAsync(MessageBuilder.Discord.GetActivityString(), ActivityType.Watching);
+                await Client.SetActivityStringAsync(MessageBuilder.Discord.GetActivityString(), DiscordActivityType.Watching);
             }
             catch (Exception e)
             {

@@ -1,6 +1,6 @@
-﻿using DSharpPlus.Entities;
+﻿using DSharpPlus.Commands;
+using DSharpPlus.Entities;
 using DSharpPlus.Exceptions;
-using DSharpPlus.SlashCommands;
 using Eco.Moose.Tools.Logger;
 using Eco.Shared.Utils;
 using System;
@@ -13,18 +13,18 @@ namespace Eco.Plugins.DiscordLink.Extensions
     {
         #region InteractionContext
 
-        public static ulong GetSenderId(this InteractionContext ctx)
+        public static ulong GetSenderId(this CommandContext command)
         {
-            DiscordUser user = ctx.Member ?? ctx.User;
+            DiscordUser user = command.Member ?? command.User;
             return user.Id;
         }
 
-        public static string GetSenderName(this InteractionContext ctx)
+        public static string GetSenderName(this CommandContext command)
         {
-            if (ctx.Member != null)
-                return ctx.Member.DisplayName;
+            if (command.Member != null)
+                return command.Member.DisplayName;
             else
-                return ctx.User.Username;
+                return command.User.Username;
         }
 
         #endregion
