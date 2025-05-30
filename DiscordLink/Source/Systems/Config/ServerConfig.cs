@@ -16,7 +16,7 @@ using System.Threading.Tasks;
 
 namespace Eco.Plugins.DiscordLink
 {
-    public sealed class DLConfig
+    public sealed class ServerConfig
     {
         public static class DefaultValues
         {
@@ -42,7 +42,7 @@ namespace Eco.Plugins.DiscordLink
             public static readonly EmoteIconSubstitution[] EmoteSubstitutions = { new EmoteIconSubstitution("DiscordLink", "DiscordLinkLogo") };
         }
 
-        public static readonly DLConfig Instance = new DLConfig();
+        public static readonly ServerConfig Instance = new ServerConfig();
         public static DLConfigData Data { get { return Instance._config.Config; } }
         public PluginConfig<DLConfigData> PluginConfig { get { return Instance._config; } }
 
@@ -76,11 +76,11 @@ namespace Eco.Plugins.DiscordLink
         private readonly List<ChannelLink> _verifiedChannelLinks = new List<ChannelLink>();
 
         // Explicit static constructor to tell C# compiler not to mark type as beforefieldinit
-        static DLConfig()
+        static ServerConfig()
         {
         }
 
-        private DLConfig()
+        private ServerConfig()
         {
         }
 
@@ -175,7 +175,7 @@ namespace Eco.Plugins.DiscordLink
             // Max tracked trades per user
             if (Data.MaxTradeWatcherDisplaysPerUser < 0)
             {
-                Data.MaxTradeWatcherDisplaysPerUser = DLConfig.DefaultValues.MaxTradeWatcherDisplaysPerUser;
+                Data.MaxTradeWatcherDisplaysPerUser = ServerConfig.DefaultValues.MaxTradeWatcherDisplaysPerUser;
             }
 
             // Invite Message
@@ -308,10 +308,10 @@ namespace Eco.Plugins.DiscordLink
         public ulong DiscordServerId { get; set; }
 
         [Description("The roles recognized as having admin permissions in DiscordLink. This setting requires a plugin restart to take effect."), Category("Base Configuration - Discord")]
-        public ObservableCollection<string> AdminRoles { get; set; } = new ObservableCollection<string>(DLConfig.DefaultValues.AdminRoles);
+        public ObservableCollection<string> AdminRoles { get; set; } = new ObservableCollection<string>(ServerConfig.DefaultValues.AdminRoles);
 
         [Description("Determines if the owner of the Discord server should have admin permissions in DiscordLink. This setting requires a plugin restart to take effect."), Category("Base Configuration - Discord")]
-        public bool DiscordServerOwnerIsAdmin { get; set; } = DLConfig.DefaultValues.DiscordServerOwnerIsAdmin;
+        public bool DiscordServerOwnerIsAdmin { get; set; } = ServerConfig.DefaultValues.DiscordServerOwnerIsAdmin;
 
         [Description("The name of the Eco server, overriding the name configured within Eco. This setting can be changed while the server is running."), Category("Base Configuration - Eco")]
         public string ServerName { get; set; }
@@ -323,7 +323,7 @@ namespace Eco.Plugins.DiscordLink
         public string ConnectionInfo { get; set; } = $"Server Id: {NetworkManager.Config.ID.ToString()}";
 
         [Description("Whether chat message should be synchroinized by default or not. This setting can be changed while the server is running."), Category("Base Configuration - Eco")]
-        public ChatSyncMode ChatSyncMode { get; set; } = DLConfig.DefaultValues.ChatSynchronizationMode;
+        public ChatSyncMode ChatSyncMode { get; set; } = ServerConfig.DefaultValues.ChatSynchronizationMode;
 
         [Description("Discord and Eco Channels to connect together for chat crossposting. This setting can be changed while the server is running."), Category("Modules - Feeds")]
         public ObservableCollection<ChatChannelLink> ChatChannelLinks { get; set; } = new ObservableCollection<ChatChannelLink>();
@@ -347,7 +347,7 @@ namespace Eco.Plugins.DiscordLink
         public ObservableCollection<ServerLogFeedChannelLink> ServerLogFeedChannels { get; set; } = new ObservableCollection<ServerLogFeedChannelLink>();
 
         [Description("Determines if users can use trade watcher feeds. This setting can be changed while the server is running."), Category("Modules - Feeds")]
-        public bool UseTradeWatcherFeeds { get; set; } = DLConfig.DefaultValues.UseTradeWatcherFeeds;
+        public bool UseTradeWatcherFeeds { get; set; } = ServerConfig.DefaultValues.UseTradeWatcherFeeds;
 
         [Description("Discord channels in which to keep a Server Info display. DiscordLink will post one server info message in these channel and keep it updated through edits. This setting can be changed while the server is running."), Category("Modules - Displays")]
         public ObservableCollection<ServerInfoChannelLink> ServerInfoDisplayChannels { get; set; } = new ObservableCollection<ServerInfoChannelLink>();
@@ -371,49 +371,49 @@ namespace Eco.Plugins.DiscordLink
         public ObservableCollection<ChannelLink> SnippetInputChannels { get; set; } = new ObservableCollection<ChannelLink>();
 
         [Description("Determines if a Discord role will be granted to users who link their Discord accounts. This setting can be changed while the server is running."), Category("Modules - Roles")]
-        public bool UseLinkedAccountRole { get; set; } = DLConfig.DefaultValues.UseLinkedAccountRole;
+        public bool UseLinkedAccountRole { get; set; } = ServerConfig.DefaultValues.UseLinkedAccountRole;
 
         [Description("Determines if Discord roles matching ingame demographics will be granted to users who have linked their accounts. This setting can be changed while the server is running."), Category("Modules - Roles")]
-        public bool UseDemographicRoles { get; set; } = DLConfig.DefaultValues.UseDemographicRoles;
+        public bool UseDemographicRoles { get; set; } = ServerConfig.DefaultValues.UseDemographicRoles;
 
         [Description("Roles that will be used (and created if needed) for the given demographics. This setting can be changed while the server is running."), Category("Modules - Roles")]
-        public ObservableCollection<DemographicRoleSubstitution> DemographicReplacementRoles { get; set; } = new ObservableCollection<DemographicRoleSubstitution>(DLConfig.DefaultValues.DemographicRoleReplacements);
+        public ObservableCollection<DemographicRoleSubstitution> DemographicReplacementRoles { get; set; } = new ObservableCollection<DemographicRoleSubstitution>(ServerConfig.DefaultValues.DemographicRoleReplacements);
 
         [Description("Determines if Discord roles matching ingame specialties will be granted to users who have linked their accounts. This setting can be changed while the server is running."), Category("Modules - Roles")]
-        public bool UseSpecialtyRoles { get; set; } = DLConfig.DefaultValues.UseSpecialtyRoles;
+        public bool UseSpecialtyRoles { get; set; } = ServerConfig.DefaultValues.UseSpecialtyRoles;
 
         [Description("Determines if Discord roles matching ingame elected titles will be granted to users who have linked their accounts. This setting can be changed while the server is running."), Category("Modules - Roles")]
-        public bool UseElectedTitleRoles { get; set; } = DLConfig.DefaultValues.UseElectedTitleRoles;
+        public bool UseElectedTitleRoles { get; set; } = ServerConfig.DefaultValues.UseElectedTitleRoles;
 
         [Description("Max amount of tracked trades allowed per user. Set to 0 to disable trade watchers. This setting can be changed while the server is running, but does not apply retroactively."), Category("Commands")]
-        public int MaxTradeWatcherDisplaysPerUser { get; set; } = DLConfig.DefaultValues.MaxTradeWatcherDisplaysPerUser;
+        public int MaxTradeWatcherDisplaysPerUser { get; set; } = ServerConfig.DefaultValues.MaxTradeWatcherDisplaysPerUser;
 
         [Description("The message to use for the /DiscordInvite command. The invite link is fetched from the network config and will replace the token " + DLConstants.INVITE_COMMAND_TOKEN + ". This setting can be changed while the server is running."), Category("Commands")]
-        public string InviteMessage { get; set; } = DLConfig.DefaultValues.InviteMessage;
+        public string InviteMessage { get; set; } = ServerConfig.DefaultValues.InviteMessage;
 
         [Description("Determines what message types will be printed to the server log. All message types below the selected one will be printed as well. This setting can be changed while the server is running."), Category("Plugin Configuration")]
-        public Logger.LogLevel LogLevel { get; set; } = DLConfig.DefaultValues.PluginLogLevel;
+        public Logger.LogLevel LogLevel { get; set; } = ServerConfig.DefaultValues.PluginLogLevel;
 
         [Description("Determines what backend message types will be printed to the server log. All message types below the selected one will be printed as well. This setting requires a plugin restart to take effect."), Category("Plugin Configuration")]
-        public Microsoft.Extensions.Logging.LogLevel BackendLogLevel { get; set; } = DLConfig.DefaultValues.BackendLogLevel;
+        public Microsoft.Extensions.Logging.LogLevel BackendLogLevel { get; set; } = ServerConfig.DefaultValues.BackendLogLevel;
 
         [Description("Trace-Logs are not logged to file by default. Please only enable this to diagnose issues. Enabling this will save every single request made to the Discord API to the logfile. This will create huge logs over time. This setting requires a plugin restart to take effect."), Category("Plugin Configuration")]
         public bool TraceFileLogging { get; set; } = false;
 
         [Description("Determines if the output in the display tab of the server GUI should be verbose or not. This setting can be changed while the server is running."), Category("Plugin Configuration")]
-        public bool UseVerboseDisplay { get; set; } = DLConfig.DefaultValues.UseVerboseDisplay;
+        public bool UseVerboseDisplay { get; set; } = ServerConfig.DefaultValues.UseVerboseDisplay;
 
         [Description("Emote keys to replace with eco icons using the value name. This setting can be changed while the server is running."), Category("Emotes")]
-        public ObservableCollection<EmoteIconSubstitution> EmoteIconSubstitutions { get; set; } = new ObservableCollection<EmoteIconSubstitution>(DLConfig.DefaultValues.EmoteSubstitutions);
+        public ObservableCollection<EmoteIconSubstitution> EmoteIconSubstitutions { get; set; } = new ObservableCollection<EmoteIconSubstitution>(ServerConfig.DefaultValues.EmoteSubstitutions);
 
         [Description("Determines for what sizes of embeds to show the footer containing meta information about posted embeds. All embeds of sizes bigger than the selected one will have footers as well. This setting can be changed while the server is running."), Category("Style - Discord")]
-        public DiscordLinkEmbed.EmbedSize MinEmbedSizeForFooter { get; set; } = DLConfig.DefaultValues.MinEmbedSizeForFooter;
+        public DiscordLinkEmbed.EmbedSize MinEmbedSizeForFooter { get; set; } = ServerConfig.DefaultValues.MinEmbedSizeForFooter;
 
         [Description("Determines the color of the left outline of embeds. Must be a valid hexadecimal color string. This setting can be changed while the server is running."), Category("Style - Discord")]
         public string EmbedColorHex { get { return _embedColorHex; } set { EmbedColor = new DiscordColor(value); _embedColorHex = value; } }
-        private string _embedColorHex = DLConfig.DefaultValues.EmbedColor;
+        private string _embedColorHex = ServerConfig.DefaultValues.EmbedColor;
 
         [Browsable(false), JsonIgnore]
-        public DiscordColor EmbedColor { get; set; } = new DiscordColor(DLConfig.DefaultValues.EmbedColor);
+        public DiscordColor EmbedColor { get; set; } = new DiscordColor(ServerConfig.DefaultValues.EmbedColor);
     }
 }

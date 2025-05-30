@@ -57,7 +57,7 @@ namespace Eco.Plugins.DiscordLink
         public static DiscordLink Obj { get { return PluginManager.GetPlugin<DiscordLink>(); } }
         public DiscordClient Client { get; private set; } = new DiscordClient();
         public Module[] Modules { get; private set; } = new Module[Enum.GetNames(typeof(ModuleType)).Length];
-        public IPluginConfig PluginConfig { get { return DLConfig.Instance.PluginConfig; } }
+        public IPluginConfig PluginConfig { get { return ServerConfig.Instance.PluginConfig; } }
         public ThreadSafeAction<object, string> ParamChanged { get; set; }
         public DateTime InitTime { get; private set; } = DateTime.MinValue;
         public bool CanRestart { get; private set; } = false; // False to start with as we cannot restart while the initial startup is in progress
@@ -77,8 +77,8 @@ namespace Eco.Plugins.DiscordLink
         public override string ToString() => PluginName;
         public string GetCategory() => "Mighty Moose";
         public string GetStatus() => _statusDescription;
-        public object GetEditObject() => DLConfig.Data;
-        public void OnEditObjectChanged(object o, string param) => _ = DLConfig.Instance.HandleConfigChanged();
+        public object GetEditObject() => ServerConfig.Data;
+        public void OnEditObjectChanged(object o, string param) => _ = ServerConfig.Instance.HandleConfigChanged();
         public LazyResult ShouldOverrideAuth(IAlias alias, IOwned property, GameAction action) => LazyResult.FailedNoMessage;
 
         public StatusState Status
@@ -137,7 +137,7 @@ namespace Eco.Plugins.DiscordLink
         {
             try
             {
-                return MessageBuilder.Shared.GetDisplayStringAsync(DLConfig.Data.UseVerboseDisplay).Result;
+                return MessageBuilder.Shared.GetDisplayStringAsync(ServerConfig.Data.UseVerboseDisplay).Result;
             }
             catch (ServerErrorException e)
             {
@@ -154,8 +154,8 @@ namespace Eco.Plugins.DiscordLink
         public async void Initialize(TimedTask timer)
         {
             InitCallbacks();
-            DLConfig.Instance.Initialize();
-            Logger.RegisterLogger(PluginName, ConsoleColor.Cyan, DLConfig.Data.LogLevel);
+            ServerConfig.Instance.Initialize();
+            Logger.RegisterLogger(PluginName, ConsoleColor.Cyan, ServerConfig.Data.LogLevel);
             Status = StatusState.InitializingPlugin;
             InitTime = DateTime.Now;
 
@@ -180,7 +180,7 @@ namespace Eco.Plugins.DiscordLink
         {
             Status = StatusState.AwaitingGuildDownload;
 
-            if (string.IsNullOrEmpty(DLConfig.Data.BotToken))
+            if (string.IsNullOrEmpty(ServerConfig.Data.BotToken))
             {
                 HandleDiscordConnectionFailed("Failed to start DiscordLink: Missing BotToken.");
                 return;
@@ -299,7 +299,7 @@ namespace Eco.Plugins.DiscordLink
 
             DLConstants.PostConnectionInit();
 
-            DLConfig.Instance.PostConnectionInit();
+            ServerConfig.Instance.PostConnectionInit();
             if (!Client.IsConnected)
             {
                 Status = StatusState.ServerConnectionFailed;

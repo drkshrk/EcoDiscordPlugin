@@ -18,7 +18,7 @@ namespace Eco.Plugins.DiscordLink.Modules
         public override string ToString() => "Work Party Display";
         protected override DlEventType GetTriggers() => base.GetTriggers() | DlEventType.DiscordClientConnected | DlEventType.Timer
             | DlEventType.PostedWorkParty | DlEventType.CompletedWorkParty | DlEventType.JoinedWorkParty | DlEventType.LeftWorkParty | DlEventType.WorkedWorkParty;
-        protected override async Task<IEnumerable<DiscordTarget>> GetDiscordTargets() => DLConfig.Data.WorkPartyDisplayChannels.Cast<DiscordTarget>();
+        protected override async Task<IEnumerable<DiscordTarget>> GetDiscordTargets() => ServerConfig.Data.WorkPartyDisplayChannels.Cast<DiscordTarget>();
 
         protected override void GetDisplayContent(DiscordTarget target, out List<DisplayContent> displayContent)
         {

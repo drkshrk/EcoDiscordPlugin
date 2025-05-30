@@ -144,7 +144,7 @@ namespace Eco.Plugins.DiscordLink.Extensions
 
         public static bool IsAdmin(this DiscordMember member)
         {
-            return member.Roles.Any(role => DLConfig.Data.AdminRoles.Any(adminRoleName => adminRoleName.EqualsCaseInsensitive(role.Name)));
+            return member.Roles.Any(role => ServerConfig.Data.AdminRoles.Any(adminRoleName => adminRoleName.EqualsCaseInsensitive(role.Name)));
         }
 
         #endregion

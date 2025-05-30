@@ -448,7 +448,7 @@ namespace Eco.Plugins.DiscordLink
 
         public static async Task<bool> PostInviteMessage(DiscordLinkCommandContext ctx)
         {
-            DLConfigData config = DLConfig.Data;
+            DLConfigData config = ServerConfig.Data;
             string discordAddress = NetworkManager.Config.DiscordAddress;
             if (string.IsNullOrEmpty(discordAddress))
             {
@@ -495,20 +495,20 @@ namespace Eco.Plugins.DiscordLink
             ulong discordMemberId = ulong.Parse(linkedUser.DiscordId);
             if (type == Modules.ModuleArchetype.Display)
             {
-                if (DLConfig.Data.MaxTradeWatcherDisplaysPerUser <= 0)
+                if (ServerConfig.Data.MaxTradeWatcherDisplaysPerUser <= 0)
                 {
                     await ReportCommandError(ctx, "Trade watcher displays are not enabled on this server.");
                     return false;
                 }
 
                 int watchedTradesCount = DLStorage.WorldData.GetTradeWatcherCountForMember(discordMemberId);
-                if (watchedTradesCount >= DLConfig.Data.MaxTradeWatcherDisplaysPerUser)
+                if (watchedTradesCount >= ServerConfig.Data.MaxTradeWatcherDisplaysPerUser)
                 {
-                    await ReportCommandError(ctx, $"You are already watching {watchedTradesCount} trades and the limit is {DLConfig.Data.MaxTradeWatcherDisplaysPerUser} trade watcher displays per user.\nUse the `/DL-RemoveTradeWatcherDisplay` command to remove a trade watcher to make space if you wish to add a new one.");
+                    await ReportCommandError(ctx, $"You are already watching {watchedTradesCount} trades and the limit is {ServerConfig.Data.MaxTradeWatcherDisplaysPerUser} trade watcher displays per user.\nUse the `/DL-RemoveTradeWatcherDisplay` command to remove a trade watcher to make space if you wish to add a new one.");
                     return false;
                 }
             }
-            else if (!DLConfig.Data.UseTradeWatcherFeeds)
+            else if (!ServerConfig.Data.UseTradeWatcherFeeds)
             {
                 await ReportCommandError(ctx, "Trade watcher feeds are not enabled on this server.");
                 return false;

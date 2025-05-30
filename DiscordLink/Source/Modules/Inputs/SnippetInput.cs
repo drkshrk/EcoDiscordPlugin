@@ -31,7 +31,7 @@ namespace Eco.Plugins.DiscordLink.Modules
 
         protected override async Task<bool> ShouldRun()
         {
-            foreach (ChannelLink link in DLConfig.Data.SnippetInputChannels)
+            foreach (ChannelLink link in ServerConfig.Data.SnippetInputChannels)
             {
                 if (link.IsValid())
                     return true;
@@ -63,7 +63,7 @@ namespace Eco.Plugins.DiscordLink.Modules
             if (messageChannel.IsPrivate)
                 return;
 
-            foreach (ChannelLink link in DLConfig.Data.SnippetInputChannels)
+            foreach (ChannelLink link in ServerConfig.Data.SnippetInputChannels)
             {
                 if (!link.IsValid())
                     continue;
@@ -79,7 +79,7 @@ namespace Eco.Plugins.DiscordLink.Modules
         private async Task ReloadSnippets()
         {
             DiscordLink plugin = DiscordLink.Obj;
-            foreach (ChannelLink snippetChannel in DLConfig.Data.SnippetInputChannels)
+            foreach (ChannelLink snippetChannel in ServerConfig.Data.SnippetInputChannels)
             {
                 if (!snippetChannel.IsValid())
                     continue;

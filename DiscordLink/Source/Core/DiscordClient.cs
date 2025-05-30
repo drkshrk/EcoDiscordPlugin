@@ -83,14 +83,14 @@ namespace Eco.Plugins.DiscordLink
 
             LastConnectionError = ConnectionError.None;
 
-            if (string.IsNullOrWhiteSpace(DLConfig.Data.BotToken))
+            if (string.IsNullOrWhiteSpace(ServerConfig.Data.BotToken))
             {
                 Logger.Error("Bot token not configured - See Github page for install instructions.");
                 LastConnectionError = ConnectionError.InvalidToken;
                 return; // Do not attempt to initialize if the bot token is empty
             }
 
-            if (DLConfig.Data.DiscordServerId == 0)
+            if (ServerConfig.Data.DiscordServerId == 0)
             {
                 Logger.Error("Discord Server not configured - See Github page for install instructions => \"https://github.com/Eco-DiscordLink/EcoDiscordPlugin\"");
                 LastConnectionError = ConnectionError.InvalidGuild;
@@ -112,7 +112,7 @@ namespace Eco.Plugins.DiscordLink
             {
                 DiscordIntents intents = DLConstants.REQUESTED_INTENTS.Aggregate((current, next) => current | next);
                 IServiceCollection services = new ServiceCollection();
-                services.AddDiscordClient(DLConfig.Data.BotToken, intents);
+                services.AddDiscordClient(ServerConfig.Data.BotToken, intents);
                 services.AddOrReplace<IGatewayController, ReconnectingGatewayController>(ServiceLifetime.Singleton);
                 services.Configure<RestClientOptions>(x => { });
                 services.Configure<ShardingOptions>(x => { });
@@ -148,7 +148,7 @@ namespace Eco.Plugins.DiscordLink
                 {
                     x.ClearProviders();
                     x.AddConsole();
-                    x.SetMinimumLevel(DLConfig.Data.BackendLogLevel);
+                    x.SetMinimumLevel(ServerConfig.Data.BackendLogLevel);
                 });
 
                 _serviceProvider = services.BuildServiceProvider();
@@ -175,7 +175,7 @@ namespace Eco.Plugins.DiscordLink
             {
                 if (e.InnerException is UnauthorizedException)
                 {
-                    Logger.Error($"An authentication error occurred while connecting to Discord using token \"{DLConfig.Data.BotToken}\". Please verify that your token is valid. See Github page for install instructions.");
+                    Logger.Error($"An authentication error occurred while connecting to Discord using token \"{ServerConfig.Data.BotToken}\". Please verify that your token is valid. See Github page for install instructions.");
                 }
                 else
                 {
@@ -196,7 +196,7 @@ namespace Eco.Plugins.DiscordLink
         private async Task HandleGuildDownloadCompleted(DSharpPlus.DiscordClient client, GuildDownloadCompletedEventArgs args)
         {
             Status = "Resolving Discord server...";
-            Guild = DSharpClient.Guilds.Values.FirstOrDefault(guild => guild.Id == DLConfig.Data.DiscordServerId);
+            Guild = DSharpClient.Guilds.Values.FirstOrDefault(guild => guild.Id == ServerConfig.Data.DiscordServerId);
 
             if (Guild == null)
             {
@@ -204,7 +204,7 @@ namespace Eco.Plugins.DiscordLink
                 ConnectionStatus = ConnectionState.Disconnected;
                 LastConnectionError = ConnectionError.GuildConnectionFailed;
                 Status = "Failed to find configured Discord server";
-                Logger.Error($"Failed to find Discord server \"{DLConfig.Data.DiscordServerId}\". Make sure the Bot is invited to your Server and the Server ID is correct. See Github page for install instructions.");
+                Logger.Error($"Failed to find Discord server \"{ServerConfig.Data.DiscordServerId}\". Make sure the Bot is invited to your Server and the Server ID is correct. See Github page for install instructions.");
                 return;
             }
 
@@ -422,10 +422,10 @@ namespace Eco.Plugins.DiscordLink
 
         public bool MemberIsAdmin(DiscordMember member)
         {
-            if (DLConfig.Data.DiscordServerOwnerIsAdmin && member.IsOwner)
+            if (ServerConfig.Data.DiscordServerOwnerIsAdmin && member.IsOwner)
                 return true;
 
-            foreach (string adminRole in DLConfig.Data.AdminRoles)
+            foreach (string adminRole in ServerConfig.Data.AdminRoles)
             {
                 if (adminRole.TryParseSnowflakeId(out ulong adminRoleId) && member.Roles.Any(role => role.Id == adminRoleId))
                     return true;

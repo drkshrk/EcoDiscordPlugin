@@ -51,7 +51,7 @@ namespace Eco.Plugins.DiscordLink.Modules
                 foreach (DiscordMember member in await client.GetMembersAsync())
                 {
                     LinkedUser linkedUser = UserLinkManager.LinkedUserByDiscordUser(member, requireValid: false);
-                    if (linkedUser == null || !linkedUser.Verified || !DLConfig.Data.UseLinkedAccountRole)
+                    if (linkedUser == null || !linkedUser.Verified || !ServerConfig.Data.UseLinkedAccountRole)
                     {
                         if (member.HasRole(_linkedAccountRole))
                         {
@@ -68,7 +68,7 @@ namespace Eco.Plugins.DiscordLink.Modules
             }
             else
             {
-                if (!DLConfig.Data.UseLinkedAccountRole)
+                if (!ServerConfig.Data.UseLinkedAccountRole)
                     return;
 
                 if (!(data[0] is LinkedUser linkedUser))
@@ -97,7 +97,7 @@ namespace Eco.Plugins.DiscordLink.Modules
 
         private void SetupLinkRole()
         {
-            if (!DLConfig.Data.UseLinkedAccountRole)
+            if (!ServerConfig.Data.UseLinkedAccountRole)
                 return;
 
             ++_opsCount;

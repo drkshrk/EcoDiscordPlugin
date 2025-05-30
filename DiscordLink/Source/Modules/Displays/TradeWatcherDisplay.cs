@@ -28,7 +28,7 @@ namespace Eco.Plugins.DiscordLink.Modules
 
         protected override async Task<bool> ShouldRun()
         {
-            return await base.ShouldRun() && (DLConfig.Data.MaxTradeWatcherDisplaysPerUser > 0);
+            return await base.ShouldRun() && (ServerConfig.Data.MaxTradeWatcherDisplaysPerUser > 0);
         }
 
         public override string GetDisplayText(string childInfo, bool verbose)

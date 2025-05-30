@@ -20,7 +20,7 @@ namespace Eco.Plugins.DiscordLink.Modules
 
         protected override async Task<bool> ShouldRun()
         {
-            foreach (ChannelLink link in DLConfig.Data.ServerLogFeedChannels)
+            foreach (ChannelLink link in ServerConfig.Data.ServerLogFeedChannels)
             {
                 if (link.IsValid())
                     return true;
@@ -33,7 +33,7 @@ namespace Eco.Plugins.DiscordLink.Modules
             if (!(data[0] is Tuple<Logger.LogLevel, string>[] logData))
                 return;
 
-            foreach (ServerLogFeedChannelLink serverFeedLink in DLConfig.Data.ServerLogFeedChannels)
+            foreach (ServerLogFeedChannelLink serverFeedLink in ServerConfig.Data.ServerLogFeedChannels)
             {
                 if (!serverFeedLink.IsValid())
                     continue;

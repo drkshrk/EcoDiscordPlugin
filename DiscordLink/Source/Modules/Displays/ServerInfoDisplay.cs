@@ -16,7 +16,7 @@ namespace Eco.Plugins.DiscordLink.Modules
         public override string ToString() => "Server Info Display";
         protected override DlEventType GetTriggers() => base.GetTriggers() | DlEventType.DiscordClientConnected | DlEventType.Timer
             | DlEventType.Login | DlEventType.ElectionStarted | DlEventType.ElectionStopped | DlEventType.Vote;
-        protected override async Task<IEnumerable<DiscordTarget>> GetDiscordTargets() => DLConfig.Data.ServerInfoDisplayChannels.Cast<DiscordTarget>();
+        protected override async Task<IEnumerable<DiscordTarget>> GetDiscordTargets() => ServerConfig.Data.ServerInfoDisplayChannels.Cast<DiscordTarget>();
 
         protected override void GetDisplayContent(DiscordTarget target, out List<DisplayContent> displayContent)
         {

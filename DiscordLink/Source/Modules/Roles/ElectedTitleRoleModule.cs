@@ -42,7 +42,7 @@ namespace Eco.Plugins.DiscordLink.Modules
                     foreach (ElectedTitle title in Lookups.ActiveElectedTitles)
                     {
                         string titleName = title.Name;
-                        if (linkedUser == null || !DLConfig.Data.UseElectedTitleRoles || !title.ContainsUser(linkedUser.EcoUser))
+                        if (linkedUser == null || !ServerConfig.Data.UseElectedTitleRoles || !title.ContainsUser(linkedUser.EcoUser))
                         {
                             if (member.HasRoleWithName(titleName))
                             {
@@ -58,7 +58,7 @@ namespace Eco.Plugins.DiscordLink.Modules
             }
             else if (trigger == DlEventType.AccountLinkVerified || trigger == DlEventType.AccountLinkRemoved)
             {
-                if (!DLConfig.Data.UseDemographicRoles)
+                if (!ServerConfig.Data.UseDemographicRoles)
                     return;
 
                 if (!(data[0] is LinkedUser linkedUser))
@@ -92,7 +92,7 @@ namespace Eco.Plugins.DiscordLink.Modules
             }
             else if (trigger == DlEventType.ElectionStopped)
             {
-                if (!DLConfig.Data.UseDemographicRoles)
+                if (!ServerConfig.Data.UseDemographicRoles)
                     return;
 
                 if (!(data[0] is Election election))
@@ -118,7 +118,7 @@ namespace Eco.Plugins.DiscordLink.Modules
             }
             else if (trigger == DlEventType.SettlementFounded)
             {
-                if (!DLConfig.Data.UseDemographicRoles)
+                if (!ServerConfig.Data.UseDemographicRoles)
                     return;
 
                 if (!(data[0] is Settlement settlement))

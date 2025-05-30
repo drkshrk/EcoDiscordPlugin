@@ -17,7 +17,7 @@ namespace Eco.Plugins.DiscordLink.Modules
 
         public override string ToString() => "Layer Display";
         protected override DlEventType GetTriggers() => base.GetTriggers() | DlEventType.DiscordClientConnected | DlEventType.Timer;
-        protected override async Task<IEnumerable<DiscordTarget>> GetDiscordTargets() => DLConfig.Data.LayerDisplayChannels.Cast<DiscordTarget>();
+        protected override async Task<IEnumerable<DiscordTarget>> GetDiscordTargets() => ServerConfig.Data.LayerDisplayChannels.Cast<DiscordTarget>();
 
         protected override async Task<bool> ShouldRun() => await base.ShouldRun() && !NetworkManager.Config.WebServerUrl.IsEmpty();
 

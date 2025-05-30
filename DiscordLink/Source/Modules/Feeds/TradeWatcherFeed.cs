@@ -31,7 +31,7 @@ namespace Eco.Plugins.DiscordLink.Modules
 
         protected override async Task<bool> ShouldRun()
         {
-            return DLConfig.Data.UseTradeWatcherFeeds;
+            return ServerConfig.Data.UseTradeWatcherFeeds;
         }
 
         protected override async Task UpdateInternal(DiscordLink plugin, DlEventType trigger, params object[] data)

@@ -50,7 +50,7 @@ namespace Eco.Plugins.DiscordLink.Modules
                         if (IgnoredSpecialtyNames.Contains(specialty.Name))
                             continue;
 
-                        if (linkedUser == null || !DLConfig.Data.UseSpecialtyRoles || !linkedUser.EcoUser.HasSpecialization(specialty.Type))
+                        if (linkedUser == null || !ServerConfig.Data.UseSpecialtyRoles || !linkedUser.EcoUser.HasSpecialization(specialty.Type))
                         {
                             if (member.HasRoleWithName(specialty.DisplayName))
                             {
@@ -66,7 +66,7 @@ namespace Eco.Plugins.DiscordLink.Modules
             }
             else if (trigger == DlEventType.AccountLinkVerified || trigger == DlEventType.AccountLinkRemoved)
             {
-                if (!DLConfig.Data.UseDemographicRoles)
+                if (!ServerConfig.Data.UseDemographicRoles)
                     return;
 
                 if (!(data[0] is LinkedUser linkedUser))
@@ -102,7 +102,7 @@ namespace Eco.Plugins.DiscordLink.Modules
             }
             else if (trigger == DlEventType.GainedSpecialty || trigger == DlEventType.LostSpecialty)
             {
-                if (!DLConfig.Data.UseSpecialtyRoles)
+                if (!ServerConfig.Data.UseSpecialtyRoles)
                     return;
 
                 SkillAction action = data[0] is GainSpecialty gainSpecialty ? gainSpecialty : data[0] is LoseSpecialty loseSpecialty ? loseSpecialty : null;
