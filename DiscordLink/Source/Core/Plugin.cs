@@ -162,10 +162,12 @@ namespace Eco.Plugins.DiscordLink
                 HandleDiscordConnectionFailed("Failed to start DiscordLink. See previous errors for more Information.");
                 return;
             }
-            CanRestart = true;
+            
 
             Status = StatusState.PostServerInit;
             HandleClientConnected();
+
+            CanRestart = true;
 
             if (_triggerWorldResetEvent)
             {
