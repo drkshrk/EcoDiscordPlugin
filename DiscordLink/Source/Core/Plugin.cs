@@ -94,41 +94,7 @@ namespace Eco.Plugins.DiscordLink
         }
         private StatusState _status = StatusState.Uninitialized;
         private string _statusDescription = TextUtils.GetEnumDescription(StatusState.Uninitialized);
-        public enum StatusState
-        {
-            [Description("Uninitialized")]
-            Uninitialized,
 
-            [Description("Initializing plugin")]
-            InitializingPlugin,
-
-            [Description("Initializing modules")]
-            InitializingModules,
-
-            [Description("Initialization aborted")]
-            InitializationAborted,
-
-            [Description("Awaiting guild download")]
-            AwaitingGuildDownload,
-
-            [Description("Performing post server init")]
-            PostServerInit,
-
-            [Description("Shutting down plugin")]
-            ShuttingDownPlugin,
-
-            [Description("Shutting down modules")]
-            ShuttingDownModules,
-
-            [Description("Connected and running")]
-            Connected,
-
-            [Description("Discord server connection failed")]
-            ServerConnectionFailed,
-
-            [Description("Disconnected")]
-            Disconnected,
-        }
 
         private Timer _activityUpdateTimer = null;
 

@@ -1,8 +1,45 @@
 ﻿using DSharpPlus.Commands.Processors.SlashCommands.ArgumentModifiers;
+using System.ComponentModel;
 
 namespace Eco.Plugins.DiscordLink
 {
     #region Non-Game
+    public enum StatusState
+    {
+        [Description("Uninitialized")]
+        Uninitialized,
+
+        [Description("Initializing plugin")]
+        InitializingPlugin,
+
+        [Description("Initializing modules")]
+        InitializingModules,
+
+        [Description("Initialization aborted")]
+        InitializationAborted,
+
+        [Description("Awaiting guild download")]
+        AwaitingGuildDownload,
+
+        [Description("Performing post server init")]
+        PostServerInit,
+
+        [Description("Shutting down plugin")]
+        ShuttingDownPlugin,
+
+        [Description("Shutting down modules")]
+        ShuttingDownModules,
+
+        [Description("Connected and running")]
+        Connected,
+
+        [Description("Discord server connection failed")]
+        ServerConnectionFailed,
+
+        [Description("Disconnected")]
+        Disconnected,
+    }
+
     public enum ApplicationInterfaceType
     {
         [ChoiceDisplayName("Eco")]
