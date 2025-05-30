@@ -43,8 +43,8 @@ namespace Eco.Plugins.DiscordLink
         }
 
         public static readonly ServerConfig Instance = new ServerConfig();
-        public static DLConfigData Data { get { return Instance._config.Config; } }
-        public PluginConfig<DLConfigData> PluginConfig { get { return Instance._config; } }
+        public static ServerConfigData Data { get { return Instance._config.Config; } }
+        public PluginConfig<ServerConfigData> PluginConfig { get { return Instance._config; } }
 
         public static List<ChannelLink> GetChannelLinks(bool verifiedLinksOnly = true)
         {
@@ -69,9 +69,9 @@ namespace Eco.Plugins.DiscordLink
 
         public const string InviteCommandLinkToken = "[LINK]";
 
-        private DLConfigData _prevConfig; // Used to detect differences when the config is saved
+        private ServerConfigData _prevConfig; // Used to detect differences when the config is saved
 
-        private PluginConfig<DLConfigData> _config;
+        private PluginConfig<ServerConfigData> _config;
         private readonly List<ChannelLink> _allChannelLinks = new List<ChannelLink>();
         private readonly List<ChannelLink> _verifiedChannelLinks = new List<ChannelLink>();
 
@@ -86,8 +86,8 @@ namespace Eco.Plugins.DiscordLink
 
         public void Initialize()
         {
-            _config = new PluginConfig<DLConfigData>("DiscordLink");
-            _prevConfig = (DLConfigData)Data.Clone();
+            _config = new PluginConfig<ServerConfigData>("DiscordLink");
+            _prevConfig = (ServerConfigData)Data.Clone();
 
             Data.ChatChannelLinks.CollectionChanged += (obj, args) => { HandleCollectionChanged(args); };
             Data.TradeFeedChannels.CollectionChanged += (obj, args) => { HandleCollectionChanged(args); };
@@ -209,7 +209,7 @@ namespace Eco.Plugins.DiscordLink
 
             _config.SaveAsync().Wait();
             OnConfigSaved?.Invoke(this, EventArgs.Empty);
-            _prevConfig = (DLConfigData)Data.Clone();
+            _prevConfig = (ServerConfigData)Data.Clone();
 
             return !correctionMade;
         }
@@ -260,11 +260,11 @@ namespace Eco.Plugins.DiscordLink
         }
     }
 
-    public class DLConfigData : ICloneable
+    public class ServerConfigData : ICloneable
     {
         public object Clone() // Be careful not to change the original object here as that will trigger endless recursion.
         {
-            return new DLConfigData
+            return new ServerConfigData
             {
                 BotToken = this.BotToken,
                 DiscordServerId = this.DiscordServerId,

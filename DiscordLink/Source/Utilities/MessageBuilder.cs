@@ -229,7 +229,7 @@ namespace Eco.Plugins.DiscordLink.Utilities
                     builder.AppendLine("[Discord Client not connected - Parts of the config was not possible to verify]");
                 }
 
-                DLConfigData config = ServerConfig.Data;
+                ServerConfigData config = ServerConfig.Data;
 
                 // Guild
                 if (config.DiscordServerId == 0)
@@ -559,7 +559,7 @@ namespace Eco.Plugins.DiscordLink.Utilities
             {
                 var plugin = DiscordLink.Obj;
 
-                DLConfigData pluginConfig = ServerConfig.Data;
+                ServerConfigData pluginConfig = ServerConfig.Data;
                 ServerInfo serverInfo = StrangeCloudWorldRegistration.StrangeWorld.ServerInfo;
                 EcoServerConfig serverConfig = NetworkManager.Config;
 
@@ -1282,7 +1282,7 @@ namespace Eco.Plugins.DiscordLink.Utilities
 
             public static DiscordLinkEmbed GetVerificationDM(User ecoUser)
             {
-                DLConfigData PluginConfig = ServerConfig.Data;
+                ServerConfigData PluginConfig = ServerConfig.Data;
                 EcoServerConfig serverConfig = NetworkManager.Config;
                 string serverName = MessageUtils.StripTags(!string.IsNullOrWhiteSpace(PluginConfig.ServerName) ? ServerConfig.Data.ServerName : serverConfig.Name.StripTags());
 

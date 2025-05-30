@@ -448,7 +448,7 @@ namespace Eco.Plugins.DiscordLink
 
         public static async Task<bool> PostInviteMessage(DiscordLinkCommandContext ctx)
         {
-            DLConfigData config = ServerConfig.Data;
+            ServerConfigData config = ServerConfig.Data;
             string discordAddress = NetworkManager.Config.DiscordAddress;
             if (string.IsNullOrEmpty(discordAddress))
             {
