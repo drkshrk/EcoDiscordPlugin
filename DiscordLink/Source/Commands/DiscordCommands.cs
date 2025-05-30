@@ -2,6 +2,7 @@
 using DSharpPlus.Entities;
 using DSharpPlus.Exceptions;
 using Eco.Core.Utils;
+using Eco.Gameplay.GameActions;
 using Eco.Gameplay.Players;
 using Eco.Gameplay.Systems.Messaging.Chat;
 using Eco.Moose.Data;
@@ -539,25 +540,50 @@ namespace Eco.Plugins.DiscordLink
                 }
 
                 List<string> targetEcoChannelNames = new List<string>();
+
+                User dummyUser = new User(Guid.Empty, "DiscordLinkSteam", "DiscordLinkTwitch", "DiscordLink", null);
+
                 if (!string.IsNullOrWhiteSpace(ecoChannel))
                 {
+                    ChatSent action = new ChatSent();
+                    action.Citizen = dummyUser;
+                    action.Message = message;
+                    action.Tag = $"#{ecoChannel}";
+
                     Message.SendChatToChannel(null, ecoChannel, $"{DLConstants.ECHO_COMMAND_TOKEN} {message}");
                     targetEcoChannelNames.Add(ecoChannel);
+
+                    DiscordLink.Obj.ActionPerformed(action);
                 }
                 else
                 {
                     bool linkFound = false;
                     foreach (ChatChannelLink chatLink in DiscordLinkConfig.ChatLinksForDiscordChannel(ctx.Command.Channel))
                     {
+                        ChatSent action = new ChatSent();
+                        action.Citizen = dummyUser;
+                        action.Message = message;
+                        action.Tag = $"#{chatLink.EcoChannel}";
+
                         Message.SendChatToChannel(null, chatLink.EcoChannel, $"{DLConstants.ECHO_COMMAND_TOKEN} {message}");
                         targetEcoChannelNames.Add(chatLink.EcoChannel);
                         linkFound = true;
+
+                        DiscordLink.Obj.ActionPerformed(action);
                     }
 
                     if (!linkFound)
                     {
+                        ChatSent action = new ChatSent();
+                        action.Citizen = dummyUser;
+                        action.Message = message;
+                        action.Tag = $"#{DLConstants.DEFAULT_CHAT_CHANNEL}";
+                        
+
                         Message.SendChatToChannel(null, DLConstants.DEFAULT_CHAT_CHANNEL, $"{DLConstants.ECHO_COMMAND_TOKEN} {message}");
                         targetEcoChannelNames.Add(DLConstants.DEFAULT_CHAT_CHANNEL);
+
+                        DiscordLink.Obj.ActionPerformed(action);
                     }
                 }
 
