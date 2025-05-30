@@ -11,13 +11,13 @@ namespace Eco.Plugins.DiscordLink
         public CurrencyTypeDisplayCondition UsePersonalCurrency { get; set; } = CurrencyTypeDisplayCondition.NoMintedExists;
 
         [Description("Max minted currencies to show.")]
-        public int MaxMintedCount { get; set; } = ServerConfig.DefaultValues.MaxMintedCurrencies;
+        public int MaxMintedCount { get; set; } = ServerConfigDefaultValues.MaxMintedCurrencies;
 
         [Description("Max personal currencies to show.")]
-        public int MaxPersonalCount { get; set; } = ServerConfig.DefaultValues.MaxPersonalCurrencies;
+        public int MaxPersonalCount { get; set; } = ServerConfigDefaultValues.MaxPersonalCurrencies;
 
         [Description("Max currency holders to show.")]
-        public int MaxTopCurrencyHolderCount { get; set; } = ServerConfig.DefaultValues.MaxTopCurrencyHolderCount;
+        public int MaxTopCurrencyHolderCount { get; set; } = ServerConfigDefaultValues.MaxTopCurrencyHolderCount;
 
         [Description("Display the amount of trades for each currency.")]
         public bool UseTradeCount { get; set; } = false;

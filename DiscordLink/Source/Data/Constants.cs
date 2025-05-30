@@ -54,6 +54,8 @@ namespace Eco.Plugins.DiscordLink
         public const string ECO_PANEL_DL_MESSAGE_MEDIUM = "DLMessageMedium";
         public const string ECO_PANEL_REPORT = "DLReport";
 
+        public const string InviteCommandLinkToken = "[LINK]";
+
         public static DiscordEmoji ACCEPT_EMOJI;
         public static DiscordEmoji DENY_EMOJI;
 

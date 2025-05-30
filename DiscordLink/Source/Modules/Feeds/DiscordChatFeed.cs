@@ -26,7 +26,7 @@ namespace Eco.Plugins.DiscordLink.Modules
 
         protected override async Task<bool> ShouldRun()
         {
-            foreach (ChatChannelLink link in ServerConfig.Data.ChatChannelLinks)
+            foreach (ChatChannelLink link in DiscordLinkConfig.ChatChannelLinks)
             {
                 if (link.IsValid() && (link.Direction == ChatSyncDirection.DiscordToEco || link.Direction == ChatSyncDirection.Duplex))
                     return true;
@@ -39,7 +39,7 @@ namespace Eco.Plugins.DiscordLink.Modules
             if (!(data[0] is DiscordMessage message))
                 return;
 
-            IEnumerable<ChatChannelLink> chatLinks = ServerConfig.ChatLinksForDiscordChannel(message.GetChannel());
+            IEnumerable<ChatChannelLink> chatLinks = DiscordLinkConfig.ChatLinksForDiscordChannel(message.GetChannel());
             foreach (ChatChannelLink chatLink in chatLinks
                 .Where(link => link.Direction == ChatSyncDirection.EcoToDiscord || link.Direction == ChatSyncDirection.Duplex))
             {
@@ -81,7 +81,7 @@ namespace Eco.Plugins.DiscordLink.Modules
             content = MessageUtils.DiscordCustomEmoteRegex.Replace(content, capture =>
             {
                 string group1 = capture.Groups[1].Value;
-                EmoteIconSubstitution sub = ServerConfig.Data.EmoteIconSubstitutions.FirstOrDefault(sub => sub.DiscordEmoteKey.EqualsCaseInsensitive(group1));
+                EmoteIconSubstitution sub = DiscordLinkConfig.EmoteIconSubstitutions.FirstOrDefault(sub => sub.DiscordEmoteKey.EqualsCaseInsensitive(group1));
                 if (sub != null)
                 {
                     return $"<ecoicon name=\"{sub.EcoIconKey}\">";

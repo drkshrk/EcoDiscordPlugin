@@ -21,7 +21,7 @@ namespace Eco.Plugins.DiscordLink.Modules
         public override string ToString() => "Election Display";
         protected override DlEventType GetTriggers() => base.GetTriggers() | DlEventType.DiscordClientConnected | DlEventType.Timer
             | DlEventType.Login | DlEventType.Vote | DlEventType.ElectionStarted | DlEventType.ElectionStopped;
-        protected override async Task<IEnumerable<DiscordTarget>> GetDiscordTargets() => ServerConfig.Data.ElectionDisplayChannels.Cast<DiscordTarget>();
+        protected override async Task<IEnumerable<DiscordTarget>> GetDiscordTargets() => DiscordLinkConfig.ElectionDisplayChannels.Cast<DiscordTarget>();
 
         protected override void GetDisplayContent(DiscordTarget target, out List<DisplayContent> displayContent)
         {

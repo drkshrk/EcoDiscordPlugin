@@ -53,7 +53,7 @@ namespace Eco.Plugins.DiscordLink.Modules
                     }
 
                     // Special
-                    if (role == AccountLinkRole && ServerConfig.Data.UseLinkedAccountRole)
+                    if (role == AccountLinkRole && DiscordLinkConfig.UseLinkedAccountRole)
                         continue;
 
                     // Demographics

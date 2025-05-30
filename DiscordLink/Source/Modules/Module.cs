@@ -85,13 +85,13 @@ namespace Eco.Plugins.DiscordLink.Modules
 
         public virtual void Setup()
         {
-            ServerConfig.Instance.OnConfigChanged += HandleConfigChanged; // Always listen for config changes as those may enable/disable the module
+            DiscordLink.Obj.ServerConfig.OnConfigChanged += HandleConfigChanged; // Always listen for config changes as those may enable/disable the module
             NetworkManager.Obj.ParamChanged.Add(async (s, e) => await HandleConfigChanged(s, new EventArgs()));
         }
 
         public virtual void Destroy()
         {
-            ServerConfig.Instance.OnConfigChanged -= HandleConfigChanged;
+            DiscordLink.Obj.ServerConfig.OnConfigChanged -= HandleConfigChanged;
         }
 
         public async Task<bool> HandleStartOrStop()

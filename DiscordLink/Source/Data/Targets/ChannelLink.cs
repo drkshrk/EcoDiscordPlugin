@@ -7,12 +7,15 @@ namespace Eco.Plugins.DiscordLink
 {
     public class ChannelLink : DiscordTarget, ICloneable
     {
-        [Browsable(false), JsonIgnore]
-        public DiscordChannel Channel { get; private set; } = null;
-
         [Description("Discord channel by id.")]
         [TypeConverter(typeof(DiscordChannelPropertyConverter))]
         public ulong DiscordChannelId { get; set; } = 0;
+
+        [Browsable(false), JsonIgnore]
+        public DiscordChannel Channel { get; private set; } = null;
+
+        [Browsable(false), JsonIgnore]
+        public bool Verified { get; private set; } = false;
 
         public override string ToString()
         {
@@ -36,6 +39,8 @@ namespace Eco.Plugins.DiscordLink
                 return false;
 
             Channel = channel;
+            Verified = true;
+
             return true;
         }
 

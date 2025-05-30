@@ -24,7 +24,7 @@ namespace Eco.Plugins.DiscordLink.Modules
 
         protected override async Task<bool> ShouldRun()
         {
-            foreach (ChatChannelLink link in ServerConfig.Data.ChatChannelLinks)
+            foreach (ChatChannelLink link in DiscordLinkConfig.ChatChannelLinks)
             {
                 if (link.IsValid() && link.Direction == ChatSyncDirection.EcoToDiscord || link.Direction == ChatSyncDirection.Duplex)
                     return true;
@@ -38,7 +38,7 @@ namespace Eco.Plugins.DiscordLink.Modules
                 return;
 
             string ecoChannel = message.Tag.Substring(1); // Remove the # character from the start.
-            IEnumerable<ChatChannelLink> chatLinks = ServerConfig.ChatLinksForEcoChannel(ecoChannel);
+            IEnumerable<ChatChannelLink> chatLinks = DiscordLinkConfig.ChatLinksForEcoChannel(ecoChannel);
 
             foreach (ChatChannelLink chatLink in chatLinks
                 .Where(link => link.Direction == ChatSyncDirection.EcoToDiscord || link.Direction == ChatSyncDirection.Duplex))
@@ -53,7 +53,7 @@ namespace Eco.Plugins.DiscordLink.Modules
 
             bool blocked = false;
             string forwardedMessage = string.Empty;
-            if (ServerConfig.Data.ChatSyncMode == ChatSyncMode.OptOut)
+            if (DiscordLinkConfig.ChatSyncMode == ChatSyncMode.OptOut)
             {
                 if (DLStorage.PersistentData.OptedOutUsers.Any(u => (u.SteamId != string.Empty && u.SteamId == chatMessage.Citizen.SteamId) || (u.StrangeId != string.Empty && u.StrangeId == chatMessage.Citizen.StrangeId)))
                 {
@@ -61,7 +61,7 @@ namespace Eco.Plugins.DiscordLink.Modules
                     blocked = true;
                 }
             }
-            else if (ServerConfig.Data.ChatSyncMode == ChatSyncMode.OptIn)
+            else if (DiscordLinkConfig.ChatSyncMode == ChatSyncMode.OptIn)
             {
                 if (DLStorage.PersistentData.OptedInUsers.None(u => (u.SteamId != string.Empty && u.SteamId == chatMessage.Citizen.SteamId) || (u.StrangeId != string.Empty && u.StrangeId == chatMessage.Citizen.StrangeId)))
                 {

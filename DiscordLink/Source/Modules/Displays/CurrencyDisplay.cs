@@ -18,7 +18,7 @@ namespace Eco.Plugins.DiscordLink.Modules
 
         public override string ToString() => "Currency Display";
         protected override DlEventType GetTriggers() => base.GetTriggers() | DlEventType.DiscordClientConnected | DlEventType.Timer | DlEventType.CurrencyCreated;
-        protected override async Task<IEnumerable<DiscordTarget>> GetDiscordTargets() => ServerConfig.Data.CurrencyDisplayChannels.Cast<DiscordTarget>();
+        protected override async Task<IEnumerable<DiscordTarget>> GetDiscordTargets() => DiscordLinkConfig.CurrencyDisplayChannels.Cast<DiscordTarget>();
 
         protected override void GetDisplayContent(DiscordTarget target, out List<DisplayContent> displayContent)
         {

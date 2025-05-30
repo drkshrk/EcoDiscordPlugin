@@ -180,7 +180,7 @@ namespace Eco.Plugins.DiscordLink.Utilities
                 builder.AppendLine($"DiscordLink {plugin.InstalledVersion.ToString(3)}");
                 if (verbose)
                 {
-                    builder.AppendLine($"Server Name: {MessageUtils.FirstNonEmptyString(ServerConfig.Data.ServerName, NetworkManager.Config.Name.StripTags(), "[Server Title Missing]")}");
+                    builder.AppendLine($"Server Name: {MessageUtils.FirstNonEmptyString(DiscordLinkConfig.ServerName, NetworkManager.Config.Name.StripTags(), "[Server Title Missing]")}");
                     builder.AppendLine($"Server Version: {EcoVersion.VersionNumber}");
                     if (client.ConnectionStatus == DiscordClient.ConnectionState.Connected)
                         builder.AppendLine($"D# Version: {client.DSharpVersion}");
@@ -221,7 +221,7 @@ namespace Eco.Plugins.DiscordLink.Utilities
                 return builder.ToString();
             }
 
-            public static string GetConfigVerificationReport()
+            public static string GetServerConfigVerificationReport()
             {
                 StringBuilder builder = new StringBuilder();
                 if (DiscordLink.Obj.Client.ConnectionStatus != DiscordClient.ConnectionState.Connected)
@@ -229,22 +229,20 @@ namespace Eco.Plugins.DiscordLink.Utilities
                     builder.AppendLine("[Discord Client not connected - Parts of the config was not possible to verify]");
                 }
 
-                ServerConfigData config = ServerConfig.Data;
-
                 // Guild
-                if (config.DiscordServerId == 0)
+                if (DiscordLinkConfig.DiscordServerId == 0)
                 {
                     builder.AppendLine("- Discord server ID not configured.");
                 }
 
                 // Bot Token
-                if (string.IsNullOrWhiteSpace(config.BotToken))
+                if (string.IsNullOrWhiteSpace(DiscordLinkConfig.BotToken))
                 {
                     builder.AppendLine("- Bot token not configured. See Github page for install instructions.");
                 }
 
                 // Invite message
-                if (!string.IsNullOrWhiteSpace(config.InviteMessage) && !config.InviteMessage.ContainsCaseInsensitive(DLConstants.INVITE_COMMAND_TOKEN))
+                if (!string.IsNullOrWhiteSpace(DiscordLinkConfig.InviteMessage) && !DiscordLinkConfig.InviteMessage.ContainsCaseInsensitive(DLConstants.INVITE_COMMAND_TOKEN))
                 {
                     builder.AppendLine($"- Invite message does not contain the invite link token {DLConstants.INVITE_COMMAND_TOKEN}.");
                 }
@@ -257,9 +255,9 @@ namespace Eco.Plugins.DiscordLink.Utilities
 
                 if (DiscordLink.Obj.Client.ConnectionStatus == DiscordClient.ConnectionState.Connected)
                 {
-                    if (DiscordLink.Obj.Client.IsConnected && ServerConfig.GetChannelLinks(verifiedLinksOnly: false).Count > 0)
+                    if (DiscordLink.Obj.Client.IsConnected && DiscordLinkConfig.ChannelLinks(verifiedLinksOnly: false).Any())
                     {
-                        foreach (ChannelLink link in ServerConfig.GetChannelLinks(verifiedLinksOnly: false))
+                        foreach (ChannelLink link in DiscordLinkConfig.ChannelLinks(verifiedLinksOnly: false))
                         {
                             if (!link.IsValid())
                                 builder.AppendLine($"- Channel Link verification failed for \"{link}\".");
@@ -306,7 +304,7 @@ namespace Eco.Plugins.DiscordLink.Utilities
 
                 if (flag.HasFlag(PermissionReportComponentFlag.ChannelPermissions))
                 {
-                    foreach (ChannelLink link in ServerConfig.GetChannelLinks().GroupBy(link => link.Channel.Id).Select(group => group.First())) // Only perform the check once per link
+                    foreach (ChannelLink link in DiscordLinkConfig.ChannelLinks().GroupBy(link => link.Channel.Id).Select(group => group.First())) // Only perform the check once per link
                     {
                         foreach (DiscordPermissions permission in DLConstants.REQUESTED_CHANNEL_PERMISSIONS)
                         {
@@ -352,7 +350,7 @@ namespace Eco.Plugins.DiscordLink.Utilities
             public static string GetChannelLinkList()
             {
                 StringBuilder builder = new StringBuilder();
-                foreach (ChannelLink link in ServerConfig.GetChannelLinks(verifiedLinksOnly: false))
+                foreach (ChannelLink link in DiscordLinkConfig.ChannelLinks(verifiedLinksOnly: false))
                 {
                     builder.Append(link.ToString());
                     if (!link.IsValid())
@@ -559,7 +557,6 @@ namespace Eco.Plugins.DiscordLink.Utilities
             {
                 var plugin = DiscordLink.Obj;
 
-                ServerConfigData pluginConfig = ServerConfig.Data;
                 ServerInfo serverInfo = StrangeCloudWorldRegistration.StrangeWorld.ServerInfo;
                 EcoServerConfig serverConfig = NetworkManager.Config;
 
@@ -567,7 +564,7 @@ namespace Eco.Plugins.DiscordLink.Utilities
 
                 if (flag.HasFlag(ServerInfoComponentFlag.Name))
                 {
-                    embed.WithTitle($"**{MessageUtils.FirstNonEmptyString(pluginConfig.ServerName, MessageUtils.StripTags(serverInfo.Description), "[Server Title Missing]")} Server Status**");
+                    embed.WithTitle($"**{MessageUtils.FirstNonEmptyString(DiscordLinkConfig.ServerName, MessageUtils.StripTags(serverInfo.Description), "[Server Title Missing]")} Server Status**");
                 }
                 else
                 {
@@ -576,14 +573,14 @@ namespace Eco.Plugins.DiscordLink.Utilities
 
                 if (flag.HasFlag(ServerInfoComponentFlag.Description))
                 {
-                    embed.WithDescription(MessageUtils.FirstNonEmptyString(pluginConfig.ServerDescription, MessageUtils.StripTags(serverInfo.Description), "No server description is available."));
+                    embed.WithDescription(MessageUtils.FirstNonEmptyString(DiscordLinkConfig.ServerDescription, MessageUtils.StripTags(serverInfo.Description), "No server description is available."));
                 }
 
                 if (flag.HasFlag(ServerInfoComponentFlag.ConnectionInfo))
                 {
                     string fieldText = "-- Connection info not configured --";
-                    if (!string.IsNullOrEmpty(pluginConfig.ConnectionInfo))
-                        fieldText = pluginConfig.ConnectionInfo;
+                    if (!string.IsNullOrEmpty(DiscordLinkConfig.ConnectionInfo))
+                        fieldText = DiscordLinkConfig.ConnectionInfo;
                     else if (!string.IsNullOrEmpty(serverConfig.IPAddress))
                         fieldText = serverConfig.IPAddress;
 
@@ -1282,9 +1279,8 @@ namespace Eco.Plugins.DiscordLink.Utilities
 
             public static DiscordLinkEmbed GetVerificationDM(User ecoUser)
             {
-                ServerConfigData PluginConfig = ServerConfig.Data;
                 EcoServerConfig serverConfig = NetworkManager.Config;
-                string serverName = MessageUtils.StripTags(!string.IsNullOrWhiteSpace(PluginConfig.ServerName) ? ServerConfig.Data.ServerName : serverConfig.Name.StripTags());
+                string serverName = MessageUtils.StripTags(!string.IsNullOrWhiteSpace(DiscordLinkConfig.ServerName) ? DiscordLinkConfig.ServerName : serverConfig.Name.StripTags());
 
                 DiscordLinkEmbed embed = new DiscordLinkEmbed();
                 embed.WithTitle("Account Linking Verification");
@@ -1297,7 +1293,7 @@ namespace Eco.Plugins.DiscordLink.Utilities
 
             public static string GetStandardEmbedFooter()
             {
-                string serverName = MessageUtils.FirstNonEmptyString(ServerConfig.Data.ServerName, NetworkManager.Config.Name.StripTags(), "[Server Title Missing]");
+                string serverName = MessageUtils.FirstNonEmptyString(DiscordLinkConfig.ServerName, NetworkManager.Config.Name.StripTags(), "[Server Title Missing]");
                 string timestamp = Shared.GetServerTimeStamp();
                 return $"Message sent by DiscordLink @ {serverName} [{timestamp}]";
             }

@@ -45,7 +45,7 @@
   "InviteMessage": "Join us on Discord!\\n[LINK]",
   "LogLevel": "Information",
   "BackendLogLevel": "None",
-  "TraceFileLogging": false,
+  "EnableTraceFileLogging": false,
   "UseVerboseDisplay": false,
   "EmoteIconSubstitutions": [],
   "MinEmbedSizeForFooter": "Medium",

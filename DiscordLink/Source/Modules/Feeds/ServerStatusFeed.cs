@@ -19,7 +19,7 @@ namespace Eco.Plugins.DiscordLink.Modules
 
         protected override async Task<bool> ShouldRun()
         {
-            foreach (ChannelLink link in ServerConfig.Data.ServerStatusFeedChannels)
+            foreach (ChannelLink link in DiscordLinkConfig.ServerStatusFeedChannels)
             {
                 if (link.IsValid())
                     return true;
@@ -48,7 +48,7 @@ namespace Eco.Plugins.DiscordLink.Modules
             DiscordLinkEmbed embed = new DiscordLinkEmbed();
             embed.WithTitle(message);
 
-            foreach (ChannelLink serverStatusLink in ServerConfig.Data.ServerStatusFeedChannels)
+            foreach (ChannelLink serverStatusLink in DiscordLinkConfig.ServerStatusFeedChannels)
             {
                 if (!serverStatusLink.IsValid())
                     continue;

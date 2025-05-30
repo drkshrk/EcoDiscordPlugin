@@ -220,7 +220,7 @@ namespace Eco.Plugins.DiscordLink
 
         public static async Task<bool> VerifyConfig(DiscordLinkCommandContext ctx)
         {
-            await DisplayCommandData(ctx, "Config Verification Report", MessageBuilder.Shared.GetConfigVerificationReport());
+            await DisplayCommandData(ctx, "Config Verification Report", MessageBuilder.Shared.GetServerConfigVerificationReport());
             return true;
         }
 
@@ -448,7 +448,6 @@ namespace Eco.Plugins.DiscordLink
 
         public static async Task<bool> PostInviteMessage(DiscordLinkCommandContext ctx)
         {
-            ServerConfigData config = ServerConfig.Data;
             string discordAddress = NetworkManager.Config.DiscordAddress;
             if (string.IsNullOrEmpty(discordAddress))
             {
@@ -456,7 +455,7 @@ namespace Eco.Plugins.DiscordLink
                 return false;
             }
 
-            string inviteMessage = config.InviteMessage;
+            string inviteMessage = DiscordLinkConfig.InviteMessage;
             if (!inviteMessage.ContainsCaseInsensitive(DLConstants.INVITE_COMMAND_TOKEN))
             {
                 await ReportCommandError(ctx, "This server has not specified a valid invite message.");
@@ -495,20 +494,20 @@ namespace Eco.Plugins.DiscordLink
             ulong discordMemberId = ulong.Parse(linkedUser.DiscordId);
             if (type == Modules.ModuleArchetype.Display)
             {
-                if (ServerConfig.Data.MaxTradeWatcherDisplaysPerUser <= 0)
+                if (DiscordLinkConfig.MaxTradeWatcherDisplaysPerUser <= 0)
                 {
                     await ReportCommandError(ctx, "Trade watcher displays are not enabled on this server.");
                     return false;
                 }
 
                 int watchedTradesCount = DLStorage.WorldData.GetTradeWatcherCountForMember(discordMemberId);
-                if (watchedTradesCount >= ServerConfig.Data.MaxTradeWatcherDisplaysPerUser)
+                if (watchedTradesCount >= DiscordLinkConfig.MaxTradeWatcherDisplaysPerUser)
                 {
-                    await ReportCommandError(ctx, $"You are already watching {watchedTradesCount} trades and the limit is {ServerConfig.Data.MaxTradeWatcherDisplaysPerUser} trade watcher displays per user.\nUse the `/DL-RemoveTradeWatcherDisplay` command to remove a trade watcher to make space if you wish to add a new one.");
+                    await ReportCommandError(ctx, $"You are already watching {watchedTradesCount} trades and the limit is {DiscordLinkConfig.MaxTradeWatcherDisplaysPerUser} trade watcher displays per user.\nUse the `/DL-RemoveTradeWatcherDisplay` command to remove a trade watcher to make space if you wish to add a new one.");
                     return false;
                 }
             }
-            else if (!ServerConfig.Data.UseTradeWatcherFeeds)
+            else if (!DiscordLinkConfig.UseTradeWatcherFeeds)
             {
                 await ReportCommandError(ctx, "Trade watcher feeds are not enabled on this server.");
                 return false;

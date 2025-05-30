@@ -314,7 +314,7 @@ namespace Eco.Plugins.DiscordLink
 
         [ChatSubCommand("DiscordLink", "Displays the Currency Report for the given currency.", ChatAuthorizationLevel.User)]
         public static async Task CurrencyReport(User caller, string currencyNameOrId,
-            int maxTopHoldersCount = ServerConfig.DefaultValues.MaxTopCurrencyHolderCount,
+            int maxTopHoldersCount = ServerConfigDefaultValues.MaxTopCurrencyHolderCount,
             bool useTradeCount = true,
             bool useBackingInfo = false)
         {
@@ -629,7 +629,7 @@ namespace Eco.Plugins.DiscordLink
             EcoCommandContext ctx = new EcoCommandContext(caller);
             await ExecuteCommand(async (lUser, args) =>
             {
-                if (ServerConfig.Data.ChatSyncMode == ChatSyncMode.OptOut)
+                if (DiscordLinkConfig.ChatSyncMode == ChatSyncMode.OptOut)
                 {
                     if (DLStorage.PersistentData.OptedOutUsers.Any(user => user.HasAnyId(caller.StrangeId, caller.SteamId)))
                     {
@@ -641,7 +641,7 @@ namespace Eco.Plugins.DiscordLink
                         ReportCommandInfo(ctx, "You have opted out of chat synchronization.");
                     }
                 }
-                else if (ServerConfig.Data.ChatSyncMode == ChatSyncMode.OptIn)
+                else if (DiscordLinkConfig.ChatSyncMode == ChatSyncMode.OptIn)
                 {
                     EcoUser optedInUser;
                     if ((optedInUser = DLStorage.PersistentData.OptedInUsers.FirstOrDefault(user => user.HasAnyId(caller.StrangeId, caller.SteamId))) != null)
@@ -664,7 +664,7 @@ namespace Eco.Plugins.DiscordLink
             EcoCommandContext ctx = new EcoCommandContext(caller);
             await ExecuteCommand(async (lUser, args) =>
             {
-                if (ServerConfig.Data.ChatSyncMode == ChatSyncMode.OptOut)
+                if (DiscordLinkConfig.ChatSyncMode == ChatSyncMode.OptOut)
                 {
                     EcoUser optedOutUser;
                     if ((optedOutUser = DLStorage.PersistentData.OptedOutUsers.FirstOrDefault(user => user.HasAnyId(caller.StrangeId, caller.SteamId))) != null)
@@ -677,7 +677,7 @@ namespace Eco.Plugins.DiscordLink
                         ReportCommandError(ctx, "This server is configured to use opt-out by default.");
                     }
                 }
-                else if (ServerConfig.Data.ChatSyncMode == ChatSyncMode.OptIn)
+                else if (DiscordLinkConfig.ChatSyncMode == ChatSyncMode.OptIn)
                 {
                     if (DLStorage.PersistentData.OptedInUsers.Any(user => user.HasAnyId(caller.StrangeId, caller.SteamId)))
                     {

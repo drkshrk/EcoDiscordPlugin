@@ -76,7 +76,7 @@ namespace Eco.Plugins.DiscordLink
 
                 if (!IsCommandAllowedForUser(ctx, requiredPermission))
                 {
-                    string permittedRolesDesc = (ServerConfig.Data.AdminRoles.Count > 0) ? string.Join("\n- ", ServerConfig.Data.AdminRoles.ToArray()) : "No admin roles configured";
+                    string permittedRolesDesc = (DiscordLinkConfig.AdminRoles.Count() > 0) ? string.Join("\n- ", DiscordLinkConfig.AdminRoles.ToArray()) : "No admin roles configured";
                     await RespondToCommand(ctx, $"You lack the `{requiredPermission}` level permission required to execute this command.\nThe permitted roles are:\n```- {permittedRolesDesc}```");
                     return;
                 }
@@ -540,7 +540,7 @@ namespace Eco.Plugins.DiscordLink
                 else
                 {
                     bool linkFound = false;
-                    foreach (ChatChannelLink chatLink in ServerConfig.ChatLinksForDiscordChannel(ctx.Command.Channel))
+                    foreach (ChatChannelLink chatLink in DiscordLinkConfig.ChatLinksForDiscordChannel(ctx.Command.Channel))
                     {
                         Message.SendChatToChannel(null, chatLink.EcoChannel, $"{DLConstants.ECHO_COMMAND_TOKEN} {message}");
                         targetEcoChannelNames.Add(chatLink.EcoChannel);
@@ -638,7 +638,7 @@ namespace Eco.Plugins.DiscordLink
         [Description("Displays the Currency Report for the given currency.")]
         public async Task CurrencyReport(CommandContext command,
             [Parameter("Currency")][Description("Name or ID of the currency for which to display a report.")] string currencyNameOrId,
-            [Parameter("TopHoldersCount")][Description("How many top account holders to include in the report")] long maxTopHoldersCount = ServerConfig.DefaultValues.MaxTopCurrencyHolderCount,
+            [Parameter("TopHoldersCount")][Description("How many top account holders to include in the report")] long maxTopHoldersCount = ServerConfigDefaultValues.MaxTopCurrencyHolderCount,
             [Parameter("ShowTradeCount")][Description("Should the total trade count for the currency be displayed in the report?")] bool useTradeCount = true,
             [Parameter("ShowBacking")][Description("Should information about the currency backing be displayed in the report?")] bool useBackingInfo = false)
         {

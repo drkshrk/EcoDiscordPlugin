@@ -22,7 +22,7 @@ namespace Eco.Plugins.DiscordLink.Modules
 
         protected override async Task<bool> ShouldRun()
         {
-            foreach (ChannelLink link in ServerConfig.Data.ElectionFeedChannels)
+            foreach (ChannelLink link in DiscordLinkConfig.ElectionFeedChannels)
             {
                 if (link.IsValid())
                     return true;
@@ -91,7 +91,7 @@ namespace Eco.Plugins.DiscordLink.Modules
                     return;
             }
 
-            foreach (ChannelLink electionLink in ServerConfig.Data.ElectionFeedChannels)
+            foreach (ChannelLink electionLink in DiscordLinkConfig.ElectionFeedChannels)
             {
                 if (!electionLink.IsValid())
                     continue;

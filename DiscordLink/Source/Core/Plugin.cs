@@ -57,7 +57,8 @@ namespace Eco.Plugins.DiscordLink
         public static DiscordLink Obj { get { return PluginManager.GetPlugin<DiscordLink>(); } }
         public DiscordClient Client { get; private set; } = new DiscordClient();
         public Module[] Modules { get; private set; } = new Module[Enum.GetNames(typeof(ModuleType)).Length];
-        public IPluginConfig PluginConfig { get { return ServerConfig.Instance.PluginConfig; } }
+        public ServerConfig ServerConfig { get; private set; } = new ServerConfig();
+        public IPluginConfig PluginConfig { get { return ServerConfig.PluginConfig; } }
         public ThreadSafeAction<object, string> ParamChanged { get; set; }
         public DateTime InitTime { get; private set; } = DateTime.MinValue;
         public bool CanRestart { get; private set; } = false; // False to start with as we cannot restart while the initial startup is in progress
@@ -77,8 +78,8 @@ namespace Eco.Plugins.DiscordLink
         public override string ToString() => PluginName;
         public string GetCategory() => "Mighty Moose";
         public string GetStatus() => _statusDescription;
-        public object GetEditObject() => ServerConfig.Data;
-        public void OnEditObjectChanged(object o, string param) => _ = ServerConfig.Instance.HandleConfigChanged();
+        public object GetEditObject() => ServerConfig.ConfigData;
+        public void OnEditObjectChanged(object o, string param) => _ = ServerConfig.HandleConfigChanged();
         public LazyResult ShouldOverrideAuth(IAlias alias, IOwned property, GameAction action) => LazyResult.FailedNoMessage;
 
         public StatusState Status
@@ -137,7 +138,7 @@ namespace Eco.Plugins.DiscordLink
         {
             try
             {
-                return MessageBuilder.Shared.GetDisplayStringAsync(ServerConfig.Data.UseVerboseDisplay).Result;
+                return MessageBuilder.Shared.GetDisplayStringAsync(DiscordLinkConfig.UseVerboseDisplay).Result;
             }
             catch (ServerErrorException e)
             {
@@ -154,8 +155,9 @@ namespace Eco.Plugins.DiscordLink
         public async void Initialize(TimedTask timer)
         {
             InitCallbacks();
-            ServerConfig.Instance.Initialize();
-            Logger.RegisterLogger(PluginName, ConsoleColor.Cyan, ServerConfig.Data.LogLevel);
+            ServerConfig.Initialize();
+            DiscordLinkConfig.Initialize(ServerConfig.ConfigData);
+            Logger.RegisterLogger(PluginName, ConsoleColor.Cyan, DiscordLinkConfig.PluginLogLevel);
             Status = StatusState.InitializingPlugin;
             InitTime = DateTime.Now;
 
@@ -180,7 +182,7 @@ namespace Eco.Plugins.DiscordLink
         {
             Status = StatusState.AwaitingGuildDownload;
 
-            if (string.IsNullOrEmpty(ServerConfig.Data.BotToken))
+            if (string.IsNullOrEmpty(DiscordLinkConfig.BotToken))
             {
                 HandleDiscordConnectionFailed("Failed to start DiscordLink: Missing BotToken.");
                 return;
@@ -244,7 +246,7 @@ namespace Eco.Plugins.DiscordLink
 
         public void GetCommands(Dictionary<string, Action> nameToFunction)
         {
-            nameToFunction.Add("Verify Config", () => { Logger.Info($"Config Verification Report:\n{MessageBuilder.Shared.GetConfigVerificationReport()}"); });
+            nameToFunction.Add("Verify Config", () => { Logger.Info($"Config Verification Report:\n{MessageBuilder.Shared.GetServerConfigVerificationReport()}"); });
             nameToFunction.Add("Verify Permissions", () =>
             {
                 if (Client.ConnectionStatus == DiscordClient.ConnectionState.Connected)
@@ -299,13 +301,15 @@ namespace Eco.Plugins.DiscordLink
 
             DLConstants.PostConnectionInit();
 
-            ServerConfig.Instance.PostConnectionInit();
             if (!Client.IsConnected)
             {
                 Status = StatusState.ServerConnectionFailed;
                 CanRestart = true;
                 return;
             }
+
+            ServerConfig.PostConnectionInit();
+            DiscordLinkConfig.PostConnectionInit();
 
             UserLinkManager.Initialize();
             InitializeModules();
