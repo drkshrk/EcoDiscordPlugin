@@ -594,11 +594,6 @@ namespace Eco.Plugins.DiscordLink
             return DiscordEmoji.FromName(DSharpClient, emojiName);
         }
 
-        public DiscordEmoji GetEmojiByName(string emojiName)
-        {
-            return DiscordEmoji.FromName(DSharpClient, emojiName);
-        }
-
         #endregion
 
         #region Manipulation
