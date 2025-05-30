@@ -44,6 +44,15 @@ namespace Eco.Plugins.DiscordLink
             try
             {
                 Logger.Debug($"{MessageUtils.StripTags(ctx.ChatClient.Name)} invoked Eco command \"/{command.Method.Name}\"");
+
+                // Block commands from non-admins if the server isn't fully ready yet
+                if (ctx.ChatClient.GetChatAuthLevel() < ChatAuthorizationLevel.Admin && Plugins.DiscordLink.DiscordLink.Obj.Status != StatusState.Connected)
+                {
+                    ReportCommandError(ctx, $"DiscordLink is not in a ready state to execute commands.\nCurrent status is {Plugins.DiscordLink.DiscordLink.Obj.GetStatus()}");
+                    return;
+                }
+
+                await command(ctx.ChatClient);
             }
             catch (Exception e)
             {

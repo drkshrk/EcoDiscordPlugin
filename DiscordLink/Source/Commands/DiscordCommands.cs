@@ -69,6 +69,18 @@ namespace Eco.Plugins.DiscordLink
         {
             try
             {
+                if (ctx.Command.Channel.IsPrivate)
+                    Logger.Debug($"{ctx.Command.User.Username} invoked Discord command \"/{command.Method.Name}\" in DM");
+                else
+                    Logger.Debug($"{ctx.Command.User.Username} invoked Discord command \"/{command.Method.Name}\" in channel {ctx.Command.Channel.Name}");
+
+                // Block commands from non-admins if the server isn't fully ready yet
+                if (!ctx.Command.Member.IsAdmin() && DiscordLink.Obj.Status != StatusState.Connected)
+                {
+                    await RespondToCommand(ctx, $"DiscordLink is not in a ready state to execute commands.\nCurrent status is `{DiscordLink.Obj.GetStatus()}`");
+                    return;
+                }
+
                 if (ctx.Timing == ResponseTiming.Delayed)
                 {
                     await ctx.Command.DeferResponseAsync();
@@ -80,11 +92,6 @@ namespace Eco.Plugins.DiscordLink
                     await RespondToCommand(ctx, $"You lack the `{requiredPermission}` level permission required to execute this command.\nThe permitted roles are:\n```- {permittedRolesDesc}```");
                     return;
                 }
-
-                if (ctx.Command.Channel.IsPrivate)
-                    Logger.Debug($"{ctx.Command.User.Username} invoked Discord command \"/{command.Method.Name}\" in DM");
-                else
-                    Logger.Debug($"{ctx.Command.User.Username} invoked Discord command \"/{command.Method.Name}\" in channel {ctx.Command.Channel.Name}");
 
                 await command(ctx);
             }
