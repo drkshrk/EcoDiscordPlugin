@@ -39,6 +39,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using static Eco.Moose.Data.CommandData;
 using static Eco.Moose.Data.Enums;
 using static Eco.Shared.Mathf; // Avoiding collisions with system mathf
 
@@ -1214,6 +1215,49 @@ namespace Eco.Plugins.DiscordLink.Utilities
                 if (!string.IsNullOrWhiteSpace(paymentDesc))
                     report.AddField("Payment", paymentDesc);
 
+                return report;
+            }
+
+            public static DiscordLinkEmbed GetSkillsReport(SpecialtyAssignmentData specialtyData, bool includeScrollNoStar, bool includeInactive, Settlement? settlementFilter)
+            {
+                DiscordLinkEmbed report = new DiscordLinkEmbed();
+
+                string title = settlementFilter == null ? "Global Skills" : $"{settlementFilter.Name.StripTags} Skills";
+                report.WithTitle(title);
+
+                Dictionary<Skill, List<User>> skillAndUsers = includeInactive ? specialtyData.AllPlayers : specialtyData.ActivePlayers;
+                specialtyData.Specialties.Sort(
+                    delegate (Skill left, Skill right)
+                    {
+                        int leftUserCount = skillAndUsers[left].Count();
+                        int rightUserCount = skillAndUsers[right].Count();
+                        if (leftUserCount == rightUserCount)
+                        {
+                            return left.Name.StripTags().CompareTo(right.Name.StripTags());
+                        }
+                        return leftUserCount.CompareTo(rightUserCount);
+                    });
+
+                foreach (Skill specialty in specialtyData.Specialties)
+                {
+                    if (!specialty.IsDiscovered())
+                        continue;
+
+                    int specialtyCount = includeInactive ? specialtyData.TotalPlayerCount[specialty] : specialtyData.ActivePlayerCount[specialty];
+                    report.AddField($"**{specialty.Name.StripTags()}** ({specialtyCount})", string.Join("\n", skillAndUsers[specialty]
+                        .OrderByDescending(user => user.Skillset.Skills.First(s => s.GetType() == specialty.GetType()).Level)
+                        .Select(user =>
+                        {
+                            int level = user.Skillset.Skills.First(s => s.GetType() == specialty.GetType()).Level;
+                            string userLine = $"{level} - {user.Name.StripTags()}";
+
+                            if (level < 1)
+                                userLine = $"_{userLine}_";
+
+                            return userLine;
+                        } )), inline: true);
+                }
+                
                 return report;
             }
 

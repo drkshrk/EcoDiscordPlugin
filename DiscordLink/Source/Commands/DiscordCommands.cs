@@ -22,6 +22,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
+using static Eco.Moose.Data.CommandData;
 using static Eco.Moose.Data.Enums;
 using static Eco.Plugins.DiscordLink.DiscordCommands;
 using static Eco.Plugins.DiscordLink.Utilities.MessageBuilder;
@@ -739,6 +740,33 @@ namespace Eco.Plugins.DiscordLink
             await ExecuteCommand<object>(PermissionType.User, ctx, async (lCtx, args) =>
             {
                 await SharedCommands.WorkPartiesReport(ctx);
+            });
+        }
+
+        [Command("SkillReport")]
+        [Description("Displays a report for skill distribution.")]
+        public async Task SkillReport(CommandContext command,
+            [Parameter("IncludeLevelZero")][Description("If true; includes skills where players have only consumed a scroll but not consumed a star.")] bool includeScrollNoStar = false,
+            [Parameter("IncludeInactive")][Description("If true; includes players who are currently not in the active demographic.")] bool includeInactive = false,
+            [Parameter("SettlementFilter")][Description("Optional name or ID of a settlement for filtering players.")] string settlementFilterNameOrId = "")
+        {
+            DiscordCommandContext ctx = new DiscordCommandContext(command, ResponseTiming.Immediate);
+            await ExecuteCommand<object>(PermissionType.User, ctx, async (lCtx, args) =>
+            {
+                Settlement? settlementFilter = null;
+                if (!string.IsNullOrWhiteSpace(settlementFilterNameOrId))
+                {
+                    settlementFilter = Lookups.SettlementByNameOrId(settlementFilterNameOrId);
+                    if (settlementFilter == null)
+                    {
+                        await ReportCommandError(ctx, $"No settlement with the name or ID \"{settlementFilterNameOrId}\" could be found.");
+                        return;
+                    }
+                }
+
+                SpecialtyAssignmentData specialtyData = Skills.GetPlayerSpecialtyData(settlementFilter, includeScrollNoStar: includeScrollNoStar);
+                DiscordLinkEmbed report = MessageBuilder.Discord.GetSkillsReport(specialtyData, includeScrollNoStar, includeInactive, settlementFilter);
+                await DisplayCommandData(ctx, string.Empty, report);
             });
         }
 
