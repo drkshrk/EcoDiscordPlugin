@@ -4,6 +4,7 @@ using DSharpPlus.Exceptions;
 using Eco.Core.Utils;
 using Eco.Gameplay.GameActions;
 using Eco.Gameplay.Players;
+using Eco.Gameplay.Settlements;
 using Eco.Gameplay.Systems.Messaging.Chat;
 using Eco.Moose.Data;
 using Eco.Moose.Features;
