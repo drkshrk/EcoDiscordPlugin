@@ -1218,7 +1218,7 @@ namespace Eco.Plugins.DiscordLink.Utilities
                 return report;
             }
 
-            public static DiscordLinkEmbed GetSkillsReport(SpecialtyAssignmentData specialtyData, bool includeScrollNoStar, bool includeInactive, Settlement? settlementFilter)
+            public static DiscordLinkEmbed GetSpecialtiesReport(SpecialtyAssignmentData specialtyData, bool includeScrollNoStar, bool includeInactive, Settlement? settlementFilter)
             {
                 DiscordLinkEmbed report = new DiscordLinkEmbed();
 
