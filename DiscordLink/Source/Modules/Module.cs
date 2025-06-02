@@ -32,6 +32,7 @@ namespace Eco.Plugins.DiscordLink.Modules
         DemographicRoleModule,
         ElectedTitleRoleModule,
         SpecialitiesRoleModule,
+        SpecialtiesDisplayModule,
         RoleCleanupModule,
         SnippetInput
     }

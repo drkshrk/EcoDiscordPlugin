@@ -365,6 +365,10 @@ namespace Eco.Plugins.DiscordLink
                     _ = HandleEvent(DlEventType.LostSpecialty, loseSpecialty);
                     break;
 
+                case SpecialtyLevelUp specialtyLevelUp:
+                    _ = HandleEvent(DlEventType.LeveledUpSpecialty, specialtyLevelUp);
+                    break;
+
                 default:
                     break;
             }
@@ -414,6 +418,7 @@ namespace Eco.Plugins.DiscordLink
             Modules[(int)ModuleType.DemographicRoleModule] = new DemographicsRoleModule();
             Modules[(int)ModuleType.ElectedTitleRoleModule] = new ElectedTitleRoleModule();
             Modules[(int)ModuleType.SpecialitiesRoleModule] = new SpecialtiesRoleModule();
+            Modules[(int)ModuleType.SpecialtiesDisplayModule] = new SpecialtiesDisplayModule();
             Modules[(int)ModuleType.RoleCleanupModule] = new RoleCleanupModule();
             Modules[(int)ModuleType.SnippetInput] = new SnippetInput();
 
