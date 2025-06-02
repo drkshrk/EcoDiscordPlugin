@@ -35,6 +35,8 @@ Displays a single message that contains customizable information about the serve
 Displays a link to the map preview image. Updates once an hour (same rate as the server updates the images)  
 ![Map Display](images/features/displays/map.png)
 
+### Player List
+Displays a simple list of online players. This is the same list as can be enabled in the server info display.  
 ### Layer
 Displays a link to a layer preview image. Updates once an hour (same rate as the server updates the images)  
 ![Layer Display](images/features/displays/layer.png)
