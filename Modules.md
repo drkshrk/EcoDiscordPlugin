@@ -60,7 +60,7 @@ Note that in the case of a non-boolean election, only the highest ranked option 
 ### Currencies
 Displays one message per existing currency up to a configurable limit and ordered by the amount of trades made in the currency during the current cycle.
 For each currency, a configurable amount of users holding the highest amounts of the currency will be shown.
-Can be configured to only show minted or credit currencies based on the existance of a minted currency.
+Can be configured to only show minted or credit currencies based on the existence of a minted currency.
 ![Currency Display](images/features/displays/currencies.png)
 
 ## Feeds
