@@ -747,7 +747,7 @@ namespace Eco.Plugins.DiscordLink
         [Command("SkillReport")]
         [Description("Displays a report for skill distribution.")]
         public async Task SkillReport(CommandContext command,
-            [Parameter("IncludeLevelZero")][Description("If true; includes skills where players have only consumed a scroll but not consumed a star.")] bool includeScrollNoStar = false,
+            [Parameter("IncludeScrollNoStar")][Description("If true; includes skills where players have only consumed a scroll but not consumed a star.")] bool includeScrollNoStar = false,
             [Parameter("IncludeInactive")][Description("If true; includes players who are currently not in the active demographic.")] bool includeInactive = false,
             [Parameter("SettlementFilter")][Description("Optional name or ID of a settlement for filtering players.")] string settlementFilterNameOrId = "")
         {
