@@ -1244,7 +1244,7 @@ namespace Eco.Plugins.DiscordLink.Utilities
                         continue;
 
                     int specialtyCount = includeInactive ? specialtyData.TotalPlayerCount[specialty] : specialtyData.ActivePlayerCount[specialty];
-                    report.AddField($"**{specialty.Name.StripTags()}** ({specialtyCount})", string.Join("\n", skillAndUsers[specialty]
+                    report.AddField($"**{specialty.DisplayName}** ({specialtyCount})", string.Join("\n", skillAndUsers[specialty]
                         .OrderByDescending(user => user.Skillset.Skills.First(s => s.GetType() == specialty.GetType()).Level)
                         .Select(user =>
                         {
