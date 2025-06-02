@@ -6,6 +6,7 @@
 	* [Map](#Map)
 	* [Layer](#Layer)
 	* [Player List](#player-list)
+	* [Skills](#skills)
 	* [Work Parties](#work-parties)
 	* [Elections](#elections)
 * [Feeds](#feeds)
@@ -37,6 +38,12 @@ Displays a link to the map preview image. Updates once an hour (same rate as the
 
 ### Player List
 Displays a simple list of online players. This is the same list as can be enabled in the server info display.  
+
+### Skills
+Displays a list of the discovered skills, which players have them and what level they are at.  
+It is possible to configure whether the list should include inactive players and if it should include players who have only consumed a skill scroll but not a star.  
+![Work Party Display](images/features/displays/skills.png)
+
 ### Layer
 Displays a link to a layer preview image. Updates once an hour (same rate as the server updates the images)  
 ![Layer Display](images/features/displays/layer.png)
