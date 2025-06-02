@@ -85,7 +85,8 @@ namespace Eco.Plugins.DiscordLink.Modules
 
         public virtual void Setup()
         {
-            DiscordLink.Obj.ServerConfig.OnConfigChanged += HandleConfigChanged; // Always listen for config changes as those may enable/disable the module
+            DiscordLink.Obj.ServerConfig.OnConfigChanged += HandleConfigChanged;    // Always listen for config changes as those may enable/disable the module
+            ChannelLink.OnChannelLinkVerifiedInRuntime += HandleConfigChanged;      // ChannelLinks added during runtime are invalid by default, so we need to listen to this event and update when they are made valid
             NetworkManager.Obj.ParamChanged.Add(async (s, e) => await HandleConfigChanged(s, new EventArgs()));
         }
 

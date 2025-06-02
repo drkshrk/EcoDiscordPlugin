@@ -1,5 +1,4 @@
-﻿using DSharpPlus;
-using DSharpPlus.Entities;
+﻿using DSharpPlus.Entities;
 using Eco.Moose.Utils.SystemUtils;
 using Eco.Plugins.DiscordLink.Events;
 using Eco.Plugins.DiscordLink.Utilities;
@@ -25,7 +24,7 @@ namespace Eco.Plugins.DiscordLink.Modules
         private Timer _updateTimer = null;
         private Timer _highFrequencyEventTimer = null;
 
-        protected override DlEventType GetTriggers() => DlEventType.ForceUpdate | DlEventType.DiscordMessageDeleted | DlEventType.DiscordReactionAdded | DlEventType.DiscordReactionRemoved;
+        protected override DlEventType GetTriggers() => DlEventType.ManualStart | DlEventType.ForceUpdate | DlEventType.DiscordMessageDeleted | DlEventType.DiscordReactionAdded | DlEventType.DiscordReactionRemoved;
         protected virtual async Task<IEnumerable<DiscordTarget>> GetDiscordTargets() { throw new NotImplementedException(); }
 
         protected override async Task<bool> ShouldRun()
@@ -56,8 +55,11 @@ namespace Eco.Plugins.DiscordLink.Modules
 
         protected override async Task Initialize()
         {
-            StartTimer();
+            bool timerStarted = StartTimer();
             await base.Initialize();
+
+            if (!timerStarted) // If the module doesn't rely on timed updates, we should trigger a manual update
+                await Update(DiscordLink.Obj, DlEventType.ManualStart);
         }
 
         protected override async Task Shutdown()
@@ -75,14 +77,16 @@ namespace Eco.Plugins.DiscordLink.Modules
             await base.HandleConfigChanged(sender, e);
         }
 
-        public void StartTimer()
+        public bool StartTimer()
         {
-            if ((GetTriggers() & DlEventType.Timer) == 0) return;
+            if ((GetTriggers() & DlEventType.Timer) == 0)
+                return false;
 
             if (_updateTimer != null)
                 StopTimer();
 
             _updateTimer = new Timer(this.TriggerTimedUpdate, null, TimerStartDelayMs, TimerUpdateIntervalMs == -1 ? Timeout.Infinite : TimerUpdateIntervalMs);
+            return true;
         }
 
         public void StopTimer()
