@@ -29,21 +29,10 @@ using System.Threading;
 using System.Threading.Tasks;
 using Module = Eco.Plugins.DiscordLink.Modules.Module;
 
-// TODO: Temporarily implemented outside of plugin due to vanilla bug
-public class DiscordLinkMod : IModInit
-{
-    public static ModRegistration Register() => new()
-    {
-        ModName = "DiscordLink",
-        ModDescription = "Connects the Eco server with the Discord server for seamless cross posting of chat messages, live updated server information and many useful commands!",
-        ModDisplayName = "DiscordLink",
-    };
-}
-
 namespace Eco.Plugins.DiscordLink
 {
     [Priority(PriorityAttribute.High)] // Need to start before WorldGenerator in order to listen for world generation finished event
-    public class DiscordLink : IModKitPlugin, IInitializablePlugin, IShutdownablePlugin, IConfigurablePlugin, IDisplayablePlugin, IGameActionAware, ICommandablePlugin
+    public class DiscordLink : IModKitPlugin, IModInit, IInitializablePlugin, IShutdownablePlugin, IConfigurablePlugin, IDisplayablePlugin, IGameActionAware, ICommandablePlugin
     {
         public readonly string PluginName = "DiscordLink";
         public readonly Version InstalledVersion = Assembly.GetExecutingAssembly().GetName().Version;
@@ -80,6 +69,12 @@ namespace Eco.Plugins.DiscordLink
         public object GetEditObject() => ServerConfig.ConfigData;
         public void OnEditObjectChanged(object o, string param) => _ = ServerConfig.HandleConfigChanged();
         public LazyResult ShouldOverrideAuth(IAlias alias, IOwned property, GameAction action) => LazyResult.FailedNoMessage;
+        public static ModRegistration Register() => new ModRegistration()
+        {
+            ModName = "DiscordLink",
+            ModDescription = "Connects the Eco server with the Discord server for seamless cross posting of chat messages, live updated server information and many useful commands!",
+            ModDisplayName = "DiscordLink",
+        };
 
         public StatusState Status
         {
@@ -93,7 +88,6 @@ namespace Eco.Plugins.DiscordLink
         }
         private StatusState _status = StatusState.Uninitialized;
         private string _statusDescription = TextUtils.GetEnumDescription(StatusState.Uninitialized);
-
 
         private Timer _activityUpdateTimer = null;
 
@@ -117,7 +111,7 @@ namespace Eco.Plugins.DiscordLink
             }
         }
 
-        public async void Initialize(TimedTask timer)
+        async void IInitializablePlugin.Initialize(TimedTask timer)
         {
             InitCallbacks();
             ServerConfig.Initialize();
