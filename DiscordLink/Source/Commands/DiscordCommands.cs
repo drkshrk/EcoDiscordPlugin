@@ -702,7 +702,7 @@ namespace Eco.Plugins.DiscordLink
         [Command("ElectionReport")]
         [Description("Displays the Election Report for the given election.")]
         public async Task ElectionReport(CommandContext command,
-            [Parameter("Election")][Description("Name or ID of the election for which to display a report.")] string electionNameOrId)
+            [Parameter("Election")][Description("Name or ID of the election for which to display a report.")][SlashAutoCompleteProvider<ElectionAutoCompleteProvider>] string electionNameOrId)
         {
             DiscordCommandContext ctx = new DiscordCommandContext(command, ResponseTiming.Immediate);
             await ExecuteCommand<object>(PermissionType.User, ctx, async (lCtx, args) =>
