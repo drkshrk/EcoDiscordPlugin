@@ -982,9 +982,10 @@ namespace Eco.Plugins.DiscordLink
 
         #region Snippets
 
+        [Command("Snippet")]
         [Description("Posts a predefined snippet to Eco or Discord.")]
         public async Task Snippet(CommandContext command,
-            [Parameter("Key")][Description("Key of the snippet to post. Displays the key list if omitted.")] string snippetKey = "")
+            [Parameter("Key")][Description("Key of the snippet to post. Displays the key list if omitted.")][SlashAutoCompleteProvider<SnippetAutoCompleteProvider>] string snippetKey = "")
         {
             DiscordCommandContext ctx = new DiscordCommandContext(command, ResponseTiming.Immediate);
             await ExecuteCommand<object>(PermissionType.User, ctx, async (lCtx, args) =>
@@ -996,7 +997,7 @@ namespace Eco.Plugins.DiscordLink
         [Command("EcoSnippet")]
         [Description("Posts a predefined snippet to Eco.")]
         public async Task EcoSnippet(CommandContext command,
-            [Parameter("Key")][Description("Key of the snippet to post. Displays the key list if omitted.")] string snippetKey = "")
+            [Parameter("Key")][Description("Key of the snippet to post. Displays the key list if omitted.")][SlashAutoCompleteProvider<SnippetAutoCompleteProvider>] string snippetKey = "")
         {
             DiscordCommandContext ctx = new DiscordCommandContext(command, ResponseTiming.Immediate);
             await ExecuteCommand<object>(PermissionType.User, ctx, async (lCtx, args) =>
