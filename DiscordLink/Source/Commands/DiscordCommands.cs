@@ -911,9 +911,9 @@ namespace Eco.Plugins.DiscordLink
             });
         }
 
-        [Command("DLT")]
+        [Command("dlt")]
         [Description("Shorthand for the Trades command.")]
-        public async Task DLT(CommandContext command,
+        public async Task dlt(CommandContext command,
             [Parameter("SearchName")][Description("The player name or item name for which to display trades. Case insensitive and auto completed.")] string searchName)
         {
             await Trades(command, searchName);
