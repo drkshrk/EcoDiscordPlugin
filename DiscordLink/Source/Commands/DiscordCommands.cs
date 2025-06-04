@@ -673,7 +673,7 @@ namespace Eco.Plugins.DiscordLink
         [Command("CurrencyReport")]
         [Description("Displays the Currency Report for the given currency.")]
         public async Task CurrencyReport(CommandContext command,
-            [Parameter("Currency")][Description("Name or ID of the currency for which to display a report.")] string currencyNameOrId,
+            [Parameter("Currency")][Description("Name or ID of the currency for which to display a report.")][SlashAutoCompleteProvider<CurrencyAutoCompleteProvider>] string currencyNameOrId,
             [Parameter("TopHoldersCount")][Description("How many top account holders to include in the report")] long maxTopHoldersCount = ServerConfigDefaultValues.MaxTopCurrencyHolderCount,
             [Parameter("ShowTradeCount")][Description("Should the total trade count for the currency be displayed in the report?")] bool useTradeCount = true,
             [Parameter("ShowBacking")][Description("Should information about the currency backing be displayed in the report?")] bool useBackingInfo = false)
