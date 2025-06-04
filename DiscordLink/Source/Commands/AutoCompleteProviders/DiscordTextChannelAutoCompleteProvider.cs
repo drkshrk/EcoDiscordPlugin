@@ -18,7 +18,7 @@ namespace Eco.Plugins.DiscordLink
             else
                 channels = channels.OrderBy(channel => channel.Position);
 
-            channels = channels.Take(DLConstants.DISCORD_AUTOCORRECT_CHOICE_COUNT_LIMIT); // Avoid triggering warnings about unsupported amounts of choices
+            channels = channels.Take(DLConstants.DISCORD_AUTOCORRECT_CHOICE_COUNT_LIMIT); // Avoid triggering warnings about unsupported amount of choices
             IEnumerable<DiscordAutoCompleteChoice> choices = channels.Select(channel => new DiscordAutoCompleteChoice(channel.Name, channel.Id.ToString()));
             return ValueTask.FromResult(choices);
         }
