@@ -17,7 +17,7 @@ namespace Eco.Plugins.DiscordLink
                 return new ValueTask<IEnumerable<DiscordAutoCompleteChoice>>();
 
             IEnumerable<string> feedWatchers = DLStorage.WorldData.TradeWatchers.GetValueOrDefault(context.Member.Id).
-                Where(watcher => watcher.Type == Modules.ModuleArchetype.Display).Select(watcher => watcher.Key);
+                Where(watcher => watcher.Type == Modules.ModuleArchetype.Feed).Select(watcher => watcher.Key);
             if (!string.IsNullOrEmpty(context.UserInput))
                 feedWatchers = feedWatchers.OrderBy(watcher => TextUtils.CalculateStringDeviationScore(context.UserInput, watcher));
             else
