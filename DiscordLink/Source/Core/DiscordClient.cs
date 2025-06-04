@@ -2,6 +2,7 @@
 using DSharpPlus.Clients;
 using DSharpPlus.Commands;
 using DSharpPlus.Commands.Processors.SlashCommands;
+using DSharpPlus.Commands.Processors.SlashCommands.NamingPolicies;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using DSharpPlus.Exceptions;
@@ -138,7 +139,15 @@ namespace Eco.Plugins.DiscordLink
                     (provider, extension) =>
                     {
                         extension.AddCommands([typeof(DiscordCommands)]);
-                        SlashCommandProcessor commandProcessor = new SlashCommandProcessor(new SlashCommandConfiguration { });
+                        SlashCommandProcessor commandProcessor = new SlashCommandProcessor(
+                            new SlashCommandConfiguration
+                            {
+                                NamingPolicy = new SnakeCaseNamingPolicy(),
+
+                                #if DEBUG
+                                    UnconditionallyOverwriteCommands = true
+                                #endif
+                            });
                         extension.AddProcessor(commandProcessor);
                     },
                     new CommandsConfiguration() { }
