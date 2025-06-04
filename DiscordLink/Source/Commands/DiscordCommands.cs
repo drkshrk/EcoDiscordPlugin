@@ -881,7 +881,7 @@ namespace Eco.Plugins.DiscordLink
         [Command("Trades")]
         [Description("Displays available trades by player, tag, item or store.")]
         public async Task Trades(CommandContext command,
-            [Parameter("SearchName")][Description("The player name or item name for which to display trades. Case insensitive and auto completed.")] string searchName)
+            [Parameter("SearchName")][Description("The player name or item name for which to display trades. Case insensitive and auto completed.")][SlashAutoCompleteProvider<TradeTargetAutoCompleteProvider>] string searchName)
         {
             DiscordCommandContext ctx = new DiscordCommandContext(command, ResponseTiming.Delayed);
             await ExecuteCommand<object>(PermissionType.User, ctx, async (lCtx, args) =>
@@ -913,16 +913,16 @@ namespace Eco.Plugins.DiscordLink
 
         [Command("dlt")]
         [Description("Shorthand for the Trades command.")]
-        public async Task dlt(CommandContext command,
-            [Parameter("SearchName")][Description("The player name or item name for which to display trades. Case insensitive and auto completed.")] string searchName)
+        public async Task DLT(CommandContext command,
+            [Parameter("SearchName")][Description("The player name or item name for which to display trades. Case insensitive and auto completed.")][SlashAutoCompleteProvider<TradeTargetAutoCompleteProvider>] string searchName)
         {
             await Trades(command, searchName);
         }
 
         [Command("WatchTradeDisplay")]
         [Description("Creates a live updated display of available trades by player, tag, item or store.")]
-        public async Task AddTradeWatcherDisplay(CommandContext command,
-            [Parameter("SearchName")][Description("The player name or item name for which to display trades.")] string searchName)
+        public async Task WatchTradeDisplay(CommandContext command,
+            [Parameter("SearchName")][Description("The player name or item name for which to display trades.")][SlashAutoCompleteProvider<TradeTargetAutoCompleteProvider>] string searchName)
         {
             DiscordCommandContext ctx = new DiscordCommandContext(command, ResponseTiming.Immediate);
             await ExecuteCommand<object>(PermissionType.User, ctx, async (lCtx, args) =>
@@ -945,8 +945,8 @@ namespace Eco.Plugins.DiscordLink
 
         [Command("WatchTradeFeed")]
         [Description("Creates a trade feed filtered by a search query.")]
-        public async Task AddTradeWatcherFeed(CommandContext command,
-            [Parameter("SearchName")][Description("The player, tag, item or store name for which to post trades.")] string searchName)
+        public async Task WatchTradeFeed(CommandContext command,
+            [Parameter("SearchName")][Description("The player, tag, item or store name for which to post trades.")][SlashAutoCompleteProvider<TradeTargetAutoCompleteProvider>] string searchName)
         {
             DiscordCommandContext ctx = new DiscordCommandContext(command, ResponseTiming.Immediate);
             await ExecuteCommand<object>(PermissionType.User, ctx, async (lCtx, args) =>
