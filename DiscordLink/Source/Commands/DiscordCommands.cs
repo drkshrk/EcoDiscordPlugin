@@ -779,7 +779,7 @@ namespace Eco.Plugins.DiscordLink
         [Command("ShowLayer")]
         [Description("Posts a link to the requested layer image.")]
         public async Task ShowLayer(CommandContext command,
-            [Parameter("LayerName")][Description("Name of the world layer to show. The layer must must be a visible layer.")] string layerName,
+            [Parameter("LayerName")][Description("Name of the world layer to show. The layer must must be a visible layer.")][SlashAutoCompleteProvider<LayerAutoCompleteProvider>] string layerName,
             [Parameter("ShowLayerHistory")][Description("If true; will post an animated gif showing how the history of the layer has changed per hour.")] bool showLayerHistory = false,
             [Parameter("ShowTerrainComparison")][Description("If true; will post a comparison gif showing the world terrain.")] bool showComparsionTerrain = false)
         {
