@@ -483,7 +483,7 @@ namespace Eco.Plugins.DiscordLink
         [Command("VerifyChannelPermissions")]
         [Description("Checks all permissions needed for the given channel and reports any missing ones.")]
         public async Task CheckChannelPermissions(CommandContext command,
-            [Parameter("Channel")][Description("Name or ID of the channel to check permissions for. Defaults to the current channel.")] string channelNameOrId = "")
+            [Parameter("Channel")][Description("Name or ID of the channel to check permissions for. Defaults to the current channel.")][SlashAutoCompleteProvider<DiscordTextChannelAutoCompleteProvider>] string channelNameOrId = "")
         {
             DiscordCommandContext ctx = new DiscordCommandContext(command, ResponseTiming.Immediate);
             await ExecuteCommand<object>(PermissionType.Admin, ctx, async (lCtx, args) =>
