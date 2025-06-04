@@ -660,7 +660,7 @@ namespace Eco.Plugins.DiscordLink
         [Command("PlayerReport")]
         [Description("Displays the Player Report for the given player.")]
         public async Task PlayerReport(CommandContext command,
-            [Parameter("Player")][Description("Name or ID of the player for which to display the report.")] string playerNameOrId = "",
+            [Parameter("Player")][Description("Name or ID of the player for which to display the report.")][SlashAutoCompleteProvider<PlayerAutoCompleteProvider>] string playerNameOrId = "",
             [Parameter("Report")][Description("Which type of information the report should include.")] PlayerReportComponentFlag reportType = PlayerReportComponentFlag.All)
         {
             DiscordCommandContext ctx = new DiscordCommandContext(command, ResponseTiming.Immediate);
@@ -1014,7 +1014,7 @@ namespace Eco.Plugins.DiscordLink
         public async Task Announce(CommandContext command,
             [Parameter("Message")][Description("The message to send.")] string message,
             [Parameter("MessageType")][Description("The type of message to send.")] MessageTypes messageType = MessageTypes.Notification,
-            [Parameter("Player")][Description("Name or ID of the player to send the message to. Sends to everyone if omitted.")] string recipientUserNameOrId = "")
+            [Parameter("Player")][Description("Name or ID of the player to send the message to. Sends to everyone if omitted.")][SlashAutoCompleteProvider<PlayerAutoCompleteProvider>] string recipientUserNameOrId = "")
         {
             DiscordCommandContext ctx = new DiscordCommandContext(command, ResponseTiming.Immediate);
             await ExecuteCommand<object>(PermissionType.Admin, ctx, async (lCtx, args) =>
