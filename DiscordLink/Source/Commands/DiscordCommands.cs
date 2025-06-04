@@ -510,7 +510,7 @@ namespace Eco.Plugins.DiscordLink
         [Description("Sends a message to Eco and back to Discord again if a chat link is configured for the channel.")]
         public async Task Echo(CommandContext commmand,
             [Parameter("Message")][Description("The message to send. Defaults to a random message.")] string message = "",
-            [Parameter("EcoChannel")][Description("The eco channel you want to test.")] string ecoChannel = "")
+            [Parameter("EcoChannel")][Description("The eco channel you want to test.")][SlashAutoCompleteProvider<EcoTextChannelAutoCompleteProvider>] string ecoChannel = "")
         {
             DiscordCommandContext ctx = new DiscordCommandContext(commmand, ResponseTiming.Immediate);
             await ExecuteCommand<object>(PermissionType.Admin, ctx, async (lCtx, args) =>
