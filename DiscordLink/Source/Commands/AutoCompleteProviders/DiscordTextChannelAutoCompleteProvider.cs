@@ -14,7 +14,7 @@ namespace Eco.Plugins.DiscordLink
         {
             IEnumerable<DiscordChannel> channels = DiscordLink.Obj.Client.GetChannelsOfType(DiscordChannelType.Text);
             if (!string.IsNullOrEmpty(context.UserInput))
-                channels = channels.OrderBy(channel => TextUtils.CalculateStringSimilarityScore(context.UserInput, channel.Name));
+                channels = channels.OrderBy(channel => TextUtils.CalculateStringDeviationScore(context.UserInput, channel.Name));
             else
                 channels = channels.OrderBy(channel => channel.Position);
 

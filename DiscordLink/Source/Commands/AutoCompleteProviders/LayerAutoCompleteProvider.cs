@@ -14,7 +14,7 @@ namespace Eco.Plugins.DiscordLink
         {
             IEnumerable<string> layerNames = Moose.Utils.Lookups.Lookups.VisibleLayers.Select(layer => layer.Name);
             if (!string.IsNullOrEmpty(context.UserInput))
-                layerNames = layerNames.OrderBy(name => TextUtils.CalculateStringSimilarityScore(context.UserInput, name));
+                layerNames = layerNames.OrderBy(name => TextUtils.CalculateStringDeviationScore(context.UserInput, name));
             else
                 layerNames = layerNames.Order();
 

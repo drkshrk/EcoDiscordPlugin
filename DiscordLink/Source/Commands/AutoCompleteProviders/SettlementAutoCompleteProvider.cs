@@ -15,7 +15,7 @@ namespace Eco.Plugins.DiscordLink
         {
             IEnumerable<Settlement> settlements = Moose.Utils.Lookups.Lookups.ActiveSettlements;
             if (!string.IsNullOrEmpty(context.UserInput))
-                settlements = settlements.OrderBy(settlement => TextUtils.CalculateStringSimilarityScore(context.UserInput, settlement.Name));
+                settlements = settlements.OrderBy(settlement => TextUtils.CalculateStringDeviationScore(context.UserInput, settlement.Name.StripTags()));
             else
                 settlements = settlements.OrderByDescending(settlement => settlement.SettlementType).ThenByDescending(settlement => settlement.Citizens.Where(citizen => citizen.IsActive).Count());
 
