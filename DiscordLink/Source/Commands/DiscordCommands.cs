@@ -933,8 +933,8 @@ namespace Eco.Plugins.DiscordLink
 
         [Command("UnwatchTradeDisplay")]
         [Description("Removes the live updated display of available trades for a player, tag, item or store.")]
-        public async Task RemoveTradeWatcherDisplay(CommandContext command,
-            [Parameter("SearchName")][Description("The player, tag, item or store name for which to display trades.")] string searchName)
+        public async Task UnwatchTradeDisplay(CommandContext command,
+            [Parameter("SearchName")][Description("The player, tag, item or store name for which to display trades.")][SlashAutoCompleteProvider<TradeDisplayWatcherAutoCompleteProvider>] string searchName)
         {
             DiscordCommandContext ctx = new DiscordCommandContext(command, ResponseTiming.Immediate);
             await ExecuteCommand<object>(PermissionType.User, ctx, async (lCtx, args) =>
@@ -957,8 +957,8 @@ namespace Eco.Plugins.DiscordLink
 
         [Command("UnwatchTradeFeed")]
         [Description("Removes the trade watcher feed for a player, tag, item or store.")]
-        public async Task RemoveTradeWatcherFeed(CommandContext command,
-            [Parameter("SearchName")][Description("The player, tag item or store name for which to remove trades.")] string searchName)
+        public async Task UnwatchTradeFeed(CommandContext command,
+            [Parameter("SearchName")][Description("The player, tag item or store name for which to remove trades.")][SlashAutoCompleteProvider<TradeFeedWatcherAutoCompleteProvider>] string searchName)
         {
             DiscordCommandContext ctx = new DiscordCommandContext(command, ResponseTiming.Immediate);
             await ExecuteCommand<object>(PermissionType.User, ctx, async (lCtx, args) =>
