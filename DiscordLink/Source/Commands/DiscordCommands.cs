@@ -725,7 +725,7 @@ namespace Eco.Plugins.DiscordLink
         [Command("WorkPartyReport")]
         [Description("Displays the Work Party Report for the given work party.")]
         public async Task WorkPartyReport(CommandContext command,
-            [Parameter("WorkParty")][Description("Name or ID of the work party for which to display a report.")] string workPartyNameOrId)
+            [Parameter("WorkParty")][Description("Name or ID of the work party for which to display a report.")][SlashAutoCompleteProvider<WorkPartyAutoCompleteProvider>] string workPartyNameOrId)
         {
             DiscordCommandContext ctx = new DiscordCommandContext(command, ResponseTiming.Immediate);
             await ExecuteCommand<object>(PermissionType.User, ctx, async (lCtx, args) =>
