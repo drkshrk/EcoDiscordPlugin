@@ -41,7 +41,7 @@ namespace Eco.Plugins.DiscordLink
                         break;
 
                     case LookupTypes.Store:
-                        tradeTargetList.AddUniqueRange(Lookups.Stores.Select(store => store.Parent.Name.StripTags()));
+                        tradeTargetList.AddUniqueRange(Lookups.StoresComponents.Select(store => store.Parent.Name.StripTags()));
                         break;
 
                     default:
