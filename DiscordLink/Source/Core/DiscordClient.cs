@@ -248,7 +248,6 @@ namespace Eco.Plugins.DiscordLink
             ConnectionStatus = ConnectionState.Disconnected;
             Status = "Disconnected from Discord";
 
-
             OnDisconnected?.Invoke();
             await DiscordLink.Obj.HandleEvent(DlEventType.DiscordClientDisconnected);
             return true;
@@ -596,6 +595,15 @@ namespace Eco.Plugins.DiscordLink
         public DiscordEmoji GetEmojiByName(string emojiName)
         {
             return DiscordEmoji.FromName(DSharpClient, emojiName);
+        }
+
+        #endregion
+
+        #region Bot Management
+
+        public async Task ReinstallCommands()
+        {
+            await DSharpClient.BulkOverwriteGuildApplicationCommandsAsync(Guild.Id, new List<DiscordApplicationCommand>());
         }
 
         #endregion

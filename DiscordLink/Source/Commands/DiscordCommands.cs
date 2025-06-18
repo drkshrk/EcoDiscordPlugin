@@ -353,6 +353,25 @@ namespace Eco.Plugins.DiscordLink
             });
         }
 
+        #endregion
+
+        #region Eco Server Management
+
+        [Command("ServerShutdown")]
+        [Description("Shuts down the Eco server.")]
+        public async Task ServerShutdown(CommandContext command)
+        {
+            DiscordCommandContext ctx = new DiscordCommandContext(command, ResponseTiming.Immediate);
+            await ExecuteCommand<object>(PermissionType.Admin, ctx, async (lCtx, args) =>
+            {
+                await SharedCommands.ServerShutdown(ctx);
+            });
+        }
+
+        #endregion
+
+        #region Discord Server Management
+
         [Command("ClearRoles")]
         [Description("Deletes all Discord roles created and tracked by DiscordLink.")]
         public async Task ClearRoles(CommandContext command)
@@ -364,18 +383,15 @@ namespace Eco.Plugins.DiscordLink
             });
         }
 
-        #endregion
-
-        #region Server Management
-
-        [Command("ServerShutdown")]
-        [Description("Shuts down the Eco server.")]
-        public async Task ServerShutdown(CommandContext command)
+        [Command("ReinstallCommands")]
+        [Description("Reinstalls all Discord commands registered by DiscordLink and cleans up any dead commands.")]
+        public async Task ReinstallCommands(CommandContext command)
         {
-            DiscordCommandContext ctx = new DiscordCommandContext(command, ResponseTiming.Immediate);
+            DiscordCommandContext ctx = new DiscordCommandContext(command, ResponseTiming.Delayed);
             await ExecuteCommand<object>(PermissionType.Admin, ctx, async (lCtx, args) =>
             {
-                await SharedCommands.ServerShutdown(ctx);
+                await DiscordLink.Obj.Client.ReinstallCommands();
+                await RespondToCommand(ctx, "All commands reinstalled - Restart the discord client (ctrl+r) to re-fetch the command list");
             });
         }
 

@@ -19,7 +19,6 @@ All Eco and Discord commands are case insensitive.
 | ResetPersistentData        |                     | Both              |                                                                          | Admin           | Yes      | Removes all persistent storage data.                                                                                 |
 | ResetWorldData             |                     | Both              |                                                                          | Admin           | Yes      | Resets world data as if a new world had been created.                                                                |
 | Update                     |                     | Both              |                                                                          | Admin           | Yes      | Forces an update of all modules.                                                                                     |
-| ClearRoles                 |                     | Both              |                                                                          | Admin           | Yes      | Deletes all Discord roles created and tracked by DiscordLink.                                                        |
 | PersistentStorageData      |                     | Both              |                                                                          | Admin           | No       | Displays a description of the persistent storage data.                                                               |
 | WorldStorageData           |                     | Both              |                                                                          | Admin           | No       | Displays a description of the world storage data.                                                                    |
 
@@ -35,13 +34,18 @@ All Eco and Discord commands are case insensitive.
 | Echo                       |                     | Discord           | Message                                                                  | Admin           | N/A      | Sends the provided message to Eco and back to Discord again if a chat link is configured for the channel.            |
 
 
-# **Server Management**
+# **Eco Server Management**
 | **Name**                   | **Alias**           | **Discord/Eco**   | **Parameters** (* = Optional)                                            | **Permissions** | **RCON** | **Description**                                                                                                      |
 |----------------------------|---------------------|-------------------|--------------------------------------------------------------------------|-----------------|----------|----------------------------------------------------------------------------------------------------------------------|
 | EcoCommand                 |                     | Discord           | Eco Command                                                              | Dynamic         | N/A      | Executes the inputted eco command. The parameter should be styled as a full ingame Eco command.                      |
 | Announce                   |                     | Both              | Message, MessageType*, recipientUserNameOrID*                            | Admin           | Yes      | Sends the message formatted as [MessageType] to everyone on the server or the specified recipient.                   |
 | ServerShutdown             |                     | Both              |                                                                          | Admin           | Yes      | Shuts down the eco server.                                                                                           |
 
+# **Discord Server Management**
+| **Name**                      | **Alias**           | **Discord/Eco**   | **Parameters** (* = Optional)                                         | **Permissions** | **RCON** | **Description**                                                                                                      |
+|-------------------------------|---------------------|-------------------|-----------------------------------------------------------------------|-----------------|----------|----------------------------------------------------------------------------------------------------------------------|
+| ClearRoles                    |                     | Both              |                                                                       | Admin           | Yes      | Deletes all Discord roles created and tracked by DiscordLink.                                                        |
+| ReinstallCommands             |                     | Discord           |                                                                       | Admin           | N/A      | Reinstalls all Discord commands registered by DiscordLink and cleans up any dead commands.                           |
 
 # **Info**
 | **Name**                   | **Alias**           | **Discord/Eco**   | **Parameters** (* = Optional)                                            | **Permissions** | **RCON** | **Description**                                                                                                      |
