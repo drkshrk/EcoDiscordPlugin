@@ -143,10 +143,6 @@ namespace Eco.Plugins.DiscordLink
                             new SlashCommandConfiguration
                             {
                                 NamingPolicy = new SnakeCaseNamingPolicy(),
-
-                                #if DEBUG
-                                    UnconditionallyOverwriteCommands = true
-                                #endif
                             });
                         extension.AddProcessor(commandProcessor);
                     },
