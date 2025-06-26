@@ -970,12 +970,11 @@ namespace Eco.Plugins.DiscordLink.Utilities
                 string backededItemName = currency.Backed ? $"{currency.BackingItem?.DisplayName ?? "Unknown"}" : "Personal";
 
                 // Build message
+                embed.AddField("Total amount", currency.Circulation.ToString("n0"), inline: true);
+                embed.AddField("Active circulation", Economy.CalculateActiveCurrencyCirculation(currency).ToString("n0"), inline: true);
                 if (useTradeCount)
                     embed.AddField("Total trades", tradesCount.ToString("n0"), inline: true);
-
-                embed.AddField("Amount in circulation", currency.Circulation.ToString("n0"), inline: true);
-                embed.AddAlignmentField();
-                if (!useTradeCount)
+                else
                     embed.AddAlignmentField();
 
                 if (useBackingInfo && currency.Backed)
