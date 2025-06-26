@@ -192,7 +192,7 @@ namespace Eco.Plugins.DiscordLink
             }
             catch (NotFoundException e)
             {
-                errorMessage = $"An error occurred while attempting to respond to command\\nException {e}\nMessage: {e.JsonMessage}";
+                errorMessage = $"An error occurred while attempting to respond to command\nException {e}\nMessage: {e.JsonMessage}";
             }
             catch (BadRequestException e)
             {
