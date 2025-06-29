@@ -120,7 +120,7 @@ namespace Eco.Plugins.DiscordLink.Modules
 
         protected abstract DlEventType GetTriggers();
 
-        protected virtual async Task<bool> ShouldRun() { throw new NotImplementedException(); }
+        protected abstract Task<bool> ShouldRun(); // Implementations should use async
 
         protected virtual async Task Initialize()
         {
