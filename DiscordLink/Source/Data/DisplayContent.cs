@@ -5,11 +5,11 @@ namespace Eco.Plugins.DiscordLink
 {
     public class DisplayContent
     {
-        public DisplayContent(string tag, string textContent = "", DiscordLinkEmbed embedContent = null)
+        public DisplayContent(string textContent = "", DiscordLinkEmbed embedContent = null, int contentData = -1)
         {
-            Tag = tag;
             TextContent = textContent;
             EmbedContent = embedContent;
+            ContentData = contentData;
         }
 
         public string TagAndText => TextContent.IsEmpty() ? Tag : $"{Tag}\n{TextContent}";

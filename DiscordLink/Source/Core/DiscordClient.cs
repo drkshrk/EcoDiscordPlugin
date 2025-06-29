@@ -610,41 +610,67 @@ namespace Eco.Plugins.DiscordLink
 
         #region Manipulation
 
-        public async Task<DiscordMessage> SendMessageAsync(DiscordChannel channel, string textContent, DiscordLinkEmbed embedContent = null)
+        public SendReadyMessage FormatMessageForSending(DiscordChannel channel, string textContent, DiscordLinkEmbed embedContent = null)
         {
             if (channel == null)
+            {
+                Logger.Error("Attempted to format message for sending to null channel");
                 return null;
+            }
 
-            DiscordMessage createdMessage = null;
+            // Either make sure we have permission to use embeds or convert the embed to text
+            string fullTextContent = (embedContent == null || ChannelHasPermission(channel, DiscordPermissions.EmbedLinks)) ? textContent : $"{textContent}\n{embedContent.AsDiscordText()}";
+
+            // If needed; split the message into multiple parts
+            ICollection<string> stringParts = MessageUtils.SplitStringBySize(fullTextContent, DLConstants.DISCORD_MESSAGE_CHARACTER_LIMIT);
+            ICollection<DiscordEmbed> embedParts = MessageUtils.BuildDiscordEmbeds(embedContent);
+
+            return new SendReadyMessage(stringParts, embedParts);
+        }
+
+        public async Task<IEnumerable<DiscordMessage>> SendMessageAsync(DiscordChannel channel, string textContent, DiscordLinkEmbed embedContent = null)
+        {
+            if (channel == null)
+            {
+                Logger.Error("Attempted to send message to null channel");
+                return null;
+            }
+
+            SendReadyMessage messageData = FormatMessageForSending(channel, textContent, embedContent);
+            return await SendMessageAsync(channel, messageData);
+        }
+
+        public async Task<IEnumerable<DiscordMessage>> SendMessageAsync(DiscordChannel channel, SendReadyMessage messageData)
+        {
+            if (channel == null)
+            {
+                Logger.Error("Attempted to send message to null channel");
+                return null;
+            }
+
+            if (!ChannelHasPermission(channel, DiscordPermissions.SendMessages))
+            {
+                Logger.Warning($"Attempted to send message to channel `{channel}` but the bot user is lacking permissions for this action");
+                return null;
+            }
+
+            List<DiscordMessage> createdMessages = new List<DiscordMessage>();
             try
             {
-                if (!ChannelHasPermission(channel, DiscordPermissions.SendMessages))
+                Logger.Trace($"Sending message to channel \"{channel.Name}\" containing {messageData.StringParts.Count} raw string parts and {messageData.EmbedParts.Count} embed parts");
+                if (messageData.StringParts.Count <= 1 && messageData.EmbedParts.Count == 1)
                 {
-                    Logger.Warning($"Attempted to send message to channel `{channel}` but the bot user is lacking permissions for this action");
-                    return null;
-                }
-
-                // Either make sure we have permission to use embeds or convert the embed to text
-                string fullTextContent = (embedContent == null || ChannelHasPermission(channel, DiscordPermissions.EmbedLinks)) ? textContent : $"{textContent}\n{embedContent.AsDiscordText()}";
-
-                // If needed; split the message into multiple parts
-                ICollection<string> stringParts = MessageUtils.SplitStringBySize(fullTextContent, DLConstants.DISCORD_MESSAGE_CHARACTER_LIMIT);
-                ICollection<DiscordEmbed> embedParts = MessageUtils.BuildDiscordEmbeds(embedContent);
-
-                Logger.Trace($"Sending message to channel \"{channel.Name}\" containing {stringParts.Count} raw string parts and {embedParts.Count} embed parts");
-                if (stringParts.Count <= 1 && embedParts.Count == 1)
-                {
-                    createdMessage = await channel.SendMessageAsync(fullTextContent, embedParts.First());
+                    createdMessages.Add(await channel.SendMessageAsync(messageData.StringParts.FirstOrDefault(), messageData.EmbedParts.First()));
                 }
                 else
                 {
-                    foreach (string textMessagePart in stringParts)
+                    foreach (string textMessagePart in messageData.StringParts)
                     {
-                        createdMessage = await channel.SendMessageAsync(textMessagePart);
+                        createdMessages.Add(await channel.SendMessageAsync(textMessagePart));
                     }
-                    foreach (DiscordEmbed embedPart in embedParts)
+                    foreach (DiscordEmbed embedPart in messageData.EmbedParts)
                     {
-                        createdMessage = await channel.SendMessageAsync(embedPart);
+                        createdMessages.Add(await channel.SendMessageAsync(embedPart));
                     }
                 }
             }
@@ -656,56 +682,51 @@ namespace Eco.Plugins.DiscordLink
             {
                 Logger.Exception($"Failed to send message to channel {channel.Name}", e);
             }
-            return createdMessage;
+            return createdMessages;
         }
 
-        public async Task<DiscordMessage> SendDmAsync(DiscordMember recipientMember, string textContent, DiscordLinkEmbed embedContent = null)
+        public async Task<IEnumerable<DiscordMessage>> SendDmAsync(DiscordMember recipientMember, string textContent, DiscordLinkEmbed embedContent = null)
         {
             if (recipientMember == null)
+            {
+                Logger.Error("Attempted to send DM to null user");
                 return null;
+            }
 
-            DiscordMessage createdMessage = null;
-            try
+            DiscordChannel DmChannel = await recipientMember.CreateDmChannelAsync();
+            if(DmChannel == null)
             {
-                // If needed; split the message into multiple parts
-                ICollection<string> stringParts = MessageUtils.SplitStringBySize(textContent, DLConstants.DISCORD_MESSAGE_CHARACTER_LIMIT);
-                ICollection<DiscordEmbed> embedParts = MessageUtils.BuildDiscordEmbeds(embedContent);
+                Logger.Error($"Failed to create DM channel for sending message to user {recipientMember.DisplayName}");
+                return null;
+            }
 
-                Logger.Trace($"Sending DM to user \"{recipientMember.Username}\" containing {stringParts.Count} raw string parts and {embedParts.Count} embed parts");
-                if (stringParts.Count <= 1 && embedParts.Count <= 1)
-                {
-                    DiscordEmbed embed = (embedParts.Count >= 1) ? embedParts.First() : null;
-                    createdMessage = await recipientMember.SendMessageAsync(textContent, embed);
-                }
-                else
-                {
-                    foreach (string textMessagePart in stringParts)
-                    {
-                        createdMessage = await recipientMember.SendMessageAsync(textMessagePart, null);
-                    }
-                    foreach (DiscordEmbed embedPart in embedParts)
-                    {
-                        createdMessage = await recipientMember.SendMessageAsync(null, embedPart);
-                    }
-                }
-            }
-            catch (ServerErrorException e)
-            {
-                Logger.DebugException($"ServerErrorException occurred while sending message to member \"{recipientMember.Username}\"", e);
-            }
-            catch (Exception e)
-            {
-                Logger.Exception($"Failed to send DM message to {recipientMember.Username}", e);
-            }
-            return createdMessage;
+            Logger.Trace($"Sending DM to user \"{recipientMember.Username}\"");
+            IEnumerable<DiscordMessage> createdMessages = await SendMessageAsync(DmChannel, textContent, embedContent);
+
+            return createdMessages;
         }
 
-        public async Task<DiscordMessage> ModifyMessageAsync(DiscordMessage message, string textContent, DiscordLinkEmbed embedContent = null)
+        public async Task<IEnumerable<DiscordMessage>> ModifyMessageAsync(DiscordMessage message, string textContent, DiscordLinkEmbed embedContent = null)
         {
             if (message == null)
+            {
+                Logger.Error("Attempted to modify null message");
                 return null;
+            }
 
-            DiscordMessage editedMessage = null;
+            SendReadyMessage messageData = FormatMessageForSending(message.Channel, textContent, embedContent);
+            return await ModifyMessageAsync(message, messageData);
+        }
+
+        public async Task<IEnumerable<DiscordMessage>> ModifyMessageAsync(DiscordMessage message, SendReadyMessage newMessageData)
+        {
+            if (message == null)
+            {
+                Logger.Error("Attempted to modify null message");
+                return null;
+            }
+
+            List<DiscordMessage> createdMessages = new List<DiscordMessage>();
             try
             {
                 DiscordChannel channel = message.GetChannel();
@@ -715,26 +736,44 @@ namespace Eco.Plugins.DiscordLink
                     return null;
                 }
 
-                if (embedContent == null)
+                if (newMessageData.StringParts.Count <= 1 && newMessageData.EmbedParts.Count == 1)
                 {
-                    Logger.Trace($"Editing raw message in channel \"{message.Channel.Name}\"");
-                    editedMessage = await message.ModifyAsync(textContent);
+                    await message.ModifyEmbedSuppressionAsync(false);
+                    await message.ModifyAsync(newMessageData.StringParts.FirstOrDefault(), newMessageData.EmbedParts.First());
                 }
                 else
                 {
-                    // Either make sure we have permission to use embeds or convert the embed to text
-                    if (ChannelHasPermission(channel, DiscordPermissions.EmbedLinks))
+                    bool messageEdited = false;
+                    foreach (string stringPart in newMessageData.StringParts)
                     {
-                        List<DiscordEmbed> splitEmbeds = MessageUtils.BuildDiscordEmbeds(embedContent);
-                        Logger.Trace($"Editing embed message with {splitEmbeds.Count} pieces in channel \"{message.Channel.Name}\"");
-                        if (splitEmbeds.Count > 0)
-                            editedMessage = await message.ModifyAsync(textContent, splitEmbeds[0]); // TODO: Actually keep track of split messages instead of only overwriting the first one
+                        if (!messageEdited)
+                        {
+                            Logger.Trace($"Editing text message in channel \"{message.Channel.Name}\"");
+                            await message.ModifyEmbedSuppressionAsync(true);
+                            await message.ModifyAsync(stringPart);
+                            messageEdited = true;
+                        }
+                        else
+                        {
+                            Logger.Trace($"Sending text edit overflow message to channel \"{message.Channel.Name}\"");
+                            createdMessages.AddRange(await SendMessageAsync(message.Channel, new SendReadyMessage(stringPart)));
+                        }
                     }
-                    else
+
+                    foreach (DiscordEmbed embedPart in newMessageData.EmbedParts)
                     {
-                        Logger.Trace($"Editing converted embed message with in channel \"{message.Channel.Name}\"");
-                        await message.ModifyEmbedSuppressionAsync(true); // Remove existing embeds
-                        editedMessage = await message.ModifyAsync($"{textContent}\n{embedContent.AsDiscordText()}");
+                        if (!messageEdited)
+                        {
+                            Logger.Trace($"Editing embed message in channel \"{message.Channel.Name}\"");
+                            await message.ModifyEmbedSuppressionAsync(false);
+                            await message.ModifyAsync(embedPart);
+                            messageEdited = true;
+                        }
+                        else
+                        {
+                            Logger.Trace($"Sending embed edit overflow message to channel \"{message.Channel.Name}\"");
+                            createdMessages.AddRange(await SendMessageAsync(message.Channel, new SendReadyMessage(embedPart)));
+                        }
                     }
                 }
             }

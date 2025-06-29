@@ -35,8 +35,9 @@ namespace Eco.Plugins.DiscordLink.Modules
             }
         }
 
-        protected async override Task PostDisplayCreated(DiscordMessage message)
+        protected async override Task PostDisplayCreated(IEnumerable<DiscordMessage> messages)
         {
+            DiscordMessage message = messages.Last(); // Only put reactions on the last message
             Election election = GetElectionFromMessage(message);
             if (election != null && election.BooleanElection)
                 await CreateVoteReactions(message);

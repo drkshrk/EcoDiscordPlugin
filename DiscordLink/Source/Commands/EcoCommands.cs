@@ -495,13 +495,14 @@ namespace Eco.Plugins.DiscordLink
                 }
 
                 // Try to Notify the Discord account, that a link has been made and ask for verification
-                DiscordMessage message = await plugin.Client.SendDmAsync(matchingMember, null, MessageBuilder.Discord.GetVerificationDM(caller));
+                IEnumerable<DiscordMessage> messages = await plugin.Client.SendDmAsync(matchingMember, null, MessageBuilder.Discord.GetVerificationDM(caller));
 
                 // This message can be null, when the target user has blocked direct messages from guild members.
-                if (message != null)
+                if (messages != null)
                 {
-                    _ = message.CreateReactionAsync(DLConstants.ACCEPT_EMOJI);
-                    _ = message.CreateReactionAsync(DLConstants.DENY_EMOJI);
+                    DiscordMessage reactionMessage = messages.Last();
+                    _ = reactionMessage.CreateReactionAsync(DLConstants.ACCEPT_EMOJI);
+                    _ = reactionMessage.CreateReactionAsync(DLConstants.DENY_EMOJI);
                 }
                 else
                 {
