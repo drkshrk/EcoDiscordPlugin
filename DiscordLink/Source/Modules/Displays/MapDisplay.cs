@@ -11,13 +11,12 @@ namespace Eco.Plugins.DiscordLink.Modules
 {
     public class MapDisplay : DisplayModule
     {
-        protected override string BaseTag { get { return "[Map]"; } }
         protected override int TimerStartDelayMs { get { return 15000; } }
         protected override int TimerUpdateIntervalMs { get { return 3600000; } } // Once an hour as that is the update rate of layers
 
         public override string ToString() => "Map Display";
         protected override DlEventType GetTriggers() => base.GetTriggers() | DlEventType.DiscordClientConnected | DlEventType.Timer;
-        protected override async Task<IEnumerable<DiscordTarget>> GetDiscordTargets() => DiscordLinkConfig.MapDisplayChannels.Cast<DiscordTarget>();
+        public override async Task<IEnumerable<DiscordTarget>> GetDiscordTargets() => DiscordLinkConfig.MapDisplayChannels.Cast<DiscordTarget>();
 
         protected override async Task<bool> ShouldRun() => await base.ShouldRun() && !NetworkManager.Config.WebServerUrl.IsEmpty();
 
@@ -40,7 +39,7 @@ namespace Eco.Plugins.DiscordLink.Modules
             if (layerFileName.IsEmpty())
                 return;
 
-            displayContent.Add(new DisplayContent(BaseTag, textContent: LayerUtils.GetLayerLink(layerFileName)));
+            displayContent.Add(new DisplayContent(textContent: LayerUtils.GetLayerLink(layerFileName)));
         }
     }
 }

@@ -16,7 +16,6 @@ namespace Eco.Plugins.DiscordLink.Modules
 {
     public class TradeWatcherDisplay : DisplayModule
     {
-        protected override string BaseTag { get { return "[Trade Watcher Display]"; } }
         protected override int TimerUpdateIntervalMs { get { return 300000; } }
         protected override int TimerStartDelayMs { get { return 10000; } }
 
@@ -31,10 +30,10 @@ namespace Eco.Plugins.DiscordLink.Modules
             return await base.ShouldRun() && (DiscordLinkConfig.MaxTradeWatcherDisplaysPerUser > 0);
         }
 
-        public override string GetDisplayText(string childInfo, bool verbose)
+        public override async Task<string> GetDisplayText(string childInfo, bool verbose)
         {
             string info = $"Trade Watcher Displays: {DLStorage.WorldData.TradeWatcherDisplayCountTotal}";
-            return base.GetDisplayText($"{childInfo}{info}\r\n", verbose);
+            return await base.GetDisplayText($"{childInfo}{info}\r\n", verbose);
         }
 
         public override void Setup()
@@ -61,7 +60,7 @@ namespace Eco.Plugins.DiscordLink.Modules
             await base.Initialize();
         }
 
-        protected override async Task<IEnumerable<DiscordTarget>> GetDiscordTargets()
+        public override async Task<IEnumerable<DiscordTarget>> GetDiscordTargets()
         {
             if (UserLinks.Count != DLStorage.WorldData.TradeWatcherDisplayCountTotal)
                 await BuildUserLinkList();
@@ -87,7 +86,7 @@ namespace Eco.Plugins.DiscordLink.Modules
 
                 TradeOfferList offerList = FindOffers(matchedEntity, matchedEntityType);
                 MessageBuilder.Discord.FormatTrades(matchedEntityName, matchedEntityType, offerList, out DiscordLinkEmbed embed);
-                displayContent.Add(new DisplayContent($"{BaseTag} [{matchedEntityName}]", embedContent: embed));
+                displayContent.Add(new DisplayContent(embedContent: embed));
             }
         }
 

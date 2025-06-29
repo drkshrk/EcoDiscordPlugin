@@ -19,6 +19,7 @@ namespace Eco.Plugins.DiscordLink.Modules
         WorkPartyDisplay,
         MapDisplay,
         LayerDisplay,
+        DisplayCleanupModule,
         CraftingFeed,
         DiscordChatFeed,
         EcoChatFeed,
@@ -64,7 +65,7 @@ namespace Eco.Plugins.DiscordLink.Modules
             _OpsCountTimer = new Timer(UpdateRollingAverage, null, Constants.MILLISECONDS_PER_MINUTE, Constants.MILLISECONDS_PER_MINUTE);
         }
 
-        public virtual string GetDisplayText(string childInfo, bool verbose)
+        public virtual async Task<string> GetDisplayText(string childInfo, bool verbose)
         {
             string info = $"\r\nStatus: {_status}";
             if (IsEnabled)

@@ -14,8 +14,9 @@ The config file is named "DiscordLink.eco" is generated inside the _"Config"_ di
 * [Roles](#roles)
 
 ## Sample Config
-This is an example of what a filled out configuration file (DiscordLink.eco) could look like.
- 
+This is an example of what a filled out configuration file (DiscordLink.eco) could look like.  
+Note that DiscordLink will add an "ID" field to all channel links. This parameter should not be changed and doing so will cause DiscordLink to lost track of Discord display messages, post duplicate display messages and may cause instability.  
+
 NOTE: YOU CANNOT COPY THIS ONE AND EXPECT IT TO WORK!  
 The config data needs to match your Eco server, Discord server and Discord bot.
 <details>

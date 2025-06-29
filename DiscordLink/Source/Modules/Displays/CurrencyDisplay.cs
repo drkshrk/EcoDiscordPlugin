@@ -3,7 +3,6 @@ using Eco.Moose.Utils.Lookups;
 using Eco.Plugins.DiscordLink.Events;
 using Eco.Plugins.DiscordLink.Extensions;
 using Eco.Plugins.DiscordLink.Utilities;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -12,13 +11,12 @@ namespace Eco.Plugins.DiscordLink.Modules
 {
     public class CurrencyDisplay : DisplayModule
     {
-        protected override string BaseTag { get { return "[Currencies]"; } }
         protected override int TimerUpdateIntervalMs { get { return 60000; } }
         protected override int TimerStartDelayMs { get { return 10000; } }
 
         public override string ToString() => "Currency Display";
         protected override DlEventType GetTriggers() => base.GetTriggers() | DlEventType.DiscordClientConnected | DlEventType.Timer | DlEventType.CurrencyCreated;
-        protected override async Task<IEnumerable<DiscordTarget>> GetDiscordTargets() => DiscordLinkConfig.CurrencyDisplayChannels.Cast<DiscordTarget>();
+        public override async Task<IEnumerable<DiscordTarget>> GetDiscordTargets() => DiscordLinkConfig.CurrencyDisplayChannels.Cast<DiscordTarget>();
 
         protected override void GetDisplayContent(DiscordTarget target, out List<DisplayContent> displayContent)
         {
@@ -46,7 +44,7 @@ namespace Eco.Plugins.DiscordLink.Modules
                 {
                     DiscordLinkEmbed currencyReport = MessageBuilder.Discord.GetCurrencyReport(currencyEnumerator.Current, currencyLink.MaxTopCurrencyHolderCount, currencyLink.UseBackingInfo, currencyLink.UseTradeCount);
                     if (currencyReport != null)
-                        displayContent.Add(new DisplayContent($"{BaseTag} [{currencyEnumerator.Current.Id}]", embedContent: currencyReport));
+                        displayContent.Add(new DisplayContent(embedContent: currencyReport));
                 }
             }
 
@@ -58,7 +56,7 @@ namespace Eco.Plugins.DiscordLink.Modules
                 {
                     DiscordLinkEmbed currencyReport = MessageBuilder.Discord.GetCurrencyReport(currencyEnumerator.Current, currencyLink.MaxTopCurrencyHolderCount, useBackingInfo: true, useTradeCount: true);
                     if (currencyReport != null)
-                        displayContent.Add(new DisplayContent($"{BaseTag} [{currencyEnumerator.Current.Id}]", embedContent: currencyReport));
+                        displayContent.Add(new DisplayContent(embedContent: currencyReport));
                 }
             }
         }

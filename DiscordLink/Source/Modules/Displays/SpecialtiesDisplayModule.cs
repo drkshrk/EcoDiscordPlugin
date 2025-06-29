@@ -10,12 +10,10 @@ namespace Eco.Plugins.DiscordLink.Modules
 {
     public class SpecialtiesDisplayModule : DisplayModule
     {
-        protected override string BaseTag { get { return "[Skill]"; } }
-
         public override string ToString() => "Skill Display";
         protected override DlEventType GetTriggers() => base.GetTriggers() | DlEventType.DiscordClientConnected | DlEventType.GainedSpecialty
             | DlEventType.LostSpecialty | DlEventType.LeveledUpSpecialty;
-        protected override async Task<IEnumerable<DiscordTarget>> GetDiscordTargets() => DiscordLinkConfig.SkillDisplayChannels.Cast<DiscordTarget>();
+        public override async Task<IEnumerable<DiscordTarget>> GetDiscordTargets() => DiscordLinkConfig.SkillDisplayChannels.Cast<DiscordTarget>();
 
         protected override void GetDisplayContent(DiscordTarget target, out List<DisplayContent> displayContent)
         {
@@ -26,7 +24,7 @@ namespace Eco.Plugins.DiscordLink.Modules
 
             CommandData.SpecialtyAssignmentData specialtyData = Moose.Features.Skills.GetPlayerSpecialtyData(null, includeScrollNoStar: skillTarget.IncludeScrollNoStar);
             DiscordLinkEmbed report = MessageBuilder.Discord.GetSpecialtiesReport(specialtyData, skillTarget.IncludeScrollNoStar, skillTarget.IncludeInactive, null);
-            displayContent.Add(new DisplayContent(BaseTag, embedContent: report));
+            displayContent.Add(new DisplayContent(embedContent: report));
         }
     }
 }

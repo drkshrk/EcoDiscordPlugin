@@ -9,14 +9,13 @@ namespace Eco.Plugins.DiscordLink.Modules
 {
     public class ServerInfoDisplay : DisplayModule
     {
-        protected override string BaseTag { get { return "[Server Info]"; } }
         protected override int TimerUpdateIntervalMs { get { return 60000; } }
         protected override int TimerStartDelayMs { get { return 0; } }
 
         public override string ToString() => "Server Info Display";
         protected override DlEventType GetTriggers() => base.GetTriggers() | DlEventType.DiscordClientConnected | DlEventType.Timer
             | DlEventType.Login | DlEventType.ElectionStarted | DlEventType.ElectionStopped | DlEventType.Vote;
-        protected override async Task<IEnumerable<DiscordTarget>> GetDiscordTargets() => DiscordLinkConfig.ServerInfoDisplayChannels.Cast<DiscordTarget>();
+        public override async Task<IEnumerable<DiscordTarget>> GetDiscordTargets() => DiscordLinkConfig.ServerInfoDisplayChannels.Cast<DiscordTarget>();
 
         protected override void GetDisplayContent(DiscordTarget target, out List<DisplayContent> displayContent)
         {
@@ -25,7 +24,7 @@ namespace Eco.Plugins.DiscordLink.Modules
                 return;
 
             DiscordLinkEmbed embed = MessageBuilder.Discord.GetServerInfo(GetServerInfoFlagForChannel(serverInfoChannel));
-            displayContent.Add(new DisplayContent(BaseTag, embedContent: embed));
+            displayContent.Add(new DisplayContent(embedContent: embed));
         }
 
         private static MessageBuilder.ServerInfoComponentFlag GetServerInfoFlagForChannel(ServerInfoChannelLink infoChannel)

@@ -210,7 +210,7 @@ namespace Eco.Plugins.DiscordLink.Utilities
                 builder.AppendLine();
                 builder.AppendLine("--- Modules ---");
 
-                string moduleDisplayText = plugin.Modules.Select(module => module.GetDisplayText(string.Empty, verbose)).DoubleNewlineList();
+                string moduleDisplayText = plugin.Modules.Select(async module => await module.GetDisplayText(string.Empty, verbose)).Select(task => task.Result).DoubleNewlineList();
                 builder.AppendLine(moduleDisplayText);
 
                 if (verbose)

@@ -108,6 +108,8 @@ namespace Eco.Plugins.DiscordLink
 
             public List<ulong> RoleIds = new List<ulong>();
 
+            public Dictionary<Guid, DisplayTracker> Displays = new Dictionary<Guid, DisplayTracker>();
+
             public LayerDiscriminator LayerDiscriminator = new LayerDiscriminator();
 
             public async Task<DiscordLinkEmbed> GetDataDescription()

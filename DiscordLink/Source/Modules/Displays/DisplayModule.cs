@@ -1,10 +1,10 @@
 ﻿using DSharpPlus.Entities;
+using Eco.Moose.Tools.Logger;
 using Eco.Moose.Utils.SystemUtils;
 using Eco.Plugins.DiscordLink.Events;
-using Eco.Plugins.DiscordLink.Utilities;
 using System;
 using System.Collections.Generic;
-using System.Text.RegularExpressions;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -14,18 +14,15 @@ namespace Eco.Plugins.DiscordLink.Modules
     {
         public DateTime LastUpdateTime { get; protected set; } = DateTime.MinValue;
 
-        protected virtual string BaseTag { get; } = "[Unset Tag]";
         protected virtual int TimerUpdateIntervalMs { get; } = -1;
         protected virtual int TimerStartDelayMs { get; } = 0;
         protected virtual int HighFrequencyEventDelayMs { get; } = 2000;
-        protected List<TargetDisplayData> TargetDisplays { get; } = new List<TargetDisplayData>();
 
-        private bool _dirty = false;
         private Timer _updateTimer = null;
         private Timer _highFrequencyEventTimer = null;
 
         protected override DlEventType GetTriggers() => DlEventType.ManualStart | DlEventType.ForceUpdate | DlEventType.DiscordMessageDeleted | DlEventType.DiscordReactionAdded | DlEventType.DiscordReactionRemoved;
-        protected virtual async Task<IEnumerable<DiscordTarget>> GetDiscordTargets() { throw new NotImplementedException(); }
+        public virtual async Task<IEnumerable<DiscordTarget>> GetDiscordTargets() { throw new NotImplementedException(); }
 
         protected override async Task<bool> ShouldRun()
         {
@@ -38,19 +35,21 @@ namespace Eco.Plugins.DiscordLink.Modules
             return false;
         }
 
-        public override string GetDisplayText(string childInfo, bool verbose)
+        public override async Task<string> GetDisplayText(string childInfo, bool verbose)
         {
             string lastUpdateTime = (LastUpdateTime == DateTime.MinValue) ? "Never" : LastUpdateTime.ToString("yyyy-MM-dd HH:mm");
+            IEnumerable<DiscordTarget> targets = await GetDiscordTargets();
             int trackedMessageCount = 0;
-            foreach (TargetDisplayData target in TargetDisplays)
+            foreach (DiscordTarget target in targets)
             {
-                trackedMessageCount += target.DisplayMessages.Count;
+                if (DLStorage.PersistentData.Displays.TryGetValue(target.Id, out DisplayTracker tracker))
+                    trackedMessageCount += tracker.MessageIds.Count;
             }
             string info = $"Last update time: {lastUpdateTime}";
             info += $"\r\nTracked Display Messages: {trackedMessageCount}";
             info += $"\r\n{childInfo}";
 
-            return base.GetDisplayText(info, verbose);
+            return await base.GetDisplayText(info, verbose);
         }
 
         protected override async Task Initialize()
@@ -66,15 +65,6 @@ namespace Eco.Plugins.DiscordLink.Modules
         {
             StopTimer();
             await base.Shutdown();
-        }
-
-        protected override async Task HandleConfigChanged(object sender, EventArgs e)
-        {
-            using (await _overlapLock.LockAsync()) // Avoid crashes caused by data being manipulated and used simultaneously
-            {
-                ClearTargetDisplays(); // The channel links may have changed so we should find the messages again.
-            }
-            await base.HandleConfigChanged(sender, e);
         }
 
         public bool StartTimer()
@@ -97,11 +87,6 @@ namespace Eco.Plugins.DiscordLink.Modules
             SystemUtils.StopAndDestroyTimer(ref _updateTimer);
         }
 
-        protected void ClearTargetDisplays()
-        {
-            TargetDisplays.Clear();
-        }
-
         private void TriggerTimedUpdate(object stateInfo)
         {
             _ = base.Update(DiscordLink.Obj, DlEventType.Timer, null);
@@ -116,21 +101,21 @@ namespace Eco.Plugins.DiscordLink.Modules
                 if (!(data[0] is DiscordMessage message))
                     return;
 
-                foreach (TargetDisplayData display in TargetDisplays)
+                KeyValuePair<Guid, DisplayTracker> IdAndTracker = DLStorage.PersistentData.Displays.FirstOrDefault(entry => entry.Value.MessageIds.Contains(message.Id));
+                if (IdAndTracker.Key == Guid.Empty)
+                    return;
+
+                // Clean up any remaining parts of the display
+                foreach (ulong messageId in IdAndTracker.Value.MessageIds)
                 {
-                    bool found = false;
-                    for (int i = 0; i < display.DisplayMessages.Count; ++i)
-                    {
-                        if (display.DisplayMessages.ContainsKey(message.Id))
-                        {
-                            display.DisplayMessages.Remove(message.Id);
-                            found = true;
-                            break;
-                        }
-                    }
-                    if (found)
-                        break;
+                    if (message.Id == messageId)
+                        continue; // The message from the event has already been deleted by the user
+
+                    // The message may have been deleted by a user, so don't throw warnings if it's missing
+                    await plugin.Client.DeleteMessageAsync(IdAndTracker.Value.ChannelId, messageId, "DiscordLink cleanup of partially deleted display", suppressMissingMessageWarning: true);
                 }
+
+                DLStorage.PersistentData.Displays.Remove(IdAndTracker.Key);
             }
             else if (trigger == DlEventType.DiscordReactionAdded || trigger == DlEventType.DiscordReactionRemoved)
             {
@@ -151,101 +136,100 @@ namespace Eco.Plugins.DiscordLink.Modules
                 return;
             }
 
-            if (_dirty || TargetDisplays.Count <= 0)
-            {
-                await FindMessages(plugin);
-                if (_dirty || TargetDisplays.Count <= 0)
-                    return; // If something went wrong, we should just retry later
-            }
+            // Get a copy of the target list - The config can manipulate the original enumerable while we are iterating over it
+            IEnumerable<DiscordTarget> targets = (await GetDiscordTargets()).ToList();
 
-            List<DiscordMessage> createdMessages = new List<DiscordMessage>();
-            List<DiscordMessage> unmatchedMessages = new List<DiscordMessage>();
-            List<DisplayContent> matchedContent = new List<DisplayContent>();
-            foreach (TargetDisplayData channelDisplayData in TargetDisplays)
+            foreach(DiscordTarget target in targets)
             {
-                DiscordTarget target = channelDisplayData.Target;
+                GetDisplayContent(target, out List<DisplayContent> displayContent);
+
                 ChannelLink channelLink = target as ChannelLink;
                 UserLink userLink = target as UserLink;
                 if (channelLink == null && userLink == null)
+                {
+                    Logger.Warning($"Failed to update display module \"{this}\". Could not resolve type of Discord target with ID: {target.Id}");
                     continue;
+                }
 
                 DiscordChannel targetChannel;
                 if (channelLink != null && channelLink.IsValid())
-                    targetChannel = channelLink.Channel;
-                else if (userLink != null)
-                    targetChannel = await plugin.Client.GetOrCreateDmChannelAsync(userLink.Member);
-                else
-                    continue;
-
-                if (!plugin.Client.ChannelHasPermission(targetChannel, DiscordPermissions.ReadMessageHistory))
-                    continue;
-
-                GetDisplayContent(target, out List<DisplayContent> displayContent);
-
-                foreach (ulong messageId in channelDisplayData.DisplayMessages.Keys)
                 {
-                    DiscordMessage message = await plugin.Client.GetMessageAsync(targetChannel, messageId);
-                    if (message == null)
-                    {
-                        _dirty = true;
-                        return; // We cannot know which messages are wrong and duplicates may be created if we continue.
-                    }
-                    if (!message.Content.StartsWith(BaseTag))
-                        continue; // The message belongs to a different display
-
-                    bool found = false;
+                    targetChannel = channelLink.Channel;
+                }    
+                else if (userLink != null)
+                {
+                    targetChannel = await plugin.Client.GetOrCreateDmChannelAsync(userLink.Member);
+                }
+                else
+                {
+                    Logger.Warning($"Failed to update display module \"{this}\". Could not resolve discord channel type of Discord target with ID: {target.Id}");
+                    continue;
+                }
+                
+                // Update the display if it already exists
+                if (DLStorage.PersistentData.Displays.TryGetValue(target.Id, out DisplayTracker tracker))
+                {
                     foreach (DisplayContent content in displayContent)
                     {
-                        if (message.Content.Contains(content.Tag))
+                        SendReadyMessage messageData = plugin.Client.FormatMessageForSending(targetChannel, content.TextContent, content.EmbedContent);
+
+                        tracker.ContentData = content.ContentData;
+                        int existingMessageCount = tracker.MessageIds.Count;
+                        int targetMessageCount = messageData.StringParts.Count + messageData.EmbedParts.Count;
+                        for(int i = 0; i < targetMessageCount; ++i)
                         {
-                            found = true;
-                            matchedContent.Add(content);
+                            IEnumerable<DiscordMessage> createdMessages;
+                            if (i < existingMessageCount)
+                            {
+                                DiscordMessage message = await plugin.Client.GetMessageAsync(targetChannel, tracker.MessageIds[i]);
+                                ++_opsCount;
 
-                            ++_opsCount;
-                            DiscordMessage editedMessage = await plugin.Client.ModifyMessageAsync(message, content.TagAndText, content.EmbedContent);
-                            if (editedMessage != null)
-                                await PostDisplayEdited(editedMessage);
+                                if (i < messageData.StringParts.Count)
+                                    createdMessages = await plugin.Client.ModifyMessageAsync(message, new SendReadyMessage(messageData.StringParts.ElementAt(i)));
+                                else
+                                    createdMessages = await plugin.Client.ModifyMessageAsync(message, new SendReadyMessage(messageData.EmbedParts.ElementAt(i - messageData.StringParts.Count)));
+                                ++_opsCount;
+                                tracker.MessageIds.AddRange(createdMessages.Select(message => message.Id));
+                            }
+                            else
+                            {
+                                if (i < messageData.StringParts.Count)
+                                    createdMessages = await plugin.Client.SendMessageAsync(targetChannel, new SendReadyMessage(messageData.StringParts.ElementAt(i)));
+                                else
+                                    createdMessages = await plugin.Client.SendMessageAsync(targetChannel, new SendReadyMessage(messageData.EmbedParts.ElementAt(i - messageData.StringParts.Count)));
+                                ++_opsCount;
+                                tracker.MessageIds.AddRange(createdMessages.Select(message => message.Id));
+                            }
+                        }
 
-                            break;
+                        // Delete any leftover messages
+                        int messagesLeft = existingMessageCount - targetMessageCount;
+                        if(messagesLeft > 0)
+                        {
+                            for(int i = targetMessageCount; i < existingMessageCount; ++i)
+                            {
+                                DiscordMessage message = await plugin.Client.GetMessageAsync(targetChannel, tracker.MessageIds[i]);
+                                tracker.MessageIds.Remove(message.Id);
+                                await plugin.Client.DeleteMessageAsync(message);
+                                ++_opsCount;
+                            }
                         }
                     }
-
-                    if (!found)
-                        unmatchedMessages.Add(message);
                 }
-
-                // Delete the messages that are no longer relevant
-                foreach (DiscordMessage message in unmatchedMessages)
+                else // Create the display if it does not already exist
                 {
-                    channelDisplayData.DisplayMessages.Remove(message.Id);
-                    await plugin.Client.DeleteMessageAsync(message);
-                    ++_opsCount;
-                }
-                unmatchedMessages.Clear();
-
-                // Send the messages that didn't already exist
-                foreach (DisplayContent content in displayContent)
-                {
-                    if (!matchedContent.Contains(content))
+                    foreach (DisplayContent content in displayContent)
                     {
-                        DiscordMessage createdMessage = await plugin.Client.SendMessageAsync(targetChannel, content.TagAndText, content.EmbedContent);
-                        if (createdMessage == null)
+                        SendReadyMessage messageData = plugin.Client.FormatMessageForSending(targetChannel, content.TextContent, content.EmbedContent);
+                        IEnumerable<DiscordMessage> createdMessages = await plugin.Client.SendMessageAsync(targetChannel, content.TextContent, content.EmbedContent);
+                        ++_opsCount;
+
+                        if (!createdMessages.Any())
                             continue;
 
-                        createdMessages.Add(createdMessage);
-                        ++_opsCount;
+                        DLStorage.PersistentData.Displays.Add(target.Id, new DisplayTracker(targetChannel.Id, createdMessages.Select(message => message.Id)));
+                        await PostDisplayCreated(createdMessages);
                     }
-                }
-                matchedContent.Clear();
-            }
-
-            if (unmatchedMessages.Count > 0 || createdMessages.Count > 0)
-            {
-                await FindMessages(plugin);
-
-                foreach (DiscordMessage message in createdMessages)
-                {
-                    await PostDisplayCreated(message);
                 }
             }
 
@@ -254,77 +238,10 @@ namespace Eco.Plugins.DiscordLink.Modules
 
         protected abstract void GetDisplayContent(DiscordTarget target, out List<DisplayContent> displayContent);
 
-        protected async virtual Task PostDisplayCreated(DiscordMessage message) { }
+        protected async virtual Task PostDisplayCreated(IEnumerable<DiscordMessage> messages) { }
 
-        protected async virtual Task PostDisplayEdited(DiscordMessage message) { }
+        protected async virtual Task PostDisplayEdited(IEnumerable<DiscordMessage> messages) { }
 
         protected async virtual Task HandleReactionChange(DiscordUser user, DiscordMessage message, DiscordEmoji reaction, DiscordReactionChange changeType) { }
-
-        private async Task FindMessages(DiscordLink plugin)
-        {
-            ClearTargetDisplays();
-
-            foreach (DiscordTarget target in await GetDiscordTargets())
-            {
-                IReadOnlyList<DiscordMessage> targetMessages = null;
-
-                ChannelLink channelLink = target as ChannelLink;
-                UserLink userLink = target as UserLink;
-                if (channelLink == null && userLink == null)
-                    continue;
-
-                TargetDisplayData data = new TargetDisplayData(target);
-                TargetDisplays.Add(data);
-                if (channelLink != null)
-                {
-                    if (!channelLink.IsValid())
-                        continue;
-
-                    targetMessages = await plugin.Client.GetMessagesAsync(channelLink.Channel);
-                }
-                else if (userLink != null)
-                {
-                    DiscordDmChannel dmChannel = await plugin.Client.GetOrCreateDmChannelAsync(userLink.Member);
-                    targetMessages = await plugin.Client.GetMessagesAsync(dmChannel);
-                }
-
-                if (targetMessages == null)
-                {
-                    // There was an error or no messages exist - Clean up and return
-                    ClearTargetDisplays();
-                    return;
-                }
-
-                // Go through the messages and find any our tagged messages
-                foreach (DiscordMessage message in targetMessages)
-                {
-                    Match match = MessageUtils.DisplayTagRegex.Match(message.Content);
-                    if (match.Groups.Count <= 1)
-                        continue;
-
-                    if (match.Groups[1].Value != BaseTag)
-                        continue;
-
-                    string tag = null;
-                    if (match.Groups.Count > 2)
-                        tag = match.Groups[2].Value;
-
-                    data.DisplayMessages.Add(message.Id, tag);
-                }
-            }
-            _dirty = false;
-        }
-
-        protected struct TargetDisplayData
-        {
-            public TargetDisplayData(DiscordTarget target)
-            {
-                this.Target = target;
-                this.DisplayMessages = new Dictionary<ulong, string>();
-            }
-
-            public DiscordTarget Target;
-            public Dictionary<ulong, string> DisplayMessages;
-        }
     }
 }
