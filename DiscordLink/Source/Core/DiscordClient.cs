@@ -789,13 +789,43 @@ namespace Eco.Plugins.DiscordLink
 
                 Logger.Exception($"Failed to modify message in channel \"{channelName}\"", e);
             }
-            return editedMessage;
+            return createdMessages;
         }
 
-        public async Task<bool> DeleteMessageAsync(DiscordMessage message)
+        public async Task<bool> DeleteMessageAsync(ulong channelId, ulong messageId, string? reason = null, bool suppressMissingMessageWarning = false)
+        {
+            DiscordChannel channel = await Guild.GetChannelAsync(channelId);
+            if(channel == null)
+            {
+                Logger.Warning($"Attempted to delete message with ID {messageId} from non existent channel with ID {channelId}");
+                return false;
+            }
+
+            return await DeleteMessageAsync(channel, messageId, reason, suppressMissingMessageWarning);
+        }
+
+        public async Task<bool> DeleteMessageAsync(DiscordChannel channel, ulong messageId, string? reason = null, bool suppressMissingMessageWarning = false)
+        {
+            DiscordMessage message = await GetMessageAsync(channel, messageId);
+            if(message == null)
+            {
+                if(!suppressMissingMessageWarning)
+                    Logger.Warning($"Attempted to delete non existent message with ID {messageId} from channel \"{channel.Name}\"");
+
+                return false;
+            }
+
+            return await DeleteMessageAsync(message);
+        }
+
+        public async Task<bool> DeleteMessageAsync(DiscordMessage message, string? reason = null)
         {
             if (message == null)
+            {
+                Logger.Error("Attempted to delete null message");
                 return false;
+            }
+                
 
             DiscordChannel channel = message.GetChannel();
             if (!ChannelHasPermission(channel, DiscordPermissions.ManageMessages))
@@ -808,7 +838,7 @@ namespace Eco.Plugins.DiscordLink
             try
             {
                 Logger.Trace($"Deleting message \"{message.Id}\" from channel \"{channel.Name}\"");
-                await message.DeleteAsync("Deleted by DiscordLink");
+                await message.DeleteAsync( reason ?? "Deleted by DiscordLink");
                 result = true;
             }
             catch (ServerErrorException e)

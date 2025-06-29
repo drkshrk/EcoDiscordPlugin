@@ -207,7 +207,7 @@ namespace Eco.Plugins.DiscordLink
                         }
 
                         client.SendMessageAsync(channel, response).Wait();
-                        _ = client.DeleteMessageAsync(message);
+                        _ = client.DeleteMessageAsync(message, "DiscordLink removing handled link verification message");
                         break;
                     }
 
