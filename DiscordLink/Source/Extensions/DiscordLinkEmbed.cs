@@ -27,13 +27,13 @@ namespace Eco.Plugins.DiscordLink.Extensions
         public DiscordLinkEmbed()
         { }
 
-        public DiscordLinkEmbed(DiscordLinkEmbed RHS)
+        public DiscordLinkEmbed(DiscordLinkEmbed rhs)
         {
-            this.Title = RHS.Title;
-            this.Description = RHS.Description;
-            this.Footer = RHS.Footer;
-            this.Thumbnail = RHS.Thumbnail;
-            foreach (DiscordLinkEmbedField field in RHS.Fields)
+            this.Title = rhs.Title;
+            this.Description = rhs.Description;
+            this.Footer = rhs.Footer;
+            this.Thumbnail = rhs.Thumbnail;
+            foreach (DiscordLinkEmbedField field in rhs.Fields)
             {
                 Fields.Add(new DiscordLinkEmbedField(field));
             }
