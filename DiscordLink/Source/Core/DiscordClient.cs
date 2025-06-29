@@ -533,6 +533,11 @@ namespace Eco.Plugins.DiscordLink
                 Logger.DebugException($"ServerErrorException occurred when attempting to fetch message with ID {messageId} from channel \"{channel.Name}\"", e);
                 return null;
             }
+            catch(NotFoundException e)
+            {
+                Logger.DebugException($"NotFoundException occurred when attempting to fetch message with ID {messageId} from channel \"{channel.Name}\"", e);
+                return null;
+            }
             catch (Exception e)
             {
                 Logger.Exception($"Error occurred when attempting to fetch message with ID {messageId} from channel \"{channel.Name}\"", e);

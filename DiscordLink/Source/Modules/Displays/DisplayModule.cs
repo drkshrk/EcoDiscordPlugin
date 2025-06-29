@@ -183,6 +183,14 @@ namespace Eco.Plugins.DiscordLink.Modules
                             {
                                 DiscordMessage message = await plugin.Client.GetMessageAsync(targetChannel, tracker.MessageIds[i]);
                                 ++_opsCount;
+                                if(message == null)
+                                {
+                                    Logger.Warning($"Failed to find message with ID {tracker.MessageIds[i]} in channel \"{targetChannel}\" when updating {this}");
+                                    tracker.MessageIds.RemoveAt(i);
+                                    --existingMessageCount;
+                                    --i;
+                                    continue;
+                                }
 
                                 if (i < messageData.StringParts.Count)
                                     createdMessages = await plugin.Client.ModifyMessageAsync(message, new SendReadyMessage(messageData.StringParts.ElementAt(i)));
