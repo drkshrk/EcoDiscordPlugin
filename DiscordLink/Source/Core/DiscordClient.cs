@@ -743,7 +743,6 @@ namespace Eco.Plugins.DiscordLink
 
                 if (newMessageData.StringParts.Count <= 1 && newMessageData.EmbedParts.Count == 1)
                 {
-                    await message.ModifyEmbedSuppressionAsync(false);
                     await message.ModifyAsync(newMessageData.StringParts.FirstOrDefault(), newMessageData.EmbedParts.First());
                 }
                 else
@@ -754,7 +753,6 @@ namespace Eco.Plugins.DiscordLink
                         if (!messageEdited)
                         {
                             Logger.Trace($"Editing text message in channel \"{message.Channel.Name}\"");
-                            await message.ModifyEmbedSuppressionAsync(true);
                             await message.ModifyAsync(stringPart);
                             messageEdited = true;
                         }
@@ -770,7 +768,6 @@ namespace Eco.Plugins.DiscordLink
                         if (!messageEdited)
                         {
                             Logger.Trace($"Editing embed message in channel \"{message.Channel.Name}\"");
-                            await message.ModifyEmbedSuppressionAsync(false);
                             await message.ModifyAsync(embedPart);
                             messageEdited = true;
                         }
