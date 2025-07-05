@@ -20,6 +20,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -495,23 +496,26 @@ namespace Eco.Plugins.DiscordLink
 
         public async Task<DiscordMember> GetMemberAsync(ulong memberId, bool updateCache = false, bool expect404 = false)
         {
+            DiscordMember member = null;
             try
             {
                 Logger.Trace($"Fetching member with ID \"{memberId}\"");
-                return await Guild.GetMemberAsync(memberId, updateCache);
+                member = await Guild.GetMemberAsync(memberId, updateCache);
+            }
+            catch (RateLimitException e)
+            {
+                Logger.DebugException($"RateLimitException occurred while attempting to fetch member with ID \"{memberId}\"", e);
             }
             catch (ServerErrorException e)
             {
-                Logger.DebugException($"ServerErrorException occurred when attempting to fetch member with ID \"{memberId}\"", e);
-                return null;
+                Logger.DebugException($"ServerErrorException occurred while attempting to fetch member with ID \"{memberId}\"", e);
             }
             catch (Exception e)
             {
                 if (!expect404)
-                    Logger.Exception($"Error occurred when attempting to fetch member with ID \"{memberId}\"", e);
-
-                return null;
+                    Logger.Exception($"Error occurred while attempting to fetch member with ID \"{memberId}\"", e);
             }
+            return member;
         }
 
         public bool IsUserDiscordLinkBot(DiscordUser user)
@@ -524,26 +528,29 @@ namespace Eco.Plugins.DiscordLink
             if (!ChannelHasPermission(channel, DiscordPermissions.ReadMessageHistory))
                 return null;
 
+            DiscordMessage message = null;
             try
             {
                 Logger.Trace($"Fetching message with ID \"{messageId}\" from channel \"{channel.Name}\"");
-                return await channel.GetMessageAsync(messageId);
+                message = await channel.GetMessageAsync(messageId);
+            }
+            catch (RateLimitException e)
+            {
+                Logger.DebugException($"RateLimitException occurred while attempting to fetch message with ID {messageId} from channel \"{channel.Name}\"", e);
             }
             catch (ServerErrorException e)
             {
-                Logger.DebugException($"ServerErrorException occurred when attempting to fetch message with ID {messageId} from channel \"{channel.Name}\"", e);
-                return null;
+                Logger.DebugException($"ServerErrorException occurred while attempting to fetch message with ID {messageId} from channel \"{channel.Name}\"", e);
             }
             catch(NotFoundException e)
             {
-                Logger.DebugException($"NotFoundException occurred when attempting to fetch message with ID {messageId} from channel \"{channel.Name}\"", e);
-                return null;
+                Logger.DebugException($"NotFoundException occurred while attempting to fetch message with ID {messageId} from channel \"{channel.Name}\"", e);
             }
             catch (Exception e)
             {
-                Logger.Exception($"Error occurred when attempting to fetch message with ID {messageId} from channel \"{channel.Name}\"", e);
-                return null;
+                Logger.Exception($"Error occurred while attempting to fetch message with ID {messageId} from channel \"{channel.Name}\"", e);
             }
+            return null;
         }
 
         public async Task<IReadOnlyList<DiscordMessage>> GetMessagesAsync(DiscordChannel channel)
@@ -557,15 +564,17 @@ namespace Eco.Plugins.DiscordLink
                 Logger.Trace($"Fetching recent messages from channel \"{channel.Name}\"");
                 messages = await channel.GetMessagesAsync().ToListAsync();
             }
+            catch (RateLimitException e)
+            {
+                Logger.DebugException($"RateLimitException occurred while fetching messages from channel \"{channel.Name}", e);
+            }
             catch (ServerErrorException e)
             {
                 Logger.DebugException($"ServerErrorException occurred while fetching messages from channel \"{channel.Name}", e);
-                return null;
             }
             catch (Exception e)
             {
                 Logger.Exception($"Error occurred when attempting to read message history from channel \"{channel.Name}\"", e);
-                return null;
             }
             return messages;
         }
@@ -584,17 +593,18 @@ namespace Eco.Plugins.DiscordLink
                 Logger.Trace("Fetching guild member list");
                 members = await Guild.GetAllMembersAsync().ToListAsync();
             }
+            catch (RateLimitException e)
+            {
+                Logger.DebugException($"RateLimitException occurred while fetching all guild members", e);
+            }
             catch (ServerErrorException e)
             {
                 Logger.DebugException($"ServerErrorException occurred while fetching all guild members", e);
-                return null;
             }
             catch (Exception e)
             {
                 Logger.Exception($"Error occured when attempting to fetch all guild members", e);
-                return null;
             }
-
             return members;
         }
 
@@ -683,6 +693,10 @@ namespace Eco.Plugins.DiscordLink
             catch (ServerErrorException e)
             {
                 Logger.DebugException($"ServerErrorException occurred while sending message to channel \"{channel.Name}\"", e);
+            }
+            catch (RateLimitException e)
+            {
+                Logger.DebugException($"RateLimitException occurred while sending message to channel \"{channel.Name}\"", e);
             }
             catch (Exception e)
             {
@@ -784,6 +798,10 @@ namespace Eco.Plugins.DiscordLink
             {
                 Logger.DebugException($"ServerErrorException occurred while modifying message in channel \"{message.Channel.Name}\"", e);
             }
+            catch ( RateLimitException e )
+            {
+                Logger.DebugException($"RateLimitException occurred while modifying message in channel \"{message.Channel.Name}\"", e);
+            }
             catch (Exception e)
             {
                 string channelName = message?.Channel?.Name;
@@ -846,11 +864,15 @@ namespace Eco.Plugins.DiscordLink
             }
             catch (ServerErrorException e)
             {
-                Logger.DebugException($"ServerErrorException occurred while deleting message in channel \"{message.Channel.Name}\"", e);
+                Logger.DebugException($"ServerErrorException occurred while deleting message in channel \"{channel.Name}\"", e);
+            }
+            catch (RateLimitException e)
+            {
+                Logger.DebugException($"RateLimitException occurred while deleting message in channel \"{channel.Name}\"", e);
             }
             catch (Exception e)
             {
-                string channelName = message?.Channel?.Name;
+                string channelName = channel?.Name;
                 if (string.IsNullOrWhiteSpace(channelName))
                     channelName = "Unknown channel";
 
@@ -894,6 +916,10 @@ namespace Eco.Plugins.DiscordLink
             {
                 Logger.Exception($"DiscordLink was not allowed to create the role \"{dlRole.Name}\". Ensure that your bot user is assigned a role with higher permission level than all roles it manages.", e);
             }
+            catch (RateLimitException e)
+            {
+                Logger.DebugException($"RateLimitException occurred while creating role \"{dlRole.Name}\"", e);
+            }
             catch (ServerErrorException e)
             {
                 Logger.DebugException($"ServerErrorException occurred while creating role \"{dlRole.Name}\"", e);
@@ -933,6 +959,10 @@ namespace Eco.Plugins.DiscordLink
             catch (UnauthorizedException e)
             {
                 Logger.Exception($"DiscordLink was not allowed to delete the role \"{role.Name}\". Ensure that your bot user is assigned a role with higher permission level than all roles it manages.", e);
+            }
+            catch (RateLimitException e)
+            {
+                Logger.DebugException($"RateLimitException occurred while deleting role \"{role.Name}\"", e);
             }
             catch (ServerErrorException e)
             {
@@ -980,6 +1010,10 @@ namespace Eco.Plugins.DiscordLink
             {
                 Logger.Exception($"DiscordLink was not allowed to grant the role \"{role.Name}\" to member \"{member.Username}\". Ensure that your bot user is assigned a role with higher permission level than all roles it manages.", e);
             }
+            catch (RateLimitException e)
+            {
+                Logger.DebugException($"RateLimitException occurred while adding role \"{role.Name}\" to member \"{member.Username}\"", e);
+            }
             catch (ServerErrorException e)
             {
                 Logger.DebugException($"ServerErrorException occurred while adding role \"{role.Name}\" to member \"{member.Username}\"", e);
@@ -1017,6 +1051,10 @@ namespace Eco.Plugins.DiscordLink
             catch (UnauthorizedException e)
             {
                 Logger.Exception($"DiscordLink was not allowed to revoke the role \"{role.Name}\" from member \"{member.Username}\". Ensure that your bot user is assigned a role with higher permission level than all roles it manages. This role was most likely not created by the current bot. Deleting it manually will resolve this Issue.", e);
+            }
+            catch (RateLimitException e)
+            {
+                Logger.DebugException($"RateLimitException occurred while removing role \"{role.Name}\" from member \"{member.Username}\"", e);
             }
             catch (ServerErrorException e)
             {
