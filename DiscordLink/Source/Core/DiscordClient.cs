@@ -555,7 +555,7 @@ namespace Eco.Plugins.DiscordLink
             {
                 Logger.Exception($"Error occurred while attempting to fetch message with ID {messageId} from channel \"{channel.Name}\"", e);
             }
-            return null;
+            return message;
         }
 
         public async Task<IReadOnlyList<DiscordMessage>> GetMessagesAsync(DiscordChannel channel)
