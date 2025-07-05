@@ -13,6 +13,7 @@ using Eco.Core.Utils;
 using Eco.Moose.Tools.Logger;
 using Eco.Plugins.DiscordLink.Events;
 using Eco.Plugins.DiscordLink.Extensions;
+using Eco.Plugins.DiscordLink.Logging;
 using Eco.Plugins.DiscordLink.Utilities;
 using Eco.Shared.Utils;
 using Microsoft.Extensions.DependencyInjection;
@@ -148,11 +149,11 @@ namespace Eco.Plugins.DiscordLink
                     },
                     new CommandsConfiguration() { }
                 );
-                services.AddLogging(x => // TODO: Make the logwrapper work here
+                services.AddLogging(builder =>
                 {
-                    x.ClearProviders();
-                    x.AddConsole();
-                    x.SetMinimumLevel(DiscordLinkConfig.BackendLogLevel);
+                    builder.ClearProviders();
+                    builder.AddDiscordLinkMicrosoftLogger();
+                    builder.SetMinimumLevel(DiscordLinkConfig.BackendLogLevel);
                 });
 
                 _serviceProvider = services.BuildServiceProvider();
