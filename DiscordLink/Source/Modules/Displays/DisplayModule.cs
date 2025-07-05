@@ -181,7 +181,7 @@ namespace Eco.Plugins.DiscordLink.Modules
                             IEnumerable<DiscordMessage> createdMessages;
                             if (i < existingMessageCount)
                             {
-                                DiscordMessage message = await plugin.Client.GetMessageAsync(targetChannel, tracker.MessageIds[i]);
+                                DiscordMessage message = await plugin.Client.GetMessageAsync(targetChannel, tracker.MessageIds[i], expectNotFound: true);
                                 ++_opsCount;
                                 if(message == null)
                                 {
@@ -216,7 +216,7 @@ namespace Eco.Plugins.DiscordLink.Modules
                         {
                             for(int i = targetMessageCount; i < existingMessageCount; ++i)
                             {
-                                DiscordMessage message = await plugin.Client.GetMessageAsync(targetChannel, tracker.MessageIds[i]);
+                                DiscordMessage message = await plugin.Client.GetMessageAsync(targetChannel, tracker.MessageIds[i], expectNotFound: true);
                                 tracker.MessageIds.Remove(message.Id);
                                 await plugin.Client.DeleteMessageAsync(message);
                                 ++_opsCount;

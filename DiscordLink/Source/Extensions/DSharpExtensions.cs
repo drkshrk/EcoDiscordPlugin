@@ -80,21 +80,7 @@ namespace Eco.Plugins.DiscordLink.Extensions
             DiscordClient client = DiscordLink.Obj.Client;
             DiscordMember member = client.GetMemberById(user.Id);
             if (member == null)
-            {
-                try
-                {
-                    member = await client.GetMemberAsync(user.Id);
-                }
-                catch (NotFoundException)
-                {
-                    // No action: It's normal to fail to look up members of users who have left the guild
-                }
-                catch (Exception e)
-                {
-                    Logger.Exception($"Failed to look up discord member for discord user {user.Username} ({user.Id})", e);
-                }
-
-            }
+                member = await client.GetMemberAsync(user.Id, expectNotFound: true);
 
             return member;
         }

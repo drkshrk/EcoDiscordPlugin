@@ -486,15 +486,15 @@ namespace Eco.Plugins.DiscordLink
             return member;
         }
 
-        public async Task<DiscordMember> GetMemberAsync(string memberIdStr, bool updateCache = false)
+        public async Task<DiscordMember> GetMemberAsync(string memberIdStr, bool updateCache = false, bool expectNotFound = false)
         {
             if (!memberIdStr.TryParseSnowflakeId(out ulong memberId))
                 return null;
 
-            return await GetMemberAsync(memberId, updateCache);
+            return await GetMemberAsync(memberId, updateCache, expectNotFound);
         }
 
-        public async Task<DiscordMember> GetMemberAsync(ulong memberId, bool updateCache = false, bool expect404 = false)
+        public async Task<DiscordMember> GetMemberAsync(ulong memberId, bool updateCache = false, bool expectNotFound = false)
         {
             DiscordMember member = null;
             try
@@ -510,10 +510,14 @@ namespace Eco.Plugins.DiscordLink
             {
                 Logger.DebugException($"ServerErrorException occurred while attempting to fetch member with ID \"{memberId}\"", e);
             }
+            catch (NotFoundException e)
+            {
+                if (!expectNotFound)
+                    Logger.Exception($"NotFoundException occurred while attempting to fetch member with ID \"{memberId}\"", e);
+            }
             catch (Exception e)
             {
-                if (!expect404)
-                    Logger.Exception($"Error occurred while attempting to fetch member with ID \"{memberId}\"", e);
+                Logger.Exception($"Error occurred while attempting to fetch member with ID \"{memberId}\"", e);
             }
             return member;
         }
@@ -523,7 +527,7 @@ namespace Eco.Plugins.DiscordLink
             return user == BotMember;
         }
 
-        public async Task<DiscordMessage> GetMessageAsync(DiscordChannel channel, ulong messageId)
+        public async Task<DiscordMessage> GetMessageAsync(DiscordChannel channel, ulong messageId, bool expectNotFound = false)
         {
             if (!ChannelHasPermission(channel, DiscordPermissions.ReadMessageHistory))
                 return null;
@@ -542,9 +546,10 @@ namespace Eco.Plugins.DiscordLink
             {
                 Logger.DebugException($"ServerErrorException occurred while attempting to fetch message with ID {messageId} from channel \"{channel.Name}\"", e);
             }
-            catch(NotFoundException e)
+            catch (NotFoundException e)
             {
-                Logger.DebugException($"NotFoundException occurred while attempting to fetch message with ID {messageId} from channel \"{channel.Name}\"", e);
+                if (!expectNotFound)
+                    Logger.Exception($"ServerErrorException occurred while attempting to fetch message with ID {messageId} from channel \"{channel.Name}\"", e);
             }
             catch (Exception e)
             {
@@ -714,7 +719,7 @@ namespace Eco.Plugins.DiscordLink
             }
 
             DiscordChannel DmChannel = await recipientMember.CreateDmChannelAsync();
-            if(DmChannel == null)
+            if (DmChannel == null)
             {
                 Logger.Error($"Failed to create DM channel for sending message to user {recipientMember.DisplayName}");
                 return null;
@@ -798,7 +803,7 @@ namespace Eco.Plugins.DiscordLink
             {
                 Logger.DebugException($"ServerErrorException occurred while modifying message in channel \"{message.Channel.Name}\"", e);
             }
-            catch ( RateLimitException e )
+            catch (RateLimitException e)
             {
                 Logger.DebugException($"RateLimitException occurred while modifying message in channel \"{message.Channel.Name}\"", e);
             }
@@ -816,7 +821,7 @@ namespace Eco.Plugins.DiscordLink
         public async Task<bool> DeleteMessageAsync(ulong channelId, ulong messageId, string? reason = null, bool suppressMissingMessageWarning = false)
         {
             DiscordChannel channel = await Guild.GetChannelAsync(channelId);
-            if(channel == null)
+            if (channel == null)
             {
                 Logger.Warning($"Attempted to delete message with ID {messageId} from non existent channel with ID {channelId}");
                 return false;
@@ -825,12 +830,12 @@ namespace Eco.Plugins.DiscordLink
             return await DeleteMessageAsync(channel, messageId, reason, suppressMissingMessageWarning);
         }
 
-        public async Task<bool> DeleteMessageAsync(DiscordChannel channel, ulong messageId, string? reason = null, bool suppressMissingMessageWarning = false)
+        public async Task<bool> DeleteMessageAsync(DiscordChannel channel, ulong messageId, string? reason = null, bool expectNotFound = false)
         {
-            DiscordMessage message = await GetMessageAsync(channel, messageId);
-            if(message == null)
+            DiscordMessage message = await GetMessageAsync(channel, messageId, expectNotFound);
+            if (message == null)
             {
-                if(!suppressMissingMessageWarning)
+                if (!expectNotFound)
                     Logger.Warning($"Attempted to delete non existent message with ID {messageId} from channel \"{channel.Name}\"");
 
                 return false;
@@ -846,7 +851,7 @@ namespace Eco.Plugins.DiscordLink
                 Logger.Error("Attempted to delete null message");
                 return false;
             }
-                
+
 
             DiscordChannel channel = message.GetChannel();
             if (!ChannelHasPermission(channel, DiscordPermissions.ManageMessages))
@@ -859,7 +864,7 @@ namespace Eco.Plugins.DiscordLink
             try
             {
                 Logger.Trace($"Deleting message \"{message.Id}\" from channel \"{channel.Name}\"");
-                await message.DeleteAsync( reason ?? "Deleted by DiscordLink");
+                await message.DeleteAsync(reason ?? "Deleted by DiscordLink");
                 result = true;
             }
             catch (ServerErrorException e)

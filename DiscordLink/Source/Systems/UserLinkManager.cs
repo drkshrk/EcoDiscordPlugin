@@ -313,7 +313,7 @@ namespace Eco.Plugins.DiscordLink
             {
                 try
                 {
-                    DiscordMember = await DiscordLink.Obj.Client.GetMemberAsync(memberId, expect404: true);
+                    DiscordMember = await DiscordLink.Obj.Client.GetMemberAsync(memberId, expectNotFound: true);
                 }
                 catch (DSharpPlus.Exceptions.NotFoundException)
                 {
