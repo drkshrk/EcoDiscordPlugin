@@ -27,10 +27,6 @@ namespace Eco.Plugins.DiscordLink
 
         private readonly List<ChannelLink> _allChannelLinks = new List<ChannelLink>();
 
-        public ServerConfig()
-        {
-        }
-
         public void Initialize()
         {
             PluginConfig = new PluginConfig<ServerConfigData>("DiscordLink");

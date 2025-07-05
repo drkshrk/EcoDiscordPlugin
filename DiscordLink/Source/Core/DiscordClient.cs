@@ -114,16 +114,16 @@ namespace Eco.Plugins.DiscordLink
                 IServiceCollection services = new ServiceCollection();
                 services.AddDiscordClient(DiscordLinkConfig.BotToken, intents);
                 services.AddOrReplace<IGatewayController, ReconnectingGatewayController>(ServiceLifetime.Singleton);
-                services.Configure<RestClientOptions>(x => { });
-                services.Configure<ShardingOptions>(x => { });
-                services.Configure<DiscordConfiguration>(x => { });
-                services.Configure<GatewayClientOptions>(x =>
+                services.Configure<RestClientOptions>(options => { });
+                services.Configure<ShardingOptions>(options => { });
+                services.Configure<DiscordConfiguration>(options => { });
+                services.Configure<GatewayClientOptions>(options =>
                 {
-                    x.Intents = intents;
+                    options.Intents = intents;
                 });
                 services.ConfigureEventHandlers
                 (
-                    b => b.HandleGuildDownloadCompleted(HandleGuildDownloadCompleted)
+                    builder => builder.HandleGuildDownloadCompleted(HandleGuildDownloadCompleted)
                     .HandleSocketClosed(HandleSocketClosed)
                     .HandleMessageCreated(HandleDiscordMessageCreated)
                     .HandleMessageUpdated(HandleDiscordMessageUpdated)
