@@ -97,6 +97,16 @@ namespace Eco.Plugins.DiscordLink.Extensions
             return this;
         }
 
+        public DiscordLinkEmbed AlignEndingRow()
+        {
+            int emptyFieldsCount = Fields.Count % DISCORD_EMBED_FIELDS_PER_ROW_LIMIT;
+            for (int i = 0; i < emptyFieldsCount; ++i)
+            {
+                AddAlignmentField();
+            }
+            return this;
+        }
+
         public DiscordLinkEmbed ClearFields()
         {
             Fields.Clear();

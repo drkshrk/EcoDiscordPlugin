@@ -788,6 +788,44 @@ namespace Eco.Plugins.DiscordLink
             });
         }
 
+        [Command("BountiesReport")]
+        [Description("Displays a report for repair bounties.")]
+        public async Task SkillReport(CommandContext command,
+            [Parameter("IncludeInactive")][Description("If true; includes bounties from players who are currently not in the active demographic.")] bool includeInactive = false,
+            [Parameter("SettlementFilter")][Description("Optional name or ID of a settlement for filtering repair bounties.")][SlashAutoCompleteProvider<SettlementAutoCompleteProvider>] string settlementFilterNameOrId = "",
+            [Parameter("PlayerFilter")][Description("Optional name or ID of a player for filtering repair bounties that they can complete.")][SlashAutoCompleteProvider<PlayerAutoCompleteProvider>] string playerNameOrId = "")
+        {
+            DiscordCommandContext ctx = new DiscordCommandContext(command, ResponseTiming.Immediate);
+            await ExecuteCommand<object>(PermissionType.User, ctx, async (lCtx, args) =>
+            {
+                Settlement? settlementFilter = null;
+                if (!string.IsNullOrWhiteSpace(settlementFilterNameOrId))
+                {
+                    settlementFilter = Lookups.SettlementByNameOrId(settlementFilterNameOrId);
+                    if (settlementFilter == null)
+                    {
+                        await ReportCommandError(ctx, $"No settlement with the name or ID \"{settlementFilterNameOrId}\" could be found.");
+                        return;
+                    }
+                }
+
+                User? userFilter = null;
+                if (!string.IsNullOrWhiteSpace(playerNameOrId))
+                {
+                    userFilter = Lookups.UserByNameOrId(playerNameOrId);
+                    if (userFilter == null)
+                    {
+                        await ReportCommandError(ctx, $"No player with the name or ID \"{playerNameOrId}\" could be found.");
+                        return;
+                    }
+                }
+
+                RepairBountyLookupResult repairBountyData = WorldObjects.LookupRepairBounties(includeInactive, settlementFilter, userFilter);
+                DiscordLinkEmbed report = MessageBuilder.Discord.GetRepairBountiesReport(repairBountyData);
+                await DisplayCommandData(ctx, string.Empty, report);
+            });
+        }
+
         #endregion
 
         #region Images

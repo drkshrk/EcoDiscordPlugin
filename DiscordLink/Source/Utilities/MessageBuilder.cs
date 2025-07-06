@@ -21,6 +21,7 @@ using Eco.Gameplay.Property;
 using Eco.Gameplay.Settlements;
 using Eco.Gameplay.Skills;
 using Eco.Gameplay.Systems.Exhaustion;
+using Eco.Moose.Data;
 using Eco.Moose.Extensions;
 using Eco.Moose.Features;
 using Eco.Moose.Utils.Lookups;
@@ -1261,7 +1262,42 @@ namespace Eco.Plugins.DiscordLink.Utilities
                             return userLine;
                         } )), inline: true);
                 }
-                
+                report.AlignEndingRow();
+
+                return report;
+            }
+
+            public static DiscordLinkEmbed GetRepairBountiesReport(RepairBountyLookupResult lookup)
+            {
+                DiscordLinkEmbed report = new DiscordLinkEmbed();
+
+                string title = string.Empty;
+                if (lookup.UserFilter != null)
+                    title = $"{lookup.UserFilter.Name} Repair Bounties";
+                else if (lookup.SettlementFilter != null)
+                    title = $"{lookup.SettlementFilter.Name.StripTags()} Repair Bounties";
+                else
+                    title = "Global Repair Bounties";
+                report.WithTitle(title);
+                report.WithFooter(GetStandardEmbedFooter());
+
+                StringBuilder ownerDesc = new StringBuilder();
+                StringBuilder worldObjectDesc = new StringBuilder();
+                StringBuilder durabilityAndPaymentDesc = new StringBuilder();
+
+                foreach (RepairBountyLookupData bounty in lookup.Bounties.OrderBy(bounty => bounty.RepairObject.DisplayName))
+                {
+                    ownerDesc.AppendLine(bounty.RepairObject.Owners.Name);
+                    worldObjectDesc.AppendLine(bounty.RepairObject.DisplayName);
+
+                    string paymentDesc = bounty.PaymentAmount > 0 ? $"{bounty.PaymentAmount.ToString("N2")} {bounty.PaymentCurrency.Name}" : "No payment";
+                    durabilityAndPaymentDesc.AppendLine($"{bounty.DurabilityPercent.ToString("00")} | {paymentDesc}");
+                }
+
+                report.AddField("Owner", ownerDesc.ToString(), inline: true);
+                report.AddField("Object", worldObjectDesc.ToString(), inline: true);
+                report.AddField("Durability **|** Payment", durabilityAndPaymentDesc.ToString(), inline: true);
+
                 return report;
             }
 
