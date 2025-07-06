@@ -562,6 +562,7 @@ namespace Eco.Plugins.DiscordLink.Utilities
                 EcoServerConfig serverConfig = NetworkManager.Config;
 
                 DiscordLinkEmbed report = new DiscordLinkEmbed();
+                report.WithFooter(GetStandardEmbedFooter());
 
                 if (flag.HasFlag(ServerInfoComponentFlag.Name))
                 {
@@ -783,6 +784,7 @@ namespace Eco.Plugins.DiscordLink.Utilities
 
                 DiscordLinkEmbed report = new DiscordLinkEmbed();
                 report.WithTitle($"Report for {MessageUtils.StripTags(user.Name)}");
+                report.WithFooter(GetStandardEmbedFooter());
 
                 // Online Status
                 if (flag.HasFlag(PlayerReportComponentFlag.OnlineStatus))
@@ -940,6 +942,7 @@ namespace Eco.Plugins.DiscordLink.Utilities
 
                 DiscordLinkEmbed report = new DiscordLinkEmbed();
                 report.WithTitle(MessageUtils.StripTags(currency.Name));
+                report.WithFooter(GetStandardEmbedFooter());
 
                 // Find and sort relevant accounts
                 IEnumerable<BankAccount> accounts = BankAccountManager.Obj.Accounts.Where(acc => acc.GetCurrencyHoldingVal(currency) >= 1).OrderByDescending(acc => acc.GetCurrencyHoldingVal(currency));
@@ -1002,6 +1005,7 @@ namespace Eco.Plugins.DiscordLink.Utilities
             {
                 DiscordLinkEmbed report = new DiscordLinkEmbed();
                 report.WithTitle(MessageUtils.StripTags(election.Name));
+                report.WithFooter(GetStandardEmbedFooter());
 
                 // Link
                 string webServerURL = NetworkManager.Config.WebServerUrl;
@@ -1094,6 +1098,7 @@ namespace Eco.Plugins.DiscordLink.Utilities
             {
                 DiscordLinkEmbed report = new DiscordLinkEmbed();
                 report.WithTitle(MessageUtils.StripTags(workParty.Name));
+                report.WithFooter(GetStandardEmbedFooter());
 
                 // Workers
                 string workersDesc = string.Empty;
@@ -1346,6 +1351,7 @@ namespace Eco.Plugins.DiscordLink.Utilities
                 // Format message
                 embedContent = new DiscordLinkEmbed();
                 embedContent.WithTitle($"Trade offers for {matchedName.StripTags()}");
+                embedContent.WithFooter(GetStandardEmbedFooter());
 
                 if (offerList.OfferCount == 0)
                 {

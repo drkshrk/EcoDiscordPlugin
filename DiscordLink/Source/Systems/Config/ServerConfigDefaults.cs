@@ -1,5 +1,4 @@
 ﻿using Eco.Moose.Tools.Logger;
-using Eco.Plugins.DiscordLink.Extensions;
 
 namespace Eco.Plugins.DiscordLink
 {
@@ -17,7 +16,6 @@ namespace Eco.Plugins.DiscordLink
         public const int MaxPersonalCurrencies = 3;
         public const int MaxTopCurrencyHolderCount = 3;
         public const int MaxTradeWatcherDisplaysPerUser = 5;
-        public const DiscordLinkEmbed.EmbedSize MinEmbedSizeForFooter = DiscordLinkEmbed.EmbedSize.Medium;
         public const bool UseTradeWatcherFeeds = true;
         public const bool UseLinkedAccountRole = true;
         public const bool UseDemographicRoles = true;

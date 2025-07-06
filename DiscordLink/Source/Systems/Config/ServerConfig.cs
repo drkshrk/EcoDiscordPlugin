@@ -1,7 +1,6 @@
 ﻿using DSharpPlus.Entities;
 using Eco.Core.Plugins;
 using Eco.Moose.Tools.Logger;
-using Eco.Plugins.DiscordLink.Extensions;
 using Eco.Plugins.Networking;
 using Eco.Shared.Serialization;
 using System;
@@ -183,7 +182,6 @@ namespace Eco.Plugins.DiscordLink
             {
                 BotToken = this.BotToken,
                 DiscordServerId = this.DiscordServerId,
-                MinEmbedSizeForFooter = this.MinEmbedSizeForFooter,
                 EmbedColorHex = this.EmbedColorHex,
                 ServerName = this.ServerName,
                 ServerDescription = this.ServerDescription,
@@ -329,9 +327,6 @@ namespace Eco.Plugins.DiscordLink
 
         [Description("Emote keys to replace with eco icons using the value name. This setting can be changed while the server is running."), Category("Emotes")]
         public ObservableCollection<EmoteIconSubstitution> EmoteIconSubstitutions { get; set; } = new ObservableCollection<EmoteIconSubstitution>(ServerConfigDefaultValues.EmoteSubstitutions);
-
-        [Description("Determines for what sizes of embeds to show the footer containing meta information about posted embeds. All embeds of sizes bigger than the selected one will have footers as well. This setting can be changed while the server is running."), Category("Style - Discord")]
-        public DiscordLinkEmbed.EmbedSize MinEmbedSizeForFooter { get; set; } = ServerConfigDefaultValues.MinEmbedSizeForFooter;
 
         [Description("Determines the color of the left outline of embeds. Must be a valid hexadecimal color string. This setting can be changed while the server is running."), Category("Style - Discord")]
         public string EmbedColorHex { get { return _embedColorHex; } set { EmbedColor = new DiscordColor(value); _embedColorHex = value; } }

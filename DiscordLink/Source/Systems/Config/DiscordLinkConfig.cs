@@ -1,6 +1,5 @@
 ﻿using DSharpPlus.Entities;
 using Eco.Moose.Tools.Logger;
-using Eco.Plugins.DiscordLink.Extensions;
 using Eco.Shared.Utils;
 using System.Collections.Generic;
 using System.Linq;
@@ -32,7 +31,6 @@ namespace Eco.Plugins.DiscordLink
 
         public static string BotToken => _serverConfig.BotToken;
         public static ulong DiscordServerId => _serverConfig.DiscordServerId;
-        public static DiscordLinkEmbed.EmbedSize MinEmbedSizeForFooter => _serverConfig.MinEmbedSizeForFooter;
         public static DiscordColor EmbedColor => _serverConfig.EmbedColor;
         public static string ServerName => _serverConfig.ServerName;
         public static string ServerDescription => _serverConfig.ServerDescription;

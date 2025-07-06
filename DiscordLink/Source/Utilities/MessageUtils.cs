@@ -78,12 +78,6 @@ namespace Eco.Plugins.DiscordLink.Utilities
             if (fullEmbed == null)
                 return resultEmbeds;
 
-            // Conditionally add the standard footer
-            if (string.IsNullOrWhiteSpace(fullEmbed.Footer) && fullEmbed.GetSize() <= DiscordLinkConfig.MinEmbedSizeForFooter)
-            {
-                fullEmbed.WithFooter(MessageBuilder.Discord.GetStandardEmbedFooter());
-            }
-
             // Count chars needed for title and footer
             int titleFooterCharCount = 0;
             if (fullEmbed.Title != null)
