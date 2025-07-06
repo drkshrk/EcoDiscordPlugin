@@ -108,6 +108,7 @@ All Eco and Discord commands are case insensitive.
 | ElectionsReport            |                     | Both              |                                                                          | User            | No       | Displays a report for the currently active elections.                                                                |
 | WorkPartyReport            |                     | Both              | WorkPartyNameOrID                                                        | User            | No       | Displays the Work Party Report for the given work party.                                                             |
 | WorkPartiesReport          |                     | Both              |                                                                          | User            | No       | Displays a report for the currently active work parties.                                                             |
+| SkillReport                |                     | Discord / Moose   | IncludeInactive*, IncludeScrollNoStar*, SettlementFilter*                | User            | No       | Displays a report for skill assignment.                                                                              |
 
 
 # **Snippets**
