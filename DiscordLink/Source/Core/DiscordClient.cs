@@ -144,7 +144,7 @@ namespace Eco.Plugins.DiscordLink
                         SlashCommandProcessor commandProcessor = new SlashCommandProcessor(
                             new SlashCommandConfiguration
                             {
-                                NamingPolicy = new SnakeCaseNamingPolicy(),
+                                NamingPolicy = new LowercaseNamingPolicy(),
                             });
                         extension.AddProcessor(commandProcessor);
                     },
