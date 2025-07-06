@@ -782,8 +782,8 @@ namespace Eco.Plugins.DiscordLink
                     }
                 }
 
-                SpecialtyAssignmentData specialtyData = Skills.GetPlayerSpecialtyData(settlementFilter, includeScrollNoStar: includeScrollNoStar);
-                DiscordLinkEmbed report = MessageBuilder.Discord.GetSpecialtiesReport(specialtyData, includeScrollNoStar, includeInactive, settlementFilter);
+                SpecialtyAssignmentLookupResult specialtyData = Skills.LookupSpecialtyAssignments(includeInactive, includeScrollNoStar, includeNonRefundable: false, settlementFilter);
+                DiscordLinkEmbed report = MessageBuilder.Discord.GetSpecialtiesReport(specialtyData);
                 await DisplayCommandData(ctx, string.Empty, report);
             });
         }

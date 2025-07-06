@@ -1217,15 +1217,15 @@ namespace Eco.Plugins.DiscordLink.Utilities
                 return report;
             }
 
-            public static DiscordLinkEmbed GetSpecialtiesReport(SpecialtyAssignmentData specialtyData, bool includeScrollNoStar, bool includeInactive, Settlement? settlementFilter)
+            public static DiscordLinkEmbed GetSpecialtiesReport(SpecialtyAssignmentLookupResult lookup)
             {
                 DiscordLinkEmbed report = new DiscordLinkEmbed();
-
-                string title = settlementFilter == null ? "Global Skills" : $"{settlementFilter.Name.StripTags} Skills";
+                string title = lookup.SettlementFilter == null ? "Global Skills" : $"{lookup.SettlementFilter.Name.StripTags} Skills";
                 report.WithTitle(title);
+                report.WithFooter(GetStandardEmbedFooter());
 
-                Dictionary<Skill, List<User>> skillAndUsers = includeInactive ? specialtyData.AllPlayers : specialtyData.ActivePlayers;
-                specialtyData.Specialties.Sort(
+                Dictionary<Skill, List<User>> skillAndUsers = lookup.PlayersPerSpecialty;
+                lookup.Specialties.Sort(
                     delegate (Skill left, Skill right)
                     {
                         int leftUserCount = skillAndUsers[left].Count();
@@ -1237,13 +1237,13 @@ namespace Eco.Plugins.DiscordLink.Utilities
                         return leftUserCount.CompareTo(rightUserCount);
                     });
 
-                foreach (Skill specialty in specialtyData.Specialties)
+                foreach (Skill specialty in lookup.Specialties)
                 {
                     if (!specialty.IsDiscovered())
                         continue;
 
-                    int specialtyCount = includeInactive ? specialtyData.TotalPlayerCount[specialty] : specialtyData.ActivePlayerCount[specialty];
-                    report.AddField($"**{specialty.DisplayName}** ({specialtyCount})", string.Join("\n", skillAndUsers[specialty]
+                    int specialtyAssignmentCount = lookup.PlayerCountPerSpecialty[specialty];
+                    report.AddField($"**{specialty.DisplayName}** ({specialtyAssignmentCount})", string.Join("\n", skillAndUsers[specialty]
                         .OrderByDescending(user => user.Skillset.Skills.First(s => s.GetType() == specialty.GetType()).Level)
                         .Select(user =>
                         {

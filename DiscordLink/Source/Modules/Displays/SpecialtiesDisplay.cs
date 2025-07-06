@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Eco.Plugins.DiscordLink.Modules
 {
-    public class SpecialtiesDisplayModule : DisplayModule
+    public class SpecialtiesDisplay : DisplayModule
     {
         public override string ToString() => "Skill Display";
         // TODO: Limit demographic updates to entering or leaving the Active demographic
@@ -23,8 +23,8 @@ namespace Eco.Plugins.DiscordLink.Modules
             if (!(target is SpecialtiesChannelLink skillTarget))
                 return;
 
-            CommandData.SpecialtyAssignmentData specialtyData = Moose.Features.Skills.GetPlayerSpecialtyData(null, includeScrollNoStar: skillTarget.IncludeScrollNoStar);
-            DiscordLinkEmbed report = MessageBuilder.Discord.GetSpecialtiesReport(specialtyData, skillTarget.IncludeScrollNoStar, skillTarget.IncludeInactive, null);
+            CommandData.SpecialtyAssignmentLookupResult specialtyData = Moose.Features.Skills.LookupSpecialtyAssignments(includeInactive: false);
+            DiscordLinkEmbed report = MessageBuilder.Discord.GetSpecialtiesReport(specialtyData);
             displayContent.Add(new DisplayContent(embedContent: report));
         }
     }
