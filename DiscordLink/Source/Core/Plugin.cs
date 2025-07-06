@@ -363,6 +363,10 @@ namespace Eco.Plugins.DiscordLink
                     _ = HandleEvent(DlEventType.LeveledUpSpecialty, specialtyLevelUp);
                     break;
 
+                    case RepairBountyClaimed repairBountyClaimed:
+                        _ = HandleEvent(DlEventType.ClaimedRepairBounty, repairBountyClaimed);
+                    break;
+
                 default:
                     break;
             }
@@ -399,6 +403,8 @@ namespace Eco.Plugins.DiscordLink
             Modules[(int)ModuleType.WorkPartyDisplay] = new WorkPartyDisplay();
             Modules[(int)ModuleType.MapDisplay] = new MapDisplay();
             Modules[(int)ModuleType.LayerDisplay] = new LayerDisplay();
+            Modules[(int)ModuleType.SpecialtiesDisplayModule] = new SpecialtiesDisplay();
+            Modules[(int)ModuleType.RepairBountyDisplayModule] = new RepairBountyDisplay();
             Modules[(int)ModuleType.DisplayCleanupModule] = new DisplayCleanupModule();
             Modules[(int)ModuleType.CraftingFeed] = new CraftingFeed();
             Modules[(int)ModuleType.DiscordChatFeed] = new DiscordChatFeed();
@@ -413,7 +419,6 @@ namespace Eco.Plugins.DiscordLink
             Modules[(int)ModuleType.DemographicRoleModule] = new DemographicsRoleModule();
             Modules[(int)ModuleType.ElectedTitleRoleModule] = new ElectedTitleRoleModule();
             Modules[(int)ModuleType.SpecialitiesRoleModule] = new SpecialtiesRoleModule();
-            Modules[(int)ModuleType.SpecialtiesDisplayModule] = new SpecialtiesDisplayModule();
             Modules[(int)ModuleType.RoleCleanupModule] = new RoleCleanupModule();
             Modules[(int)ModuleType.SnippetInput] = new SnippetInput();
 

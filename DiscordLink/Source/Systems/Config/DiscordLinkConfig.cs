@@ -63,6 +63,7 @@ namespace Eco.Plugins.DiscordLink
         public static IEnumerable<MapChannelLink> MapDisplayChannels => _serverConfig.MapDisplayChannels;
         public static IEnumerable<LayerChannelLink> LayerDisplayChannels => _serverConfig.LayerDisplayChannels;
         public static IEnumerable<SpecialtiesChannelLink> SkillDisplayChannels => _serverConfig.SkillDisplayChannels;
+        public static IEnumerable<RepairBountyChannelLink> RepairBountyDisplayChannels => _serverConfig.RepairBountyDisplayChannels;
         public static IEnumerable<ChannelLink> SnippetInputChannels => _serverConfig.SnippetInputChannels;
         public static IEnumerable<DemographicRoleSubstitution> DemographicReplacementRoles => _serverConfig.DemographicReplacementRoles;
         public static IEnumerable<EmoteIconSubstitution> EmoteIconSubstitutions => _serverConfig.EmoteIconSubstitutions;
@@ -83,6 +84,7 @@ namespace Eco.Plugins.DiscordLink
                 .Concat(MapDisplayChannels)
                 .Concat(LayerDisplayChannels)
                 .Concat(SkillDisplayChannels)
+                .Concat(RepairBountyDisplayChannels)
                 .Concat(SnippetInputChannels)
                 .Where(x => !verifiedLinksOnly || x.Verified);
         }

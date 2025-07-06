@@ -46,7 +46,8 @@ namespace Eco.Plugins.DiscordLink.Events
         GainedSpecialty             = 1L << 37,
         LostSpecialty               = 1L << 38,
         LeveledUpSpecialty          = 1L << 39,
-        AccumulatedServerLog        = 1L << 40,
+        ClaimedRepairBounty         = 1L << 40,
+        AccumulatedServerLog        = 1L << 41,
 
         // Matched with other plugins
         SettlementFounded           = 1L << 61,

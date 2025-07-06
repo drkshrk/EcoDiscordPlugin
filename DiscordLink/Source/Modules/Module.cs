@@ -19,6 +19,8 @@ namespace Eco.Plugins.DiscordLink.Modules
         WorkPartyDisplay,
         MapDisplay,
         LayerDisplay,
+        SpecialtiesDisplayModule,
+        RepairBountyDisplayModule,
         DisplayCleanupModule,
         CraftingFeed,
         DiscordChatFeed,
@@ -33,7 +35,6 @@ namespace Eco.Plugins.DiscordLink.Modules
         DemographicRoleModule,
         ElectedTitleRoleModule,
         SpecialitiesRoleModule,
-        SpecialtiesDisplayModule,
         RoleCleanupModule,
         SnippetInput
     }
