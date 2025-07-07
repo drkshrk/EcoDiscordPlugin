@@ -10,35 +10,6 @@ using System.Threading.Tasks;
 
 namespace Eco.Plugins.DiscordLink.Modules
 {
-    public enum ModuleType
-    {
-        CurrencyDisplay,
-        ElectionDisplay,
-        ServerInfoDisplay,
-        TradeWatcherDisplay,
-        WorkPartyDisplay,
-        MapDisplay,
-        LayerDisplay,
-        SpecialtiesDisplayModule,
-        RepairBountyDisplayModule,
-        DisplayCleanupModule,
-        CraftingFeed,
-        DiscordChatFeed,
-        EcoChatFeed,
-        ElectionFeed,
-        PlayerStatusFeed,
-        ServerLogFeed,
-        ServerStatusFeed,
-        TradeFeed,
-        TradeWatcherFeed,
-        AccountLinkRoleModule,
-        DemographicRoleModule,
-        ElectedTitleRoleModule,
-        SpecialitiesRoleModule,
-        RoleCleanupModule,
-        SnippetInput
-    }
-
     public enum ModuleArchetype
     {
         Display,

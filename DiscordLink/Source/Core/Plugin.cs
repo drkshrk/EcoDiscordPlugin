@@ -17,13 +17,13 @@ using Eco.Moose.Utils.SystemUtils;
 using Eco.Moose.Utils.TextUtils;
 using Eco.Plugins.DiscordLink.Events;
 using Eco.Plugins.DiscordLink.Extensions;
-using Eco.Plugins.DiscordLink.Modules;
 using Eco.Plugins.DiscordLink.Utilities;
 using Eco.Shared.Utils;
 using Eco.WorldGenerator;
 using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
@@ -44,7 +44,7 @@ namespace Eco.Plugins.DiscordLink
 
         public static DiscordLink Obj { get { return PluginManager.GetPlugin<DiscordLink>(); } }
         public DiscordClient Client { get; private set; } = new DiscordClient();
-        public Module[] Modules { get; private set; } = new Module[Enum.GetNames(typeof(ModuleType)).Length];
+        public List<Module> Modules { get; private set; } = new List<Module>();
         public ServerConfig ServerConfig { get; private set; } = new ServerConfig();
         public IPluginConfig PluginConfig { get { return ServerConfig.PluginConfig; } }
         public ThreadSafeAction<object, string> ParamChanged { get; set; }
@@ -396,36 +396,23 @@ namespace Eco.Plugins.DiscordLink
         {
             Status = StatusState.InitializingModules;
 
-            Modules[(int)ModuleType.CurrencyDisplay] = new CurrencyDisplay();
-            Modules[(int)ModuleType.ElectionDisplay] = new ElectionDisplay();
-            Modules[(int)ModuleType.ServerInfoDisplay] = new ServerInfoDisplay();
-            Modules[(int)ModuleType.TradeWatcherDisplay] = new TradeWatcherDisplay();
-            Modules[(int)ModuleType.WorkPartyDisplay] = new WorkPartyDisplay();
-            Modules[(int)ModuleType.MapDisplay] = new MapDisplay();
-            Modules[(int)ModuleType.LayerDisplay] = new LayerDisplay();
-            Modules[(int)ModuleType.SpecialtiesDisplayModule] = new SpecialtiesDisplay();
-            Modules[(int)ModuleType.RepairBountyDisplayModule] = new RepairBountyDisplay();
-            Modules[(int)ModuleType.DisplayCleanupModule] = new DisplayCleanupModule();
-            Modules[(int)ModuleType.CraftingFeed] = new CraftingFeed();
-            Modules[(int)ModuleType.DiscordChatFeed] = new DiscordChatFeed();
-            Modules[(int)ModuleType.EcoChatFeed] = new EcoChatFeed();
-            Modules[(int)ModuleType.ElectionFeed] = new ElectionFeed();
-            Modules[(int)ModuleType.PlayerStatusFeed] = new PlayerStatusFeed();
-            Modules[(int)ModuleType.ServerLogFeed] = new ServerLogFeed();
-            Modules[(int)ModuleType.ServerStatusFeed] = new ServerStatusFeed();
-            Modules[(int)ModuleType.TradeFeed] = new TradeFeed();
-            Modules[(int)ModuleType.TradeWatcherFeed] = new TradeWatcherFeed();
-            Modules[(int)ModuleType.AccountLinkRoleModule] = new AccountLinkRoleModule();
-            Modules[(int)ModuleType.DemographicRoleModule] = new DemographicsRoleModule();
-            Modules[(int)ModuleType.ElectedTitleRoleModule] = new ElectedTitleRoleModule();
-            Modules[(int)ModuleType.SpecialitiesRoleModule] = new SpecialtiesRoleModule();
-            Modules[(int)ModuleType.RoleCleanupModule] = new RoleCleanupModule();
-            Modules[(int)ModuleType.SnippetInput] = new SnippetInput();
+            IEnumerable<Type> moduleTypes = AppDomain.CurrentDomain.GetAssemblies()
+             .SelectMany(domainAssembly => domainAssembly.GetTypes())
+             .Where(type => !type.IsAbstract && type.IsSubclassOf(typeof(Module)));
 
+            // Instantiate
+            foreach (Type type in moduleTypes)
+            {
+                Modules.Add((Module)Activator.CreateInstance(type));
+            }
+
+            // Initialize
             foreach (Module module in Modules)
             {
                 module.Setup();
             }
+
+            // Start
             foreach (Module module in Modules)
             {
                 await module.HandleStartOrStop();
@@ -444,7 +431,7 @@ namespace Eco.Plugins.DiscordLink
             {
                 module.Destroy();
             }
-            Modules = new Module[Enum.GetNames(typeof(ModuleType)).Length];
+            Modules = new List<Module>();
         }
 
         private async void UpdateModules(DlEventType trigger, params object[] data)

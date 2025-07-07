@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace Eco.Plugins.DiscordLink.Modules
 {
-    abstract public class DisplayModule : Module
+    public abstract class DisplayModule : Module
     {
         public DateTime LastUpdateTime { get; protected set; } = DateTime.MinValue;
 
