@@ -673,21 +673,21 @@ namespace Eco.Plugins.DiscordLink
             });
         }
 
-        [Command("PlayerReport")]
-        [Description("Displays the Player Report for the given player.")]
-        public async Task PlayerReport(CommandContext command,
+        [Command("Player")]
+        [Description("Displays information about the given player.")]
+        public async Task Player(CommandContext command,
             [Parameter("Player")][Description("Name or ID of the player for which to display the report.")][SlashAutoCompleteProvider<PlayerAutoCompleteProvider>] string playerNameOrId = "",
-            [Parameter("Report")][Description("Which type of information the report should include.")] PlayerReportComponentFlag reportType = PlayerReportComponentFlag.All)
+            [Parameter("Component")][Description("Which type of information the report should include.")] PlayerReportComponentFlag component = PlayerReportComponentFlag.All)
         {
             DiscordCommandContext ctx = new DiscordCommandContext(command, ResponseTiming.Immediate);
             await ExecuteCommand<object>(PermissionType.User, ctx, async (lCtx, args) =>
             {
-                await SharedCommands.PlayerReport(ctx, playerNameOrId, reportType);
+                await SharedCommands.PlayerReport(ctx, playerNameOrId, component);
             });
         }
 
-        [Command("CurrencyReport")]
-        [Description("Displays the Currency Report for the given currency.")]
+        [Command("Currency")]
+        [Description("Displays information about the given currency.")]
         public async Task CurrencyReport(CommandContext command,
             [Parameter("Currency")][Description("Name or ID of the currency for which to display a report.")][SlashAutoCompleteProvider<CurrencyAutoCompleteProvider>] string currencyNameOrId,
             [Parameter("TopHoldersCount")][Description("How many top account holders to include in the report")] long maxTopHoldersCount = ServerConfigDefaultValues.MaxTopCurrencyHolderCount,
@@ -701,8 +701,8 @@ namespace Eco.Plugins.DiscordLink
             });
         }
 
-        [Command("CurrenciesReport")]
-        [Description("Displays a report for the top used currencies.")]
+        [Command("Currencies")]
+        [Description("Displays information about the top used currencies.")]
         public async Task CurrenciesReport(CommandContext command,
             [Parameter("Type")][Description("The type of currencies to include in the report.")] CurrencyType currencyType = CurrencyType.All,
             [Parameter("MaxPerType")][Description("How many currencies per type to display reports for.")] long maxCurrenciesPerType = DLConstants.CURRENCY_REPORT_COMMAND_MAX_CURRENCIES_PER_TYPE_DEFAULT,
@@ -715,9 +715,9 @@ namespace Eco.Plugins.DiscordLink
             });
         }
 
-        [Command("ElectionReport")]
-        [Description("Displays the Election Report for the given election.")]
-        public async Task ElectionReport(CommandContext command,
+        [Command("Election")]
+        [Description("Displays information about the given election.")]
+        public async Task Election(CommandContext command,
             [Parameter("Election")][Description("Name or ID of the election for which to display a report.")][SlashAutoCompleteProvider<ElectionAutoCompleteProvider>] string electionNameOrId)
         {
             DiscordCommandContext ctx = new DiscordCommandContext(command, ResponseTiming.Immediate);
@@ -727,9 +727,9 @@ namespace Eco.Plugins.DiscordLink
             });
         }
 
-        [Command("ElectionsReport")]
-        [Description("Displays a report for the currently active elections.")]
-        public async Task ElectionsReport(CommandContext command)
+        [Command("Elections")]
+        [Description("Displays a report about the currently active elections.")]
+        public async Task Elections(CommandContext command)
         {
             DiscordCommandContext ctx = new DiscordCommandContext(command, ResponseTiming.Immediate);
             await ExecuteCommand<object>(PermissionType.User, ctx, async (lCtx, args) =>
@@ -738,9 +738,9 @@ namespace Eco.Plugins.DiscordLink
             });
         }
 
-        [Command("WorkPartyReport")]
-        [Description("Displays the Work Party Report for the given work party.")]
-        public async Task WorkPartyReport(CommandContext command,
+        [Command("WorkParty")]
+        [Description("Displays information about the given work party.")]
+        public async Task WorkParty(CommandContext command,
             [Parameter("WorkParty")][Description("Name or ID of the work party for which to display a report.")][SlashAutoCompleteProvider<WorkPartyAutoCompleteProvider>] string workPartyNameOrId)
         {
             DiscordCommandContext ctx = new DiscordCommandContext(command, ResponseTiming.Immediate);
@@ -750,9 +750,9 @@ namespace Eco.Plugins.DiscordLink
             });
         }
 
-        [Command("WorkPartiesReport")]
-        [Description("Displays a report for the currently active work parties.")]
-        public async Task WorkPartiesReport(CommandContext command)
+        [Command("WorkParties")]
+        [Description("Displays information about the currently active work parties.")]
+        public async Task WorkParties(CommandContext command)
         {
             DiscordCommandContext ctx = new DiscordCommandContext(command, ResponseTiming.Immediate);
             await ExecuteCommand<object>(PermissionType.User, ctx, async (lCtx, args) =>
@@ -762,8 +762,8 @@ namespace Eco.Plugins.DiscordLink
         }
 
         [Command("SkillReport")]
-        [Description("Displays a report for skill distribution.")]
-        public async Task SkillReport(CommandContext command,
+        [Description("Displays information about skill distribution for all players or a specific settlement.")]
+        public async Task Skills(CommandContext command,
             [Parameter("IncludeInactive")][Description("If true; includes players who are currently not in the active demographic.")] bool includeInactive = false,
             [Parameter("IncludeScrollNoStar")][Description("If true; includes skills where players have only consumed a scroll but not consumed a star.")] bool includeScrollNoStar = false,
             [Parameter("SettlementFilter")][Description("Optional name or ID of a settlement for filtering players.")][SlashAutoCompleteProvider<SettlementAutoCompleteProvider>] string settlementFilterNameOrId = "")
@@ -782,15 +782,15 @@ namespace Eco.Plugins.DiscordLink
                     }
                 }
 
-                SpecialtyAssignmentLookupResult specialtyData = Skills.LookupSpecialtyAssignments(includeInactive, includeScrollNoStar, includeNonRefundable: false, settlementFilter);
+                SpecialtyAssignmentLookupResult specialtyData = Moose.Features.Skills.LookupSpecialtyAssignments(includeInactive, includeScrollNoStar, includeNonRefundable: false, settlementFilter);
                 DiscordLinkEmbed report = MessageBuilder.Discord.GetSpecialtiesReport(specialtyData);
                 await DisplayCommandData(ctx, string.Empty, report);
             });
         }
 
-        [Command("BountiesReport")]
-        [Description("Displays a report for repair bounties.")]
-        public async Task SkillReport(CommandContext command,
+        [Command("Bounties")]
+        [Description("Displays information about available repair bounties.")]
+        public async Task Bounties(CommandContext command,
             [Parameter("IncludeInactive")][Description("If true; includes bounties from players who are currently not in the active demographic.")] bool includeInactive = false,
             [Parameter("SettlementFilter")][Description("Optional name or ID of a settlement for filtering repair bounties.")][SlashAutoCompleteProvider<SettlementAutoCompleteProvider>] string settlementFilterNameOrId = "",
             [Parameter("PlayerFilter")][Description("Optional name or ID of a player for filtering repair bounties that they can complete.")][SlashAutoCompleteProvider<PlayerAutoCompleteProvider>] string playerNameOrId = "")

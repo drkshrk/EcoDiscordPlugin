@@ -297,15 +297,15 @@ namespace Eco.Plugins.DiscordLink
 
         #region Lookups
 
-        [ChatSubCommand("DiscordLink", "Displays the Player Report for the given player.", ChatAuthorizationLevel.User)]
-        public static async Task PlayerReport(User caller, string playerNameOrId, string reportType = "All")
+        [ChatSubCommand("DiscordLink", "Displays information about the given player.", ChatAuthorizationLevel.User)]
+        public static async Task Player(User caller, string playerNameOrId, string component = "All")
         {
             EcoCommandContext ctx = new EcoCommandContext(caller);
             await ExecuteCommand(async (lUser, args) =>
             {
-                if (!Enum.TryParse(reportType, out PlayerReportComponentFlag reportTypeEnum))
+                if (!Enum.TryParse(component, out PlayerReportComponentFlag reportTypeEnum))
                 {
-                    ReportCommandError(ctx, $"\"{reportType}\" is not a valid report type. The available report types are: {string.Join(", ", Enum.GetNames(typeof(PlayerReportComponentFlag)))}");
+                    ReportCommandError(ctx, $"\"{component}\" is not a valid player report component type. The available types are: {string.Join(", ", Enum.GetNames(typeof(PlayerReportComponentFlag)))}");
                     return;
                 }
 
@@ -313,8 +313,8 @@ namespace Eco.Plugins.DiscordLink
             }, ctx);
         }
 
-        [ChatSubCommand("DiscordLink", "Displays the Currency Report for the given currency.", ChatAuthorizationLevel.User)]
-        public static async Task CurrencyReport(User caller, string currencyNameOrId,
+        [ChatSubCommand("DiscordLink", "Displays information about the given currency.", ChatAuthorizationLevel.User)]
+        public static async Task Currency(User caller, string currencyNameOrId,
             int maxTopHoldersCount = ServerConfigDefaultValues.MaxTopCurrencyHolderCount,
             bool useTradeCount = true,
             bool useBackingInfo = false)
@@ -326,8 +326,8 @@ namespace Eco.Plugins.DiscordLink
             }, ctx);
         }
 
-        [ChatSubCommand("DiscordLink", "Displays a report for the top used currencies.", ChatAuthorizationLevel.User)]
-        public static async Task CurrenciesReport(User caller, string currencyType = "all",
+        [ChatSubCommand("DiscordLink", "Displays information about the top used currencies.", ChatAuthorizationLevel.User)]
+        public static async Task Currencies(User caller, string currencyType = "all",
             int maxCurrenciesPerType = DLConstants.CURRENCY_REPORT_COMMAND_MAX_CURRENCIES_PER_TYPE_DEFAULT,
             int holdersPerCurrency = DLConstants.CURRENCY_REPORT_COMMAND_MAX_TOP_HOLDERS_PER_CURRENCY_DEFAULT)
         {
@@ -345,8 +345,8 @@ namespace Eco.Plugins.DiscordLink
             }, ctx);
         }
 
-        [ChatSubCommand("DiscordLink", "Displays the Election Report for the given election.", ChatAuthorizationLevel.User)]
-        public static async Task ElectionReport(User caller, string electionNameOrId)
+        [ChatSubCommand("DiscordLink", "Displays information about the given election.", ChatAuthorizationLevel.User)]
+        public static async Task Election(User caller, string electionNameOrId)
         {
             EcoCommandContext ctx = new EcoCommandContext(caller);
             await ExecuteCommand(async (lUser, args) =>
@@ -355,8 +355,8 @@ namespace Eco.Plugins.DiscordLink
             }, ctx);
         }
 
-        [ChatSubCommand("DiscordLink", "Displays a report for the currently active elections.", ChatAuthorizationLevel.User)]
-        public static async Task ElectionsReport(User caller)
+        [ChatSubCommand("DiscordLink", "Displays a report about the currently active elections.", ChatAuthorizationLevel.User)]
+        public static async Task Elections(User caller)
         {
             EcoCommandContext ctx = new EcoCommandContext(caller);
             await ExecuteCommand(async (lUser, args) =>
@@ -365,8 +365,8 @@ namespace Eco.Plugins.DiscordLink
             }, ctx);
         }
 
-        [ChatSubCommand("DiscordLink", "Displays the Work Party Report for the given work party.", ChatAuthorizationLevel.User)]
-        public static async Task WorkPartyReport(User caller, string workPartyNameOrId)
+        [ChatSubCommand("DiscordLink", "Displays information about the given work party.", ChatAuthorizationLevel.User)]
+        public static async Task WorkParty(User caller, string workPartyNameOrId)
         {
             EcoCommandContext ctx = new EcoCommandContext(caller);
             await ExecuteCommand(async (lUser, args) =>
@@ -375,8 +375,8 @@ namespace Eco.Plugins.DiscordLink
             }, ctx);
         }
 
-        [ChatSubCommand("DiscordLink", "Displays a report for the currently active work parties.", ChatAuthorizationLevel.User)]
-        public static async Task WorkPartiesReport(User caller)
+        [ChatSubCommand("DiscordLink", "Displays information about the currently active work parties.", ChatAuthorizationLevel.User)]
+        public static async Task WorkParties(User caller)
         {
             EcoCommandContext ctx = new EcoCommandContext(caller);
             await ExecuteCommand(async (lUser, args) =>
