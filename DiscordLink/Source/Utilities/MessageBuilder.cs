@@ -539,8 +539,6 @@ namespace Eco.Plugins.DiscordLink.Utilities
                         string movementDesc;
                         if (animal.Swimming)
                             movementDesc = "swim";
-                        else if (animal.Flying)
-                            movementDesc = "fly";
                         else
                             movementDesc = "run";
 
