@@ -80,7 +80,7 @@ namespace Eco.Plugins.DiscordLink.Extensions
             DiscordClient client = DiscordLink.Obj.Client;
             DiscordMember member = client.GetMemberById(user.Id);
             if (member == null)
-                member = await client.GetMemberAsync(user.Id, expectNotFound: true);
+                member = await client.FetchMemberAsync(user.Id, expectNotFound: true);
 
             return member;
         }

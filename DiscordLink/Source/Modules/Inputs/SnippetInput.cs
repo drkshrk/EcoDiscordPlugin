@@ -84,7 +84,7 @@ namespace Eco.Plugins.DiscordLink.Modules
                 if (!snippetChannel.IsValid())
                     continue;
 
-                IReadOnlyList<DiscordMessage> snippetChannelMessages = await plugin.Client.GetMessagesAsync(snippetChannel.Channel);
+                IReadOnlyList<DiscordMessage> snippetChannelMessages = await plugin.Client.FetchMessagesAsync(snippetChannel.Channel);
                 if (snippetChannelMessages == null)
                     continue;
 

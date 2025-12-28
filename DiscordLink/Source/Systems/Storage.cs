@@ -267,7 +267,7 @@ namespace Eco.Plugins.DiscordLink
                     StringBuilder typeBuilder = new StringBuilder();
                     foreach (var memberIdAndWatch in TradeWatchers)
                     {
-                        DiscordMember member = await DiscordLink.Obj.Client.GetMemberAsync(memberIdAndWatch.Key, expectNotFound: true);
+                        DiscordMember member = await DiscordLink.Obj.Client.FetchMemberAsync(memberIdAndWatch.Key, expectNotFound: true);
                         foreach (var watch in memberIdAndWatch.Value)
                         {
                             userBuilder.AppendLine(member != null ? member.DisplayName : memberIdAndWatch.Key.ToString());

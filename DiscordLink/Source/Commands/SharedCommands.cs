@@ -123,7 +123,7 @@ namespace Eco.Plugins.DiscordLink
                 else if (ctx is DiscordCommandContext discordCtx)
                 {
                     // Special handling since the call context is broken by the restart and can't be used to respond to the command
-                    DiscordChannel channel = plugin.Client.ChannelByNameOrId(discordCtx.Command.Channel.Id.ToString());
+                    DiscordChannel channel = plugin.Client.GetChannelByNameOrId(discordCtx.Command.Channel.Id.ToString());
                     _ = plugin.Client.SendMessageAsync(channel, result);
                 }
             }
@@ -232,7 +232,7 @@ namespace Eco.Plugins.DiscordLink
 
         public static async Task<bool> VerifyPermissionsForChannel(DiscordLinkCommandContext ctx, string channelNameOrId)
         {
-            DiscordChannel channel = DiscordLink.Obj.Client.ChannelByNameOrId(channelNameOrId);
+            DiscordChannel channel = DiscordLink.Obj.Client.GetChannelByNameOrId(channelNameOrId);
             if (channel == null)
             {
                 await ReportCommandError(ctx, $"No channel with the named \"{channelNameOrId}\" could be found.");

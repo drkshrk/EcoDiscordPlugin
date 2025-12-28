@@ -48,7 +48,7 @@ namespace Eco.Plugins.DiscordLink.Modules
                     return;
 
                 ++_opsCount;
-                foreach (DiscordMember member in await client.GetMembersAsync())
+                foreach (DiscordMember member in await client.FetchMembersAsync())
                 {
                     LinkedUser linkedUser = UserLinkManager.LinkedUserByDiscordUser(member, requireValid: false);
                     if (linkedUser == null || !linkedUser.Verified || !DiscordLinkConfig.UseLinkedAccountRole)

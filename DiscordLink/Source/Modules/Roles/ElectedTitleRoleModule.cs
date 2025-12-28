@@ -36,7 +36,7 @@ namespace Eco.Plugins.DiscordLink.Modules
             if (trigger == DlEventType.DiscordClientConnected || trigger == DlEventType.ForceUpdate)
             {
                 ++_opsCount;
-                foreach (DiscordMember member in await client.GetMembersAsync())
+                foreach (DiscordMember member in await client.FetchMembersAsync())
                 {
                     LinkedUser linkedUser = UserLinkManager.LinkedUserByDiscordUser(member);
                     foreach (ElectedTitle title in Lookups.ActiveElectedTitles)

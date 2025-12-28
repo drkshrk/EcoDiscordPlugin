@@ -369,7 +369,7 @@ namespace Eco.Plugins.DiscordLink
             return channels.Where(channel => channelTypes.Any(type => type == channel.Type));
         }
 
-        public DiscordChannel ChannelByNameOrId(string channelNameOrId)
+        public DiscordChannel GetChannelByNameOrId(string channelNameOrId)
         {
             return channelNameOrId.TryParseSnowflakeId(out ulong channelId)
                 ? GetChannelById(channelId)
@@ -486,15 +486,15 @@ namespace Eco.Plugins.DiscordLink
             return member;
         }
 
-        public async Task<DiscordMember> GetMemberAsync(string memberIdStr, bool updateCache = false, bool expectNotFound = false)
+        public async Task<DiscordMember> FetchMemberAsync(string memberIdStr, bool updateCache = false, bool expectNotFound = false)
         {
             if (!memberIdStr.TryParseSnowflakeId(out ulong memberId))
                 return null;
 
-            return await GetMemberAsync(memberId, updateCache, expectNotFound);
+            return await FetchMemberAsync(memberId, updateCache, expectNotFound);
         }
 
-        public async Task<DiscordMember> GetMemberAsync(ulong memberId, bool updateCache = false, bool expectNotFound = false)
+        public async Task<DiscordMember> FetchMemberAsync(ulong memberId, bool updateCache = false, bool expectNotFound = false)
         {
             DiscordMember member = null;
             try
@@ -527,7 +527,7 @@ namespace Eco.Plugins.DiscordLink
             return user == BotMember;
         }
 
-        public async Task<DiscordMessage> GetMessageAsync(DiscordChannel channel, ulong messageId, bool expectNotFound = false)
+        public async Task<DiscordMessage> FetchMessageAsync(DiscordChannel channel, ulong messageId, bool expectNotFound = false)
         {
             if (!ChannelHasPermission(channel, DiscordPermissions.ReadMessageHistory))
                 return null;
@@ -558,7 +558,7 @@ namespace Eco.Plugins.DiscordLink
             return message;
         }
 
-        public async Task<IReadOnlyList<DiscordMessage>> GetMessagesAsync(DiscordChannel channel)
+        public async Task<IReadOnlyList<DiscordMessage>> FetchMessagesAsync(DiscordChannel channel)
         {
             if (channel == null || !ChannelHasPermission(channel, DiscordPermissions.ReadMessageHistory))
                 return null;
@@ -584,7 +584,7 @@ namespace Eco.Plugins.DiscordLink
             return messages;
         }
 
-        public async Task<IReadOnlyList<DiscordMember>> GetMembersAsync()
+        public async Task<IReadOnlyList<DiscordMember>> FetchMembersAsync()
         {
             if (!BotHasIntent(DiscordIntents.GuildMembers))
             {
@@ -832,7 +832,7 @@ namespace Eco.Plugins.DiscordLink
 
         public async Task<bool> DeleteMessageAsync(DiscordChannel channel, ulong messageId, string? reason = null, bool expectNotFound = false)
         {
-            DiscordMessage message = await GetMessageAsync(channel, messageId, expectNotFound);
+            DiscordMessage message = await FetchMessageAsync(channel, messageId, expectNotFound);
             if (message == null)
             {
                 if (!expectNotFound)

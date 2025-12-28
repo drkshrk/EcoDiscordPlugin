@@ -455,7 +455,7 @@ namespace Eco.Plugins.DiscordLink
 
                 // Find the Discord user
                 DiscordMember matchingMember = null;
-                IReadOnlyCollection<DiscordMember> guildMembers = await plugin.Client.GetMembersAsync();
+                IReadOnlyCollection<DiscordMember> guildMembers = await plugin.Client.FetchMembersAsync();
                 if (guildMembers == null)
                     return;
 
