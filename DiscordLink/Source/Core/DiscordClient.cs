@@ -277,7 +277,7 @@ namespace Eco.Plugins.DiscordLink
             DiscordMessage message = args.Message;
             Logger.Trace($"Discord Message Received\n{message.FormatForLog()}");
 
-            if (args.Author == DSharpClient.CurrentUser)
+            if (IsUserDiscordLinkBot(args.Author))
                 return; // Ignore messages sent by our own bot
 
             await DiscordLink.Obj.HandleEvent(DlEventType.DiscordMessageSent, message);
@@ -285,7 +285,7 @@ namespace Eco.Plugins.DiscordLink
 
         private async Task HandleDiscordMessageUpdated(DSharpPlus.DiscordClient client, MessageUpdatedEventArgs args)
         {
-            if (args.Author == DSharpClient.CurrentUser)
+            if (IsUserDiscordLinkBot(args.Author))
                 return; // Ignore messages edited by our own bot
 
             await DiscordLink.Obj.HandleEvent(DlEventType.DiscordMessageEdited, args.Message, args.MessageBefore);
@@ -298,7 +298,7 @@ namespace Eco.Plugins.DiscordLink
 
         private async Task HandleDiscordReactionAdded(DSharpPlus.DiscordClient client, MessageReactionAddedEventArgs args)
         {
-            if (args.User == client.CurrentUser)
+            if (IsUserDiscordLinkBot(args.User))
                 return; // Ignore reactions sent by our own bot
 
             await DiscordLink.Obj.HandleEvent(DlEventType.DiscordReactionAdded, args.User, args.Message, args.Emoji);
@@ -306,7 +306,7 @@ namespace Eco.Plugins.DiscordLink
 
         private async Task HandleDiscordReactionRemoved(DSharpPlus.DiscordClient client, MessageReactionRemovedEventArgs args)
         {
-            if (args.User == client.CurrentUser)
+            if (IsUserDiscordLinkBot(args.User))
                 return; // Ignore reactions sent by our own bot
 
             await DiscordLink.Obj.HandleEvent(DlEventType.DiscordReactionRemoved, args.User, args.Message, args.Emoji);
@@ -386,95 +386,6 @@ namespace Eco.Plugins.DiscordLink
             return Guild.Channels.Values.FirstOrDefault(guild => guild.Name.EqualsCaseInsensitive(channelName));
         }
 
-        public bool ChannelHasPermission(DiscordChannel channel, DiscordPermissions permission)
-        {
-            if (BotMember == null)
-            {
-                Logger.Error($"BotMember was null when evaluating channel permissions for channel \"{channel.Name}\"");
-                return false;
-            }
-
-            if (channel.IsPrivate)
-                return true; // Assume permission is given for DMs
-
-            return channel.PermissionsFor(BotMember).HasPermission(permission);
-        }
-
-        public bool BotHasPermission(DiscordPermissions permission)
-        {
-            if (BotMember == null)
-            {
-                Logger.Error($"BotMember was null when evaluating bot permissions");
-                return false;
-            }
-
-            bool hasPermission = false;
-            foreach (DiscordRole role in BotMember.Roles)
-            {
-                if (role.CheckPermission(permission) == DiscordPermissionLevel.Allowed)
-                {
-                    hasPermission = true;
-                    break;
-                }
-            }
-            return hasPermission;
-        }
-
-        public bool BotHasIntent(DiscordIntents intent)
-        {
-            return (DSharpClient.Intents & intent) != 0;
-        }
-
-        public bool MemberIsAdmin(DiscordMember member)
-        {
-            if (DiscordLinkConfig.DiscordServerOwnerIsAdmin && member.IsOwner)
-                return true;
-
-            foreach (string adminRole in DiscordLinkConfig.AdminRoles)
-            {
-                if (adminRole.TryParseSnowflakeId(out ulong adminRoleId) && member.Roles.Any(role => role.Id == adminRoleId))
-                    return true;
-
-                if (member.Roles.Any(role => role.Name.EqualsCaseInsensitive(adminRole)))
-                    return true;
-            }
-
-            return false;
-        }
-
-        public IEnumerable<DiscordPermissions> FindMissingGuildPermissions()
-        {
-            List<DiscordPermissions> missingPermissions = new List<DiscordPermissions>();
-            foreach (DiscordPermissions permission in DLConstants.REQUESTED_GUILD_PERMISSIONS)
-            {
-                if (!BotHasPermission(permission))
-                    missingPermissions.Add(permission);
-            }
-            return missingPermissions;
-        }
-
-        public IEnumerable<DiscordPermissions> FindMissingChannelPermissions(DiscordChannel channel)
-        {
-            List<DiscordPermissions> missingPermissions = new List<DiscordPermissions>();
-            foreach (DiscordPermissions permission in DLConstants.REQUESTED_CHANNEL_PERMISSIONS)
-            {
-                if (!ChannelHasPermission(channel, permission))
-                    missingPermissions.Add(permission);
-            }
-            return missingPermissions;
-        }
-
-        public IEnumerable<DiscordIntents> FindMissingIntents()
-        {
-            List<DiscordIntents> missingIntents = new List<DiscordIntents>();
-            foreach (DiscordIntents intent in DLConstants.REQUESTED_INTENTS)
-            {
-                if (!BotHasIntent(intent))
-                    missingIntents.Add(intent);
-            }
-            return missingIntents;
-        }
-
         public IEnumerable<DiscordMember> GetMembers()
         {
             return Guild.Members.Values;
@@ -520,11 +431,6 @@ namespace Eco.Plugins.DiscordLink
                 Logger.Exception($"Error occurred while attempting to fetch member with ID \"{memberId}\"", e);
             }
             return member;
-        }
-
-        public bool IsUserDiscordLinkBot(DiscordUser user)
-        {
-            return user == BotMember;
         }
 
         public async Task<DiscordMessage> FetchMessageAsync(DiscordChannel channel, ulong messageId, bool expectNotFound = false)
@@ -616,6 +522,86 @@ namespace Eco.Plugins.DiscordLink
         public DiscordEmoji GetEmojiByName(string emojiName)
         {
             return DiscordEmoji.FromName(DSharpClient, emojiName);
+        }
+
+        #endregion
+
+        #region Permission Management
+
+        public bool BotHasPermission(DiscordPermissions permission, bool logFailure = true)
+        {
+            if (BotMember == null)
+            {
+                Logger.Error($"BotMember was null when evaluating bot permissions");
+                return false;
+            }
+
+            bool hasPermission = false;
+            foreach (DiscordRole role in BotMember.Roles)
+            {
+                if (role.CheckPermission(permission) == DiscordPermissionLevel.Allowed)
+                {
+                    hasPermission = true;
+                    break;
+                }
+            }
+
+            if (logFailure && !hasPermission && Logger.GetConfiguredLogLevel() <= Logger.LogLevel.Debug) // Extra check for log level due to Stack Trace generation being heavy
+                Logger.Debug($"Bot permission check failed at\n{new System.Diagnostics.StackTrace()}");
+
+            return hasPermission;
+        }
+
+        public bool ChannelHasPermission(DiscordChannel channel, DiscordPermissions permission)
+        {
+            if (BotMember == null)
+            {
+                Logger.Error($"BotMember was null when evaluating channel permissions for channel \"{channel.Name}\"");
+                return false;
+            }
+
+            if (channel.IsPrivate)
+                return true; // Assume permission is given for DMs
+
+            return channel.PermissionsFor(BotMember).HasPermission(permission);
+        }
+
+        public bool BotHasIntent(DiscordIntents intent)
+        {
+            return (DSharpClient.Intents & intent) != 0;
+        }
+
+        public IEnumerable<DiscordPermissions> FindMissingGuildPermissions()
+        {
+            List<DiscordPermissions> missingPermissions = new List<DiscordPermissions>();
+            foreach (DiscordPermissions permission in DLConstants.REQUESTED_GUILD_PERMISSIONS)
+            {
+                if (!BotHasPermission(permission))
+                    missingPermissions.Add(permission);
+            }
+            return missingPermissions;
+        }
+
+        public IEnumerable<DiscordPermissions> FindMissingChannelPermissions(DiscordChannel channel)
+        {
+            List<DiscordPermissions> missingPermissions = new List<DiscordPermissions>();
+            foreach (DiscordPermissions permission in DLConstants.REQUESTED_CHANNEL_PERMISSIONS)
+            {
+                if (!ChannelHasPermission(channel, permission))
+                    missingPermissions.Add(permission);
+            }
+            return missingPermissions;
+        }
+
+        public IEnumerable<DiscordIntents> FindMissingIntents()
+        {
+            List<DiscordIntents> missingIntents = new List<DiscordIntents>();
+            foreach (DiscordIntents intent in DLConstants.REQUESTED_INTENTS)
+            {
+                if (!BotHasIntent(intent))
+                    missingIntents.Add(intent);
+            }
+            return missingIntents;
         }
 
         #endregion
@@ -1074,6 +1060,32 @@ namespace Eco.Plugins.DiscordLink
         public async Task SetActivityStringAsync(string activityString, DiscordActivityType activityType)
         {
             await DSharpClient.UpdateStatusAsync(new DiscordActivity(activityString, activityType));
+        }
+
+        #endregion
+
+        #region Utilities
+
+        public bool IsUserDiscordLinkBot(DiscordUser user)
+        {
+            return user == BotMember;
+        }
+
+        public bool MemberIsAdmin(DiscordMember member)
+        {
+            if (DiscordLinkConfig.DiscordServerOwnerIsAdmin && member.IsOwner)
+                return true;
+
+            foreach (string adminRole in DiscordLinkConfig.AdminRoles)
+            {
+                if (adminRole.TryParseSnowflakeId(out ulong adminRoleId) && member.Roles.Any(role => role.Id == adminRoleId))
+                    return true;
+
+                if (member.Roles.Any(role => role.Name.EqualsCaseInsensitive(adminRole)))
+                    return true;
+            }
+
+            return false;
         }
 
         #endregion
