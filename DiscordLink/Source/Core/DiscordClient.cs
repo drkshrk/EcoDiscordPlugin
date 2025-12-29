@@ -87,14 +87,14 @@ namespace Eco.Plugins.DiscordLink
 
             if (string.IsNullOrWhiteSpace(DiscordLinkConfig.BotToken))
             {
-                Logger.Error("Bot token not configured - See Github page for install instructions.");
+                Logger.Error($"Bot token not configured - {GITHUB_HELP_TEXT}");
                 LastConnectionError = ConnectionError.InvalidToken;
                 return; // Do not attempt to initialize if the bot token is empty
             }
 
             if (DiscordLinkConfig.DiscordServerId == 0)
             {
-                Logger.Error("Discord Server not configured - See Github page for install instructions => \"https://github.com/Eco-DiscordLink/EcoDiscordPlugin\"");
+                Logger.Error($"Discord Server not configured - {GITHUB_HELP_TEXT}");
                 LastConnectionError = ConnectionError.InvalidGuild;
                 return; // Do not attempt to initialize if the server name/id is empty
             }
@@ -181,7 +181,7 @@ namespace Eco.Plugins.DiscordLink
             {
                 if (e is UnauthorizedException || e.InnerException is UnauthorizedException)
                 {
-                    Logger.Error($"An authentication error occurred while connecting to Discord using token \"{DiscordLinkConfig.BotToken}\". Please verify that your token is valid. See Github page for install instructions.");
+                    Logger.Error($"An authentication error occurred while connecting to Discord - Please verify that your token is valid - {GITHUB_HELP_TEXT}");
                 }
                 else
                 {
@@ -210,7 +210,7 @@ namespace Eco.Plugins.DiscordLink
                 ConnectionStatus = ConnectionState.Disconnected;
                 LastConnectionError = ConnectionError.GuildConnectionFailed;
                 Status = "Failed to find configured Discord server";
-                Logger.Error($"Failed to find Discord server \"{DiscordLinkConfig.DiscordServerId}\". Make sure the Bot is invited to your Server and the Server ID is correct. See Github page for install instructions.");
+                Logger.Error($"Failed to find Discord server \"{DiscordLinkConfig.DiscordServerId}\" - Make sure the Bot is invited to your Server and the Server ID is correct - {GITHUB_HELP_TEXT}");
                 return;
             }
 
@@ -1065,6 +1065,8 @@ namespace Eco.Plugins.DiscordLink
         #endregion
 
         #region Utilities
+
+        const string GITHUB_HELP_TEXT = "See Github page for install instructions => \"https://github.com/Eco-DiscordLink/EcoDiscordPlugin\"";
 
         public bool IsUserDiscordLinkBot(DiscordUser user)
         {
