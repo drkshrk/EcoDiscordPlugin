@@ -96,7 +96,7 @@ namespace Eco.Plugins.DiscordLink.Modules
 
         protected virtual async Task Initialize()
         {
-            Logger.Debug($"Starting {this}");
+            Logger.Debug($"Starting {ToString()}");
 
             IsEnabled = true;
             _status = "Running";
@@ -105,7 +105,7 @@ namespace Eco.Plugins.DiscordLink.Modules
 
         protected virtual async Task Shutdown()
         {
-            Logger.Debug($"Stopping {this}");
+            Logger.Debug($"Stopping {ToString()}");
 
             IsEnabled = false;
             _status = "Off";
@@ -136,11 +136,12 @@ namespace Eco.Plugins.DiscordLink.Modules
 
                 try
                 {
+                    Logger.Trace($"Updating the {ToString()}");
                     await UpdateInternal(plugin, trigger, data);
                 }
                 catch (Exception e)
                 {
-                    Logger.Exception($"An error occured while updating the {ToString()} module", e);
+                    Logger.Exception($"An error occured while updating the {ToString()}", e);
                 }
             }
         }
