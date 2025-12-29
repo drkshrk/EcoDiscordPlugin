@@ -557,7 +557,7 @@ namespace Eco.Plugins.DiscordLink.Utilities
             {
                 var plugin = DiscordLink.Obj;
 
-                ServerInfo serverInfo = StrangeCloudWorldRegistration.StrangeWorld.ServerInfo;
+                ServerInfo serverInfo = StrangeCloudWorldRegistration.StrangeWorld?.ServerInfo;
                 EcoServerConfig serverConfig = NetworkManager.Config;
 
                 DiscordLinkEmbed report = new DiscordLinkEmbed();
@@ -565,7 +565,7 @@ namespace Eco.Plugins.DiscordLink.Utilities
 
                 if (flag.HasFlag(ServerInfoComponentFlag.Name))
                 {
-                    report.WithTitle($"**{MessageUtils.FirstNonEmptyString(DiscordLinkConfig.ServerName, MessageUtils.StripTags(serverInfo.Description), "[Server Title Missing]")} Server Status**");
+                    report.WithTitle($"**{MessageUtils.FirstNonEmptyString(DiscordLinkConfig.ServerName, MessageUtils.StripTags(serverInfo?.Description ?? "[Missing StrangeWorld Data]"), "[Server Title Missing]")} Server Status**");
                 }
                 else
                 {
@@ -574,7 +574,7 @@ namespace Eco.Plugins.DiscordLink.Utilities
 
                 if (flag.HasFlag(ServerInfoComponentFlag.Description))
                 {
-                    report.WithDescription(MessageUtils.FirstNonEmptyString(DiscordLinkConfig.ServerDescription, MessageUtils.StripTags(serverInfo.Description), "No server description is available."));
+                    report.WithDescription(MessageUtils.FirstNonEmptyString(DiscordLinkConfig.ServerDescription, MessageUtils.StripTags(serverInfo?.Description ?? "[Missing StrangeWorld Data]"), "No server description is available."));
                 }
 
                 if (flag.HasFlag(ServerInfoComponentFlag.ConnectionInfo))
@@ -600,7 +600,7 @@ namespace Eco.Plugins.DiscordLink.Utilities
                     int fieldsAdded = 0;
                     if (flag.HasFlag(ServerInfoComponentFlag.PlayerCount))
                     {
-                        report.AddField("Player Count", $"{Lookups.NumOnlinePlayers} Online / {serverInfo.TotalPlayers} Total", inline: true);
+                        report.AddField("Player Count", $"{Lookups.NumOnlinePlayers} Online / {serverInfo?.TotalPlayers ?? -1} Total", inline: true);
                         ++fieldsAdded;
                     }
 
@@ -647,7 +647,7 @@ namespace Eco.Plugins.DiscordLink.Utilities
                         ++fieldsAdded;
                     }
 
-                    if (flag.HasFlag(ServerInfoComponentFlag.MeteorTimeRemaining) && serverInfo.HasMeteor)
+                    if (flag.HasFlag(ServerInfoComponentFlag.MeteorTimeRemaining) && (serverInfo?.HasMeteor ?? false))
                     {
                         string meteorContent = DisasterPlugin.MeteorData.MeteorDestroyed || DisasterPlugin.MeteorData.MeteorImpacted
                             ? DisasterPlugin.MeteorData.MeteorDestroyed ? "Destroyed!" : "Impacted!"
