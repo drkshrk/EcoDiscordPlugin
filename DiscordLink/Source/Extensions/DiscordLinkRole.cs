@@ -14,6 +14,8 @@ namespace Eco.Plugins.DiscordLink.Extensions
             AddReason = addReason;
         }
 
+        public string GetLogName() => $"\"{Name}\"";
+
         public string Name { get; private set; }
         public DiscordPermissions? Permissions { get; private set; }
         public DiscordColor? Color { get; private set; }

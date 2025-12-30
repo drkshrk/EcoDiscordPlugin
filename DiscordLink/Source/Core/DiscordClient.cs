@@ -274,13 +274,11 @@ namespace Eco.Plugins.DiscordLink
 
         private async Task HandleDiscordMessageCreated(DSharpPlus.DiscordClient client, MessageCreatedEventArgs args)
         {
-            DiscordMessage message = args.Message;
-            Logger.Trace($"Discord Message Received\n{message.FormatForLog()}");
-
             if (IsUserDiscordLinkBot(args.Author))
                 return; // Ignore messages sent by our own bot
 
-            await DiscordLink.Obj.HandleEvent(DlEventType.DiscordMessageSent, message);
+            Logger.Trace($"Discord message {args.Message.GetLogId()} received\n{args.Message.GetLogData()}");
+            await DiscordLink.Obj.HandleEvent(DlEventType.DiscordMessageSent, args.Message);
         }
 
         private async Task HandleDiscordMessageUpdated(DSharpPlus.DiscordClient client, MessageUpdatedEventArgs args)
@@ -288,11 +286,13 @@ namespace Eco.Plugins.DiscordLink
             if (IsUserDiscordLinkBot(args.Author))
                 return; // Ignore messages edited by our own bot
 
+            Logger.Trace($"Discord message {args.Message.GetLogId()} edit received\n--- Before ---\n{args.MessageBefore.GetLogData()}\n--- After ---\n{args.Message.GetLogData()}");
             await DiscordLink.Obj.HandleEvent(DlEventType.DiscordMessageEdited, args.Message, args.MessageBefore);
         }
 
         private async Task HandleDiscordMessageDeleted(DSharpPlus.DiscordClient client, MessageDeletedEventArgs args)
         {
+            Logger.Trace($"Discord message {args.Message.GetLogId()} deleted\n{args.Message.GetLogData()}");
             await DiscordLink.Obj.HandleEvent(DlEventType.DiscordMessageDeleted, args.Message);
         }
 
@@ -301,6 +301,7 @@ namespace Eco.Plugins.DiscordLink
             if (IsUserDiscordLinkBot(args.User))
                 return; // Ignore reactions sent by our own bot
 
+            Logger.Trace($"Discord reaction added\nReaction: {args.Emoji.GetLogName()}\nMesage ->\n{args.Message.GetLogData()}");
             await DiscordLink.Obj.HandleEvent(DlEventType.DiscordReactionAdded, args.User, args.Message, args.Emoji);
         }
 
@@ -309,11 +310,13 @@ namespace Eco.Plugins.DiscordLink
             if (IsUserDiscordLinkBot(args.User))
                 return; // Ignore reactions sent by our own bot
 
+            Logger.Trace($"Discord reaction removed\nReaction: {args.Emoji.GetLogName()}\nMessage ->\n{args.Message.GetLogData()}");
             await DiscordLink.Obj.HandleEvent(DlEventType.DiscordReactionRemoved, args.User, args.Message, args.Emoji);
         }
 
         private async Task HandleMemberRemoved(DSharpPlus.DiscordClient client, GuildMemberRemovedEventArgs args)
         {
+            Logger.Trace($"Discord member removed\nUser: {args.Member.GetLogName()}");
             await DiscordLink.Obj.HandleEvent(DlEventType.DiscordMemberRemoved, args.Member);
         }
 
@@ -322,7 +325,7 @@ namespace Eco.Plugins.DiscordLink
             IEnumerable<DiscordRole> revokedRoles = args.RolesBefore.Except(args.RolesAfter);
             IEnumerable<DiscordRole> grantedRoles = args.RolesAfter.Except(args.RolesBefore);
 
-            Logger.Trace($"Received member update event for {args.Member.DisplayName} ({args.Member.Id})\nGranted roles: {string.Join(", ", grantedRoles)}\nRevoked roles:{string.Join(", ", revokedRoles)}");
+            Logger.Trace($"Discord member update received\nMember: {args.Member.GetLogName()}\nGranted roles: {string.Join(", ", grantedRoles)}\nRevoked roles:{string.Join(", ", revokedRoles)}");
 
             if (revokedRoles.Count() > 0)
             {
@@ -365,6 +368,7 @@ namespace Eco.Plugins.DiscordLink
 
         public async Task<IEnumerable<DiscordChannel>> FetchChannels(params DiscordChannelType[] channelTypes)
         {
+            Logger.Trace("Fetching channel list");
             IReadOnlyList<DiscordChannel> channels = await Guild.GetChannelsAsync();
             return channels.Where(channel => channelTypes.Any(type => type == channel.Type));
         }
@@ -436,12 +440,15 @@ namespace Eco.Plugins.DiscordLink
         public async Task<DiscordMessage> FetchMessageAsync(DiscordChannel channel, ulong messageId, bool expectNotFound = false)
         {
             if (!ChannelHasPermission(channel, DiscordPermissions.ReadMessageHistory))
+            {
+                Logger.Error($"Failed to fetch specific message from channel {channel.GetLogName()} as the bot lacks permission for reading message history");
                 return null;
+            }
 
             DiscordMessage message = null;
             try
             {
-                Logger.Trace($"Fetching message with ID \"{messageId}\" from channel \"{channel.Name}\"");
+                Logger.Trace($"Fetching message with ID \"{messageId}\" from channel {channel.GetLogName()}");
                 message = await channel.GetMessageAsync(messageId);
             }
             catch (RateLimitException e)
@@ -466,26 +473,35 @@ namespace Eco.Plugins.DiscordLink
 
         public async Task<IReadOnlyList<DiscordMessage>> FetchMessagesAsync(DiscordChannel channel)
         {
-            if (channel == null || !ChannelHasPermission(channel, DiscordPermissions.ReadMessageHistory))
+            if(channel == null)
+            {
+                Logger.DebugWarning("Attempted to fetch message from null channel");
                 return null;
+            }
+
+            if (!ChannelHasPermission(channel, DiscordPermissions.ReadMessageHistory))
+            {
+                Logger.Error($"Failed to fetch messages from channel {channel.GetLogName()} as the bot lacks permission for reading message history");
+                return null;
+            }
 
             IReadOnlyList<DiscordMessage> messages = null;
             try
             {
-                Logger.Trace($"Fetching recent messages from channel \"{channel.Name}\"");
+                Logger.Trace($"Fetching recent messages from channel {channel.GetLogName()}");
                 messages = await channel.GetMessagesAsync().ToListAsync();
             }
             catch (RateLimitException e)
             {
-                Logger.DebugException($"RateLimitException occurred while fetching messages from channel \"{channel.Name}", e);
+                Logger.DebugException($"RateLimitException occurred while fetching messages from channel \"{channel.GetLogName()}", e);
             }
             catch (ServerErrorException e)
             {
-                Logger.DebugException($"ServerErrorException occurred while fetching messages from channel \"{channel.Name}", e);
+                Logger.DebugException($"ServerErrorException occurred while fetching messages from channel \"{channel.GetLogName()}", e);
             }
             catch (Exception e)
             {
-                Logger.Exception($"Error occurred when attempting to read message history from channel \"{channel.Name}\"", e);
+                Logger.Exception($"Error occurred when attempting to read message history from channel \"{channel.GetLogName()}\"", e);
             }
             return messages;
         }
@@ -556,7 +572,7 @@ namespace Eco.Plugins.DiscordLink
         {
             if (BotMember == null)
             {
-                Logger.Error($"BotMember was null when evaluating channel permissions for channel \"{channel.Name}\"");
+                Logger.Error($"BotMember was null when evaluating channel permissions for channel {channel.GetLogName()}");
                 return false;
             }
 
@@ -664,7 +680,7 @@ namespace Eco.Plugins.DiscordLink
             List<DiscordMessage> createdMessages = new List<DiscordMessage>();
             try
             {
-                Logger.Trace($"Sending message to channel \"{channel.Name}\" containing {messageData.StringParts.Count} raw string parts and {messageData.EmbedParts.Count} embed parts");
+                Logger.Trace($"Sending message to channel {channel.GetLogName()} containing {messageData.StringParts.Count} raw string parts and {messageData.EmbedParts.Count} embed parts");
                 if (messageData.StringParts.Count <= 1 && messageData.EmbedParts.Count == 1)
                 {
                     createdMessages.Add(await channel.SendMessageAsync(messageData.StringParts.FirstOrDefault(), messageData.EmbedParts.First()));
@@ -683,15 +699,15 @@ namespace Eco.Plugins.DiscordLink
             }
             catch (ServerErrorException e)
             {
-                Logger.DebugException($"ServerErrorException occurred while sending message to channel \"{channel.Name}\"", e);
+                Logger.DebugException($"ServerErrorException occurred while sending message to channel {channel.GetLogName()}", e);
             }
             catch (RateLimitException e)
             {
-                Logger.DebugException($"RateLimitException occurred while sending message to channel \"{channel.Name}\"", e);
+                Logger.DebugException($"RateLimitException occurred while sending message to channel {channel.GetLogName()}", e);
             }
             catch (Exception e)
             {
-                Logger.Exception($"Failed to send message to channel {channel.Name}", e);
+                Logger.Exception($"Failed to send message to channel {channel.GetLogName()}", e);
             }
             return createdMessages;
         }
@@ -707,11 +723,11 @@ namespace Eco.Plugins.DiscordLink
             DiscordChannel DmChannel = await recipientMember.CreateDmChannelAsync();
             if (DmChannel == null)
             {
-                Logger.Error($"Failed to create DM channel for sending message to user {recipientMember.DisplayName}");
+                Logger.Error($"Failed to create DM channel for sending message to user {recipientMember.GetLogName()}");
                 return null;
             }
 
-            Logger.Trace($"Sending DM to user \"{recipientMember.Username}\"");
+            Logger.Trace($"Sending DM to user {recipientMember.GetLogName()}");
             IEnumerable<DiscordMessage> createdMessages = await SendMessageAsync(DmChannel, textContent, embedContent);
 
             return createdMessages;
@@ -743,12 +759,13 @@ namespace Eco.Plugins.DiscordLink
                 DiscordChannel channel = message.GetChannel();
                 if (!ChannelHasPermission(channel, DiscordPermissions.ManageMessages))
                 {
-                    Logger.Error($"Attempted to modify message in channel `{channel}` but the bot user is lacking permissions for this action");
+                    Logger.Error($"Attempted to modify message {message.GetLogId()} in channel {channel.GetLogName()} but the bot user is lacking permissions for this action");
                     return null;
                 }
 
                 if (newMessageData.StringParts.Count <= 1 && newMessageData.EmbedParts.Count == 1)
                 {
+                    Logger.Trace($"Editing embed message {message.GetLogId()} in channel {message.Channel.GetLogName()}");
                     await message.ModifyAsync(newMessageData.StringParts.FirstOrDefault(), newMessageData.EmbedParts.First());
                 }
                 else
@@ -758,13 +775,13 @@ namespace Eco.Plugins.DiscordLink
                     {
                         if (!messageEdited)
                         {
-                            Logger.Trace($"Editing text message in channel \"{message.Channel.Name}\"");
+                            Logger.Trace($"Editing text message {message.GetLogId()} in channel {message.Channel.GetLogName()}");
                             await message.ModifyAsync(stringPart);
                             messageEdited = true;
                         }
                         else
                         {
-                            Logger.Trace($"Sending text edit overflow message to channel \"{message.Channel.Name}\"");
+                            Logger.Trace($"Sending text edit overflow message to channel \"{message.Channel.GetLogName()}");
                             createdMessages.AddRange(await SendMessageAsync(message.Channel, new SendReadyMessage(stringPart)));
                         }
                     }
@@ -773,13 +790,13 @@ namespace Eco.Plugins.DiscordLink
                     {
                         if (!messageEdited)
                         {
-                            Logger.Trace($"Editing embed message in channel \"{message.Channel.Name}\"");
+                            Logger.Trace($"Editing embed message {message.GetLogId()} in channel {message.Channel.GetLogName()}");
                             await message.ModifyAsync(embedPart);
                             messageEdited = true;
                         }
                         else
                         {
-                            Logger.Trace($"Sending embed edit overflow message to channel \"{message.Channel.Name}\"");
+                            Logger.Trace($"Sending embed edit overflow message to channel {message.Channel.GetLogName()}");
                             createdMessages.AddRange(await SendMessageAsync(message.Channel, new SendReadyMessage(embedPart)));
                         }
                     }
@@ -787,19 +804,20 @@ namespace Eco.Plugins.DiscordLink
             }
             catch (ServerErrorException e)
             {
-                Logger.DebugException($"ServerErrorException occurred while modifying message in channel \"{message.Channel.Name}\"", e);
+                Logger.DebugException($"ServerErrorException occurred while modifying message in channel {message.Channel.GetLogName()}", e);
             }
             catch (RateLimitException e)
             {
-                Logger.DebugException($"RateLimitException occurred while modifying message in channel \"{message.Channel.Name}\"", e);
+                Logger.DebugException($"RateLimitException occurred while modifying message in channel {message.Channel.GetLogName()}", e);
             }
             catch (Exception e)
             {
                 string channelName = message?.Channel?.Name;
                 if (string.IsNullOrWhiteSpace(channelName))
-                    channelName = "Unknown channel";
-
-                Logger.Exception($"Failed to modify message in channel \"{channelName}\"", e);
+                    channelName = "\"Unknown channel\"";
+                else
+                    channelName = $"\"{channelName}\" ({message.ChannelId})";
+                Logger.Exception($"Failed to modify message in channel {channelName}", e);
             }
             return createdMessages;
         }
@@ -822,7 +840,7 @@ namespace Eco.Plugins.DiscordLink
             if (message == null)
             {
                 if (!expectNotFound)
-                    Logger.Warning($"Attempted to delete non existent message with ID {messageId} from channel \"{channel.Name}\"");
+                    Logger.Warning($"Attempted to delete non existent message with ID {messageId} from channel {channel.GetLogName()}");
 
                 return false;
             }
@@ -838,36 +856,37 @@ namespace Eco.Plugins.DiscordLink
                 return false;
             }
 
-
             DiscordChannel channel = message.GetChannel();
             if (!ChannelHasPermission(channel, DiscordPermissions.ManageMessages))
             {
-                Logger.Warning($"Attempted to delete message in channel \"{channel}\" but the bot user is lacking permissions for this action");
+                Logger.Warning($"Attempted to delete message in channel {channel.GetLogName()} but the bot user is lacking permissions for this action");
                 return false;
             }
 
             bool result = false;
             try
             {
-                Logger.Trace($"Deleting message \"{message.Id}\" from channel \"{channel.Name}\"");
+                Logger.Trace($"Deleting message {message.GetLogId()} from channel {channel.GetLogName()}");
                 await message.DeleteAsync(reason ?? "Deleted by DiscordLink");
                 result = true;
             }
             catch (ServerErrorException e)
             {
-                Logger.DebugException($"ServerErrorException occurred while deleting message in channel \"{channel.Name}\"", e);
+                Logger.DebugException($"ServerErrorException occurred while deleting message in channel {channel.GetLogName()}", e);
             }
             catch (RateLimitException e)
             {
-                Logger.DebugException($"RateLimitException occurred while deleting message in channel \"{channel.Name}\"", e);
+                Logger.DebugException($"RateLimitException occurred while deleting message in channel {channel.GetLogName()}", e);
             }
             catch (Exception e)
             {
                 string channelName = channel?.Name;
                 if (string.IsNullOrWhiteSpace(channelName))
-                    channelName = "Unknown channel";
+                    channelName = "\"Unknown channel\"";
+                else
+                    channelName = $"\"{channelName}\" ({message.ChannelId})";
 
-                Logger.Exception($"Failed to delete message from channel \"{channelName}\"", e);
+                Logger.Exception($"Failed to delete message from channel {channelName}", e);
             }
             return result;
         }
@@ -876,11 +895,22 @@ namespace Eco.Plugins.DiscordLink
         {
             try
             {
+                Logger.Trace($"Creating/Fetchng DM channel for member {member.GetLogName()}");
                 return await member.CreateDmChannelAsync();
+            }
+            catch (NotFoundException e)
+            {
+                Logger.Warning($"Failed to get or create DM channel for member {member.GetLogName()} - Bot was unable to find member");
+                return null;
+            }
+            catch (UnauthorizedException e)
+            {
+                Logger.DebugException($"Failed to get or create DM channel for member {member.GetLogName()} - Bot was refused access to member DM channel", e);
+                return null;
             }
             catch (Exception e)
             {
-                Logger.Exception($"Failed to get or create DM channel for member \"{member.Id}\"", e);
+                Logger.Exception($"Failed to get or create DM channel for member {member.GetLogName()}", e);
                 return null;
             }
         }
@@ -889,7 +919,7 @@ namespace Eco.Plugins.DiscordLink
         {
             try
             {
-                Logger.Trace($"Creating role \"{dlRole.Name}\"");
+                Logger.Trace($"Creating role {dlRole.GetLogName()}");
                 DiscordRole role = await Guild.CreateRoleAsync(dlRole.Name, dlRole.Permissions, dlRole.Color, dlRole.Hoist, dlRole.Mentionable, dlRole.AddReason);
                 if (role != null)
                 {
@@ -898,26 +928,26 @@ namespace Eco.Plugins.DiscordLink
                 }
                 else
                 {
-                    Logger.Error($"Failed to create role \"{dlRole.Name}\".");
+                    Logger.Error($"Failed to create role {dlRole.GetLogName()}.");
                 }
 
                 return role;
             }
             catch (UnauthorizedException e)
             {
-                Logger.Exception($"DiscordLink was not allowed to create the role \"{dlRole.Name}\". Ensure that your bot user is assigned a role with higher permission level than all roles it manages.", e);
+                Logger.Exception($"DiscordLink was not allowed to create the role {dlRole.GetLogName()}. Ensure that your bot user is assigned a role with higher permission level than all roles it manages.", e);
             }
             catch (RateLimitException e)
             {
-                Logger.DebugException($"RateLimitException occurred while creating role \"{dlRole.Name}\"", e);
+                Logger.DebugException($"RateLimitException occurred while creating role {dlRole.GetLogName()}", e);
             }
             catch (ServerErrorException e)
             {
-                Logger.DebugException($"ServerErrorException occurred while creating role \"{dlRole.Name}\"", e);
+                Logger.DebugException($"ServerErrorException occurred while creating role {dlRole.GetLogName()}", e);
             }
             catch (Exception e)
             {
-                Logger.Exception($"Failed to create role \"{dlRole.Name}\"", e);
+                Logger.Exception($"Failed to create role {dlRole.GetLogName}", e);
             }
             return await Task.FromResult<DiscordRole>(null);
         }
@@ -944,24 +974,24 @@ namespace Eco.Plugins.DiscordLink
 
             try
             {
-                Logger.Trace($"Deleting role \"{role.Name}\"");
+                Logger.Trace($"Deleting role {role.GetLogName()}");
                 await role.DeleteAsync("Deleted by DiscordLink");
             }
             catch (UnauthorizedException e)
             {
-                Logger.Exception($"DiscordLink was not allowed to delete the role \"{role.Name}\". Ensure that your bot user is assigned a role with higher permission level than all roles it manages.", e);
+                Logger.Error($"DiscordLink was not allowed to delete the role {role.GetLogName()} - Ensure that your bot user is assigned a role with higher permission level than all roles it manages.");
             }
             catch (RateLimitException e)
             {
-                Logger.DebugException($"RateLimitException occurred while deleting role \"{role.Name}\"", e);
+                Logger.DebugException($"RateLimitException occurred while deleting role {role.GetLogName()}", e);
             }
             catch (ServerErrorException e)
             {
-                Logger.DebugException($"ServerErrorException occurred while deleting role \"{role.Name}\"", e);
+                Logger.DebugException($"ServerErrorException occurred while deleting role {role.GetLogName()}", e);
             }
             catch (Exception e)
             {
-                Logger.Exception($"Failed to delete role \"{role.Name}\"", e);
+                Logger.Exception($"Failed to delete role {role.GetLogName()}", e);
             }
         }
 
@@ -994,24 +1024,24 @@ namespace Eco.Plugins.DiscordLink
 
             try
             {
-                Logger.Trace($"Adding role \"{role.Name}\" to member \"{member.Username}\"");
+                Logger.Trace($"Adding role {role.GetLogName()} to member {member.GetLogName()}");
                 await member.GrantRoleAsync(role, "Added by DiscordLink");
             }
             catch (UnauthorizedException e)
             {
-                Logger.Exception($"DiscordLink was not allowed to grant the role \"{role.Name}\" to member \"{member.Username}\". Ensure that your bot user is assigned a role with higher permission level than all roles it manages.", e);
+                Logger.Error($"DiscordLink was not allowed to grant the role {role.GetLogName()} to member {member.GetLogName()} - Ensure that your bot user is assigned a role with higher permission level than all roles it manages.");
             }
             catch (RateLimitException e)
             {
-                Logger.DebugException($"RateLimitException occurred while adding role \"{role.Name}\" to member \"{member.Username}\"", e);
+                Logger.DebugException($"RateLimitException occurred while adding role {role.GetLogName()} to member {member.GetLogName()}", e);
             }
             catch (ServerErrorException e)
             {
-                Logger.DebugException($"ServerErrorException occurred while adding role \"{role.Name}\" to member \"{member.Username}\"", e);
+                Logger.DebugException($"ServerErrorException occurred while adding role {role.GetLogName()} to member {member.GetLogName()}", e);
             }
             catch (Exception e)
             {
-                Logger.Exception($"Failed to grant role \"{role.Name}\" to member \"{member.Username}\"", e);
+                Logger.Exception($"Failed to grant role {role.GetLogName()} to member {member.GetLogName()}", e);
             }
         }
 
@@ -1020,7 +1050,7 @@ namespace Eco.Plugins.DiscordLink
             DiscordRole role = Guild.GetRoleByName(roleName);
             if (role == null)
             {
-                Logger.Debug($"Attempting to remove nonexistent role \"{roleName}\" from user \"{member.DisplayName}\"");
+                Logger.Debug($"Attempting to remove nonexistent role \"{roleName}\" from user {member.GetLogName()}");
                 return;
             }
 
@@ -1031,34 +1061,36 @@ namespace Eco.Plugins.DiscordLink
         {
             if (member == null || role == null)
                 return;
+
             if (!member.HasRole(role))
                 return; // Member doesn't have the role
 
             try
             {
-                Logger.Trace($"Removing role \"{role.Name}\" from member \"{member.Username}\"");
+                Logger.Trace($"Removing role {role.GetLogName()} from member {member.GetLogName()}");
                 await member.RevokeRoleAsync(role, "Removed by DiscordLink");
             }
             catch (UnauthorizedException e)
             {
-                Logger.Exception($"DiscordLink was not allowed to revoke the role \"{role.Name}\" from member \"{member.Username}\". Ensure that your bot user is assigned a role with higher permission level than all roles it manages. This role was most likely not created by the current bot. Deleting it manually will resolve this Issue.", e);
+                Logger.Error($"DiscordLink was not allowed to revoke the role {role.GetLogName()} from member {member.GetLogName()} - Ensure that your bot user is assigned a role with higher permission level than all roles it manages. This role was most likely not created by the current bot. Deleting it manually will resolve this Issue.");
             }
             catch (RateLimitException e)
             {
-                Logger.DebugException($"RateLimitException occurred while removing role \"{role.Name}\" from member \"{member.Username}\"", e);
+                Logger.DebugException($"RateLimitException occurred while removing role {role.GetLogName()} from member {member.GetLogName()}", e);
             }
             catch (ServerErrorException e)
             {
-                Logger.DebugException($"ServerErrorException occurred while removing role \"{role.Name}\" from member \"{member.Username}\"", e);
+                Logger.DebugException($"ServerErrorException occurred while removing role {role.GetLogName()} from member {member.GetLogName()}", e);
             }
             catch (Exception e)
             {
-                Logger.Exception($"Failed to revoke role \"{role.Name}\" from member \"{member.Username}\"", e);
+                Logger.Exception($"Failed to revoke role {role.GetLogName()} from member {member.GetLogName()}", e);
             }
         }
 
         public async Task SetActivityStringAsync(string activityString, DiscordActivityType activityType)
         {
+            Logger.Trace($"Updating bot status message to {Enum.GetNames(typeof(DiscordActivityType))[(int)activityType]} {activityString}");
             await DSharpClient.UpdateStatusAsync(new DiscordActivity(activityString, activityType));
         }
 

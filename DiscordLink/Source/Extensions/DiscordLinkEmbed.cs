@@ -31,6 +31,8 @@ namespace Eco.Plugins.DiscordLink.Extensions
             }
         }
 
+        public string GetLogName() => $"\"{Title}\" ({Fields.Count()} fields)";
+
         public DiscordLinkEmbed WithTitle(string title)
         {
             Title = title;

@@ -1,9 +1,6 @@
 ﻿using DSharpPlus.Commands;
 using DSharpPlus.Entities;
-using DSharpPlus.Exceptions;
-using Eco.Moose.Tools.Logger;
 using Eco.Shared.Utils;
-using System;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -33,13 +30,15 @@ namespace Eco.Plugins.DiscordLink.Extensions
 
         public static string[] GuildNames(this DSharpPlus.DiscordClient client) => client.Guilds.Values.Select(guild => guild.Name).ToArray();
 
-        public static DiscordGuild DefaultGuild(this DSharpPlus.DiscordClient client) => client.Guilds.FirstOrDefault().Value;
+        public static DiscordGuild GetDefaultGuild(this DSharpPlus.DiscordClient client) => client.Guilds.FirstOrDefault().Value;
 
-        public static DiscordGuild GuildByName(this DSharpPlus.DiscordClient client, string name) => client.Guilds.Values.FirstOrDefault(guild => guild.Name == name);
+        public static DiscordGuild GetGuildByName(this DSharpPlus.DiscordClient client, string name) => client.Guilds.Values.FirstOrDefault(guild => guild.Name == name);
 
         #endregion
 
         #region DiscordGuild
+
+        public static string GetLogName(this DiscordGuild guild) => $"\"{guild.Name}\" ({guild.Id})";
 
         public static DiscordRole GetRoleByName(this DiscordGuild guild, string roleName)
         {
@@ -55,6 +54,8 @@ namespace Eco.Plugins.DiscordLink.Extensions
 
         #region DiscordChannel
 
+        public static string GetLogName(this DiscordChannel channel) => $"\"{channel.Name}\" ({channel.Id})";
+
         public static bool HasNameOrId(this DiscordChannel channel, string nameOrChannelId)
         {
             if (nameOrChannelId.TryParseSnowflakeId(out ulong channelId))
@@ -66,6 +67,8 @@ namespace Eco.Plugins.DiscordLink.Extensions
         #endregion
 
         #region DiscordUser
+
+        public static string GetLogName(this DiscordUser user) => $"\"{user.Username}\" ({user.Id})";
 
         public static bool HasNameOrId(this DiscordUser user, string nameOrUserId)
         {
@@ -89,13 +92,7 @@ namespace Eco.Plugins.DiscordLink.Extensions
 
         #region DiscordMember
 
-        public static bool HasNameOrMemberId(this DiscordMember member, string nameOrId)
-        {
-            if (nameOrId.TryParseSnowflakeId(out ulong Id))
-                return member.Id == Id;
-
-            return member.Username.EqualsCaseInsensitive(nameOrId) || member.Username.EqualsCaseInsensitive(nameOrId);
-        }
+        public static string GetLogName(this DiscordMember member) => $"\"{member.DisplayName}\" ({member.Id})";
 
         public static DiscordRole GetHighestHierarchyRole(this DiscordMember member)
         {
@@ -118,6 +115,14 @@ namespace Eco.Plugins.DiscordLink.Extensions
             return topRoleName;
         }
 
+        public static bool HasNameOrMemberId(this DiscordMember member, string nameOrId)
+        {
+            if (nameOrId.TryParseSnowflakeId(out ulong Id))
+                return member.Id == Id;
+
+            return member.Username.EqualsCaseInsensitive(nameOrId) || member.Username.EqualsCaseInsensitive(nameOrId);
+        }
+
         public static bool HasRole(this DiscordMember member, DiscordRole role)
         {
             return member.Roles.Any(memberRole => memberRole == role);
@@ -137,6 +142,8 @@ namespace Eco.Plugins.DiscordLink.Extensions
 
         #region DiscordRole
 
+        public static string GetLogName(this DiscordRole role) => $"\"{role.Name}\" ({role.Id})";
+
         public static bool HasNameOrId(this DiscordRole role, string nameOrId)
         {
             if (nameOrId.TryParseSnowflakeId(out ulong roleId))
@@ -149,8 +156,21 @@ namespace Eco.Plugins.DiscordLink.Extensions
 
         #region DiscordMessage
 
+        public static string GetLogId(this DiscordMessage message) => $"({message.Id})";
+        public static string GetLogData(this DiscordMessage message)
+        {
+            return $"Channel: {message.GetChannel()}" +
+                $"\nAuthor: {message.Author}" +
+                $"\nMessage: {message.Content}" +
+                $"\nAttachments ({message.Attachments.Count}): {string.Join(", ", message.Attachments.Select(a => $"{a.FileName} ({a.FileSize} bytes)"))}";
+        }
         public static DiscordChannel GetChannel(this DiscordMessage message) => message.Channel ?? DiscordLink.Obj.Client.GetChannelById(message.ChannelId);
-        public static string FormatForLog(this DiscordMessage message) => $"Channel: {message.GetChannel()}\nAuthor: {message.Author}\nMessage: {message.Content}\nAttachments ({message.Attachments.Count}): {string.Join(", ", message.Attachments.Select(a => $"{a.FileName} ({a.FileSize} bytes)"))}";
+
+        #endregion
+
+        #region DiscordEmoji
+
+        public static string GetLogName(this DiscordEmoji emoji) => $"{emoji.GetDiscordName()} ({emoji.Id})";
 
         #endregion
     }
