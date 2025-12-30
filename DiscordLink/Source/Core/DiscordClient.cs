@@ -535,6 +535,16 @@ namespace Eco.Plugins.DiscordLink
             return members;
         }
 
+        public DiscordRole GetRoleById(ulong roleId)
+        {
+            return Guild.GetRoleById(roleId);
+        }
+
+        public DiscordRole GetRoleByName(string roleName)
+        {
+            return Guild.GetRoleByName(roleName);
+        }
+
         public DiscordEmoji GetEmojiByName(string emojiName)
         {
             return DiscordEmoji.FromName(DSharpClient, emojiName);
@@ -993,16 +1003,6 @@ namespace Eco.Plugins.DiscordLink
             {
                 Logger.Exception($"Failed to delete role {role.GetLogName()}", e);
             }
-        }
-
-        public DiscordRole GetRoleById(ulong roleId)
-        {
-            return Guild.GetRoleById(roleId);
-        }
-
-        public DiscordRole GetRoleByName(string roleName)
-        {
-            return Guild.GetRoleByName(roleName);
         }
 
         public async Task GrantRoleAsync(DiscordMember member, DiscordLinkRole dlRole)
