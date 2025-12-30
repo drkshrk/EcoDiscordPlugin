@@ -38,6 +38,9 @@ namespace Eco.Plugins.DiscordLink.Modules
                 ++_opsCount;
                 foreach (DiscordMember member in await client.FetchMembersAsync())
                 {
+                    if (member.IsBot)
+                        continue;
+
                     LinkedUser linkedUser = UserLinkManager.LinkedUserByDiscordUser(member);
                     foreach (ElectedTitle title in Lookups.ActiveElectedTitles)
                     {

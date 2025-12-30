@@ -459,6 +459,12 @@ namespace Eco.Plugins.DiscordLink
                 {
                     if (member.HasNameOrMemberId(discordName))
                     {
+                        if(member.IsBot)
+                        {
+                            ReportCommandError(ctx, $"The discord account with name \"{discordName}\" belongs to a bot and is not a valid account link target.");
+                            return;
+                        }
+
                         matchingMember = member;
                         break;
                     }
