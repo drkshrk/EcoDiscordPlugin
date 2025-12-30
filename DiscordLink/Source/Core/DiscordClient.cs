@@ -508,13 +508,14 @@ namespace Eco.Plugins.DiscordLink
 
         public async Task<IReadOnlyList<DiscordMember>> FetchMembersAsync()
         {
+            IReadOnlyList<DiscordMember> members = new List<DiscordMember>();
+
             if (!BotHasIntent(DiscordIntents.GuildMembers))
             {
                 Logger.Error("Attempted to get full guild member list but the bot does not have the privileged GuildMembers intent");
-                return null;
+                return members;
             }
 
-            IReadOnlyList<DiscordMember> members = null;
             try
             {
                 Logger.Trace("Fetching guild member list");
