@@ -134,7 +134,6 @@ namespace Eco.Plugins.DiscordLink
                     .HandleMessageReactionRemoved(HandleDiscordReactionRemoved)
                     .HandleGuildMemberRemoved(HandleMemberRemoved)
                     .HandleGuildMemberUpdated(HandleMemberUpdated)
-                    .HandleMessageUpdated(HandleDiscordMessageUpdated)
                 );
                 services.AddCommandsExtension
                 (
