@@ -555,7 +555,7 @@ namespace Eco.Plugins.DiscordLink
 
         #region Permission Management
 
-        public bool BotHasPermission(DiscordPermissions permission, bool logFailure = true)
+        public bool BotHasPermission(DiscordPermissions permission)
         {
             if (BotMember == null)
             {
@@ -572,9 +572,6 @@ namespace Eco.Plugins.DiscordLink
                     break;
                 }
             }
-
-            if (logFailure && !hasPermission && Logger.GetConfiguredLogLevel() <= Logger.LogLevel.Debug) // Extra check for log level due to Stack Trace generation being heavy
-                Logger.Debug($"Bot permission check failed at\n{new System.Diagnostics.StackTrace()}");
 
             return hasPermission;
         }
