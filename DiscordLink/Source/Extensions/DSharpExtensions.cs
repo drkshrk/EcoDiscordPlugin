@@ -125,7 +125,7 @@ namespace Eco.Plugins.DiscordLink.Extensions
 
         public static bool HasRole(this DiscordMember member, DiscordRole role)
         {
-            return member.Roles.Any(memberRole => memberRole == role);
+            return member.Roles.Any(memberRole => memberRole.Id == role.Id);
         }
 
         public static bool HasRoleWithName(this DiscordMember member, string roleName)
