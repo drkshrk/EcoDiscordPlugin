@@ -239,6 +239,11 @@ namespace Eco.Plugins.DiscordLink
                     Logger.Info("Could not restart - The plugin is not in a ready state.");
                 }
             });
+            nameToFunction.Add("Reinstall Discord Commands", () =>
+            {
+                _ = Client.ReinstallCommands();
+                Logger.Info("All commands reinstalled - Restart the discord client (ctrl+r) to re-fetch the command list");
+            });
         }
 
         public async Task<bool> Restart()
