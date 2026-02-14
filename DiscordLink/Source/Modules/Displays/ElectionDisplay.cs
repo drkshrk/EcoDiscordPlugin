@@ -14,29 +14,28 @@ namespace Eco.Plugins.DiscordLink.Modules
 {
     class ElectionDisplay : DisplayModule
     {
-        protected override string BaseTag { get { return "[Election]"; } }
         protected override int TimerUpdateIntervalMs { get { return 60000; } }
         protected override int TimerStartDelayMs { get { return 15000; } }
 
         public override string ToString() => "Election Display";
         protected override DlEventType GetTriggers() => base.GetTriggers() | DlEventType.DiscordClientConnected | DlEventType.Timer
             | DlEventType.Login | DlEventType.Vote | DlEventType.ElectionStarted | DlEventType.ElectionStopped;
-        protected override async Task<IEnumerable<DiscordTarget>> GetDiscordTargets() => DLConfig.Data.ElectionDisplayChannels.Cast<DiscordTarget>();
+        public override async Task<IEnumerable<DiscordTarget>> GetDiscordTargets() => DiscordLinkConfig.ElectionDisplayChannels.Cast<DiscordTarget>();
 
         protected override void GetDisplayContent(DiscordTarget target, out List<DisplayContent> displayContent)
         {
             displayContent = new List<DisplayContent>();
             foreach (Election election in Lookups.ActiveElections)
             {
-                string tag = $"{BaseTag} [{election.Id}]";
                 DiscordLinkEmbed report = MessageBuilder.Discord.GetElectionReport(election);
                 if (report.Fields.Count > 0)
-                    displayContent.Add(new DisplayContent(tag, embedContent: report));
+                    displayContent.Add(new DisplayContent(embedContent: report, contentData: election.Id));
             }
         }
 
-        protected async override Task PostDisplayCreated(DiscordMessage message)
+        protected async override Task PostDisplayCreated(IEnumerable<DiscordMessage> messages)
         {
+            DiscordMessage message = messages.Last(); // Only put reactions on the last message
             Election election = GetElectionFromMessage(message);
             if (election != null && election.BooleanElection)
                 await CreateVoteReactions(message);
@@ -79,32 +78,26 @@ namespace Eco.Plugins.DiscordLink.Modules
 
         private Election GetElectionFromMessage(DiscordMessage message)
         {
-            Election election = null;
-            foreach (TargetDisplayData displayData in TargetDisplays)
+            DisplayTracker tracker = DLStorage.PersistentData.Displays.Values.FirstOrDefault(tracker => tracker.MessageIds.Contains(message.Id));
+            if (tracker == null)
             {
-                if (!(displayData.Target is ChannelLink channelLink))
-                    continue;
-
-                string tag = displayData.DisplayMessages.GetValueOrDefault(message.Id);
-                if (string.IsNullOrWhiteSpace(tag))
-                    continue;
-
-                if (!int.TryParse(tag, out int electionId))
-                    continue;
-
-                Election foundElection = Lookups.ActiveElections.FirstOrDefault(e => e.Id == electionId);
-                if (foundElection != null)
-                {
-                    election = foundElection;
-                    break;
-                }
+                Logger.Error($"Failed to find tracker for election display message in channel {message.ChannelId}");
+                return null;
             }
+
+            Election election = Lookups.ActiveElections.FirstOrDefault(election => election.Id == tracker.ContentData);
+            if(election == null)
+            {
+                Logger.Warning($"Failed to find active election matching display message tracker for message in channel {tracker}");
+                return null;
+            }
+
             return election;
         }
 
         private async Task CreateVoteReactions(DiscordMessage message)
         {
-            if (DiscordLink.Obj.Client.ChannelHasPermission(message.GetChannel(), DSharpPlus.Permissions.AddReactions))
+            if (DiscordLink.Obj.Client.ChannelHasPermission(message.GetChannel(), DiscordPermissions.AddReactions))
             {
                 await message.CreateReactionAsync(DLConstants.ACCEPT_EMOJI);
                 await message.CreateReactionAsync(DLConstants.DENY_EMOJI);

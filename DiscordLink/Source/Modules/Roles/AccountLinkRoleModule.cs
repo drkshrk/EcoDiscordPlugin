@@ -33,7 +33,7 @@ namespace Eco.Plugins.DiscordLink.Modules
         protected override async Task UpdateInternal(DiscordLink plugin, DlEventType trigger, params object[] data)
         {
             DiscordClient client = DiscordLink.Obj.Client;
-            if (!client.BotHasPermission(Permissions.ManageRoles))
+            if (!client.BotHasPermission(DiscordPermissions.ManageRoles))
                 return;
 
             if (_linkedAccountRole == null || client.GetRoleById(_linkedAccountRole.Id) == null)
@@ -48,10 +48,13 @@ namespace Eco.Plugins.DiscordLink.Modules
                     return;
 
                 ++_opsCount;
-                foreach (DiscordMember member in await client.GetMembersAsync())
+                foreach (DiscordMember member in await client.FetchMembersAsync())
                 {
+                    if (member.IsBot)
+                        continue;
+
                     LinkedUser linkedUser = UserLinkManager.LinkedUserByDiscordUser(member, requireValid: false);
-                    if (linkedUser == null || !linkedUser.Verified || !DLConfig.Data.UseLinkedAccountRole)
+                    if (linkedUser == null || !linkedUser.Verified || !DiscordLinkConfig.UseLinkedAccountRole)
                     {
                         if (member.HasRole(_linkedAccountRole))
                         {
@@ -68,7 +71,7 @@ namespace Eco.Plugins.DiscordLink.Modules
             }
             else
             {
-                if (!DLConfig.Data.UseLinkedAccountRole)
+                if (!DiscordLinkConfig.UseLinkedAccountRole)
                     return;
 
                 if (!(data[0] is LinkedUser linkedUser))
@@ -97,7 +100,7 @@ namespace Eco.Plugins.DiscordLink.Modules
 
         private void SetupLinkRole()
         {
-            if (!DLConfig.Data.UseLinkedAccountRole)
+            if (!DiscordLinkConfig.UseLinkedAccountRole)
                 return;
 
             ++_opsCount;

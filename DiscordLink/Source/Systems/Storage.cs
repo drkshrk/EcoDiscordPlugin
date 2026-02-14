@@ -108,6 +108,8 @@ namespace Eco.Plugins.DiscordLink
 
             public List<ulong> RoleIds = new List<ulong>();
 
+            public Dictionary<Guid, DisplayTracker> Displays = new Dictionary<Guid, DisplayTracker>();
+
             public LayerDiscriminator LayerDiscriminator = new LayerDiscriminator();
 
             public async Task<DiscordLinkEmbed> GetDataDescription()
@@ -265,7 +267,7 @@ namespace Eco.Plugins.DiscordLink
                     StringBuilder typeBuilder = new StringBuilder();
                     foreach (var memberIdAndWatch in TradeWatchers)
                     {
-                        DiscordMember member = await DiscordLink.Obj.Client.GetMemberAsync(memberIdAndWatch.Key);
+                        DiscordMember member = await DiscordLink.Obj.Client.FetchMemberAsync(memberIdAndWatch.Key, expectNotFound: true);
                         foreach (var watch in memberIdAndWatch.Value)
                         {
                             userBuilder.AppendLine(member != null ? member.DisplayName : memberIdAndWatch.Key.ToString());

@@ -1,5 +1,6 @@
 ﻿using Eco.Gameplay.Systems.Messaging.Chat.Channels;
 using Eco.Moose.Tools.Logger;
+using Eco.Moose.Utils.Message;
 using System.ComponentModel;
 
 namespace Eco.Plugins.DiscordLink
@@ -15,6 +16,21 @@ namespace Eco.Plugins.DiscordLink
         }
 
         public override bool IsValid() => base.IsValid() && !string.IsNullOrWhiteSpace(EcoChannel);
+
+        public override bool Initialize()
+        {
+            bool result = base.Initialize();
+            if (result)
+            {
+                // Ensure that the chat channel exists
+                if (!Message.ChatChannelExists(EcoChannel))
+                {
+                    Message.CreateChatChannel(EcoChannel);
+                    Message.SendChatToChannel(null, EcoChannel, "Created by DiscordLink");
+                }
+            }
+            return result;
+        }
 
         public override bool MakeCorrections()
         {

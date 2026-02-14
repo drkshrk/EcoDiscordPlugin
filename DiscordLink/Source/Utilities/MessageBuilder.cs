@@ -1,6 +1,6 @@
 ﻿using DSharpPlus;
+using DSharpPlus.Commands.Processors.SlashCommands.ArgumentModifiers;
 using DSharpPlus.Entities;
-using DSharpPlus.SlashCommands;
 using Eco.Core.Utils;
 using Eco.Gameplay.Civics;
 using Eco.Gameplay.Civics.Demographics;
@@ -21,6 +21,7 @@ using Eco.Gameplay.Property;
 using Eco.Gameplay.Settlements;
 using Eco.Gameplay.Skills;
 using Eco.Gameplay.Systems.Exhaustion;
+using Eco.Moose.Data;
 using Eco.Moose.Extensions;
 using Eco.Moose.Features;
 using Eco.Moose.Utils.Lookups;
@@ -39,6 +40,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+using static Eco.Moose.Data.CommandData;
 using static Eco.Moose.Data.Enums;
 using static Eco.Shared.Mathf; // Avoiding collisions with system mathf
 
@@ -79,19 +81,19 @@ namespace Eco.Plugins.DiscordLink.Utilities
         [Flags]
         public enum PlayerReportComponentFlag
         {
-            [ChoiceName("Online")]          OnlineStatus    = 1 << 0,
-            [ChoiceName("Playtime")]        PlayTime        = 1 << 1,
-            [ChoiceName("Exhaustion")]      Exhaustion      = 1 << 2,
-            [ChoiceName("Permissions")]     Permissions     = 1 << 3,
-            [ChoiceName("Access")]          AccessLists     = 1 << 4,
-            [ChoiceName("Discord")]         DiscordInfo     = 1 << 5,
-            [ChoiceName("Reputation")]      Reputation      = 1 << 6,
-            [ChoiceName("Experience")]      Experience      = 1 << 7,
-            [ChoiceName("Skills")]          Skills          = 1 << 8,
-            [ChoiceName("Demographics")]    Demographics    = 1 << 9,
-            [ChoiceName("Titles")]          Titles          = 1 << 10,
-            [ChoiceName("Properties")]      Properties      = 1 << 11,
-            [ChoiceName("All")]             All             = ~0
+            [ChoiceDisplayName("Online")]          OnlineStatus    = 1 << 0,
+            [ChoiceDisplayName("Playtime")]        PlayTime        = 1 << 1,
+            [ChoiceDisplayName("Exhaustion")]      Exhaustion      = 1 << 2,
+            [ChoiceDisplayName("Permissions")]     Permissions     = 1 << 3,
+            [ChoiceDisplayName("Access")]          AccessLists     = 1 << 4,
+            [ChoiceDisplayName("Discord")]         DiscordInfo     = 1 << 5,
+            [ChoiceDisplayName("Reputation")]      Reputation      = 1 << 6,
+            [ChoiceDisplayName("Experience")]      Experience      = 1 << 7,
+            [ChoiceDisplayName("Skills")]          Skills          = 1 << 8,
+            [ChoiceDisplayName("Demographics")]    Demographics    = 1 << 9,
+            [ChoiceDisplayName("Titles")]          Titles          = 1 << 10,
+            [ChoiceDisplayName("Properties")]      Properties      = 1 << 11,
+            [ChoiceDisplayName("All")]             All             = ~0
         }
 
         [Flags]
@@ -180,7 +182,7 @@ namespace Eco.Plugins.DiscordLink.Utilities
                 builder.AppendLine($"DiscordLink {plugin.InstalledVersion.ToString(3)}");
                 if (verbose)
                 {
-                    builder.AppendLine($"Server Name: {MessageUtils.FirstNonEmptyString(DLConfig.Data.ServerName, NetworkManager.Config.Name.StripTags(), "[Server Title Missing]")}");
+                    builder.AppendLine($"Server Name: {MessageUtils.FirstNonEmptyString(DiscordLinkConfig.ServerName, NetworkManager.Config.Name.StripTags(), "[Server Title Missing]")}");
                     builder.AppendLine($"Server Version: {EcoVersion.VersionNumber}");
                     if (client.ConnectionStatus == DiscordClient.ConnectionState.Connected)
                         builder.AppendLine($"D# Version: {client.DSharpVersion}");
@@ -209,7 +211,7 @@ namespace Eco.Plugins.DiscordLink.Utilities
                 builder.AppendLine();
                 builder.AppendLine("--- Modules ---");
 
-                string moduleDisplayText = plugin.Modules.Select(module => module.GetDisplayText(string.Empty, verbose)).DoubleNewlineList();
+                string moduleDisplayText = plugin.Modules.Select(async module => await module.GetDisplayText(string.Empty, verbose)).Select(task => task.Result).DoubleNewlineList();
                 builder.AppendLine(moduleDisplayText);
 
                 if (verbose)
@@ -221,7 +223,7 @@ namespace Eco.Plugins.DiscordLink.Utilities
                 return builder.ToString();
             }
 
-            public static string GetConfigVerificationReport()
+            public static string GetServerConfigVerificationReport()
             {
                 StringBuilder builder = new StringBuilder();
                 if (DiscordLink.Obj.Client.ConnectionStatus != DiscordClient.ConnectionState.Connected)
@@ -229,22 +231,20 @@ namespace Eco.Plugins.DiscordLink.Utilities
                     builder.AppendLine("[Discord Client not connected - Parts of the config was not possible to verify]");
                 }
 
-                DLConfigData config = DLConfig.Data;
-
                 // Guild
-                if (config.DiscordServerId == 0)
+                if (DiscordLinkConfig.DiscordServerId == 0)
                 {
                     builder.AppendLine("- Discord server ID not configured.");
                 }
 
                 // Bot Token
-                if (string.IsNullOrWhiteSpace(config.BotToken))
+                if (string.IsNullOrWhiteSpace(DiscordLinkConfig.BotToken))
                 {
                     builder.AppendLine("- Bot token not configured. See Github page for install instructions.");
                 }
 
                 // Invite message
-                if (!string.IsNullOrWhiteSpace(config.InviteMessage) && !config.InviteMessage.ContainsCaseInsensitive(DLConstants.INVITE_COMMAND_TOKEN))
+                if (!string.IsNullOrWhiteSpace(DiscordLinkConfig.InviteMessage) && !DiscordLinkConfig.InviteMessage.ContainsCaseInsensitive(DLConstants.INVITE_COMMAND_TOKEN))
                 {
                     builder.AppendLine($"- Invite message does not contain the invite link token {DLConstants.INVITE_COMMAND_TOKEN}.");
                 }
@@ -257,9 +257,9 @@ namespace Eco.Plugins.DiscordLink.Utilities
 
                 if (DiscordLink.Obj.Client.ConnectionStatus == DiscordClient.ConnectionState.Connected)
                 {
-                    if (DiscordLink.Obj.Client.IsConnected && DLConfig.GetChannelLinks(verifiedLinksOnly: false).Count > 0)
+                    if (DiscordLink.Obj.Client.IsConnected && DiscordLinkConfig.ChannelLinks(verifiedLinksOnly: false).Any())
                     {
-                        foreach (ChannelLink link in DLConfig.GetChannelLinks(verifiedLinksOnly: false))
+                        foreach (ChannelLink link in DiscordLinkConfig.ChannelLinks(verifiedLinksOnly: false))
                         {
                             if (!link.IsValid())
                                 builder.AppendLine($"- Channel Link verification failed for \"{link}\".");
@@ -295,7 +295,7 @@ namespace Eco.Plugins.DiscordLink.Utilities
 
                 if (flag.HasFlag(PermissionReportComponentFlag.ServerPermissions))
                 {
-                    foreach (Permissions permission in DLConstants.REQUESTED_GUILD_PERMISSIONS)
+                    foreach (DiscordPermissions permission in DLConstants.REQUESTED_GUILD_PERMISSIONS)
                     {
                         if (!client.BotHasPermission(permission))
                         {
@@ -306,9 +306,9 @@ namespace Eco.Plugins.DiscordLink.Utilities
 
                 if (flag.HasFlag(PermissionReportComponentFlag.ChannelPermissions))
                 {
-                    foreach (ChannelLink link in DLConfig.GetChannelLinks().GroupBy(link => link.Channel.Id).Select(group => group.First())) // Only perform the check once per link
+                    foreach (ChannelLink link in DiscordLinkConfig.ChannelLinks().GroupBy(link => link.Channel.Id).Select(group => group.First())) // Only perform the check once per link
                     {
-                        foreach (Permissions permission in DLConstants.REQUESTED_CHANNEL_PERMISSIONS)
+                        foreach (DiscordPermissions permission in DLConstants.REQUESTED_CHANNEL_PERMISSIONS)
                         {
                             if (!client.ChannelHasPermission(link.Channel, permission))
                             {
@@ -333,7 +333,7 @@ namespace Eco.Plugins.DiscordLink.Utilities
             public static string GetPermissionsReportForChannel(DiscordChannel channel)
             {
                 StringBuilder builder = new StringBuilder();
-                foreach (Permissions permission in DLConstants.REQUESTED_CHANNEL_PERMISSIONS)
+                foreach (DiscordPermissions permission in DLConstants.REQUESTED_CHANNEL_PERMISSIONS)
                 {
                     if (!DiscordLink.Obj.Client.ChannelHasPermission(channel, permission))
                     {
@@ -352,7 +352,7 @@ namespace Eco.Plugins.DiscordLink.Utilities
             public static string GetChannelLinkList()
             {
                 StringBuilder builder = new StringBuilder();
-                foreach (ChannelLink link in DLConfig.GetChannelLinks(verifiedLinksOnly: false))
+                foreach (ChannelLink link in DiscordLinkConfig.ChannelLinks(verifiedLinksOnly: false))
                 {
                     builder.Append(link.ToString());
                     if (!link.IsValid())
@@ -557,42 +557,42 @@ namespace Eco.Plugins.DiscordLink.Utilities
             {
                 var plugin = DiscordLink.Obj;
 
-                DLConfigData pluginConfig = DLConfig.Data;
-                ServerInfo serverInfo = StrangeCloudWorldRegistration.StrangeWorld.ServerInfo;
+                ServerInfo serverInfo = StrangeCloudWorldRegistration.StrangeWorld?.ServerInfo;
                 EcoServerConfig serverConfig = NetworkManager.Config;
 
-                DiscordLinkEmbed embed = new DiscordLinkEmbed();
+                DiscordLinkEmbed report = new DiscordLinkEmbed();
+                report.WithFooter(GetStandardEmbedFooter());
 
                 if (flag.HasFlag(ServerInfoComponentFlag.Name))
                 {
-                    embed.WithTitle($"**{MessageUtils.FirstNonEmptyString(pluginConfig.ServerName, MessageUtils.StripTags(serverInfo.Description), "[Server Title Missing]")} Server Status**");
+                    report.WithTitle($"**{MessageUtils.FirstNonEmptyString(DiscordLinkConfig.ServerName, MessageUtils.StripTags(serverInfo?.Description ?? "[Missing StrangeWorld Data]"), "[Server Title Missing]")} Server Status**");
                 }
                 else
                 {
-                    embed.WithTitle($"**Server Status**");
+                    report.WithTitle($"**Server Status**");
                 }
 
                 if (flag.HasFlag(ServerInfoComponentFlag.Description))
                 {
-                    embed.WithDescription(MessageUtils.FirstNonEmptyString(pluginConfig.ServerDescription, MessageUtils.StripTags(serverInfo.Description), "No server description is available."));
+                    report.WithDescription(MessageUtils.FirstNonEmptyString(DiscordLinkConfig.ServerDescription, MessageUtils.StripTags(serverInfo?.Description ?? "[Missing StrangeWorld Data]"), "No server description is available."));
                 }
 
                 if (flag.HasFlag(ServerInfoComponentFlag.ConnectionInfo))
                 {
                     string fieldText = "-- Connection info not configured --";
-                    if (!string.IsNullOrEmpty(pluginConfig.ConnectionInfo))
-                        fieldText = pluginConfig.ConnectionInfo;
+                    if (!string.IsNullOrEmpty(DiscordLinkConfig.ConnectionInfo))
+                        fieldText = DiscordLinkConfig.ConnectionInfo;
                     else if (!string.IsNullOrEmpty(serverConfig.IPAddress))
                         fieldText = serverConfig.IPAddress;
 
-                    embed.AddField("Connection Info", fieldText, useCodeBlockBackground: true);
+                    report.AddField("Connection Info", fieldText, useCodeBlockBackground: true);
                 }
 
                 if (flag.HasFlag(ServerInfoComponentFlag.WebServerAddress))
                 {
                     string WebServerUrl = Lookups.WebServerUrl;
                     string fieldText = !WebServerUrl.IsEmpty() ? WebServerUrl : "Web server URL not configured.";
-                    embed.AddField("Webpage Address", fieldText);
+                    report.AddField("Webpage Address", fieldText);
                 }
 
                 if (flag.HasFlag(ServerInfoComponentFlag.PlayerCount) || flag.HasFlag(ServerInfoComponentFlag.ActiveSettlementCount))
@@ -600,19 +600,19 @@ namespace Eco.Plugins.DiscordLink.Utilities
                     int fieldsAdded = 0;
                     if (flag.HasFlag(ServerInfoComponentFlag.PlayerCount))
                     {
-                        embed.AddField("Player Count", $"{Lookups.NumOnlinePlayers} Online / {serverInfo.TotalPlayers} Total", inline: true);
+                        report.AddField("Player Count", $"{Lookups.NumOnlinePlayers} Online / {serverInfo?.TotalPlayers ?? -1} Total", inline: true);
                         ++fieldsAdded;
                     }
 
                     if (flag.HasFlag(ServerInfoComponentFlag.ActiveSettlementCount))
                     {
-                        embed.AddField("Active Settlement Count", $"{Lookups.ActiveSettlements.Count()}", inline: true);
+                        report.AddField("Active Settlement Count", $"{Lookups.ActiveSettlements.Count()}", inline: true);
                         ++fieldsAdded;
                     }
 
                     for (int i = fieldsAdded; i < DLConstants.DISCORD_EMBED_FIELDS_PER_ROW_LIMIT; ++i)
                     {
-                        embed.AddAlignmentField();
+                        report.AddAlignmentField();
                     }
                 }
 
@@ -621,19 +621,19 @@ namespace Eco.Plugins.DiscordLink.Utilities
                     int fieldsAdded = 0;
                     if (flag.HasFlag(ServerInfoComponentFlag.LawCount))
                     {
-                        embed.AddField("Law Count", $"{Lookups.ActiveLaws.Count()}", inline: true);
+                        report.AddField("Law Count", $"{Lookups.ActiveLaws.Count()}", inline: true);
                         ++fieldsAdded;
                     }
 
                     if (flag.HasFlag(ServerInfoComponentFlag.ActiveElectionCount))
                     {
-                        embed.AddField("Active Elections Count", $"{Lookups.ActiveElections.Count()}", inline: true);
+                        report.AddField("Active Elections Count", $"{Lookups.ActiveElections.Count()}", inline: true);
                         ++fieldsAdded;
                     }
 
                     for (int i = fieldsAdded; i < DLConstants.DISCORD_EMBED_FIELDS_PER_ROW_LIMIT; ++i)
                     {
-                        embed.AddAlignmentField();
+                        report.AddAlignmentField();
                     }
                 }
 
@@ -643,28 +643,28 @@ namespace Eco.Plugins.DiscordLink.Utilities
                     if (flag.HasFlag(ServerInfoComponentFlag.IngameTime))
                     {
                         TimeSpan timeSinceStartSpan = new TimeSpan(0, 0, (int)Lookups.SecondsPassedTotal);
-                        embed.AddField("Ingame Time", $"Day {timeSinceStartSpan.Days + 1} {timeSinceStartSpan.Hours.ToString("00")}:{timeSinceStartSpan.Minutes.ToString("00")}", inline: true); // +1 days to get start at day 1 just like ingame
+                        report.AddField("Ingame Time", $"Day {timeSinceStartSpan.Days + 1} {timeSinceStartSpan.Hours.ToString("00")}:{timeSinceStartSpan.Minutes.ToString("00")}", inline: true); // +1 days to get start at day 1 just like ingame
                         ++fieldsAdded;
                     }
 
-                    if (flag.HasFlag(ServerInfoComponentFlag.MeteorTimeRemaining) && serverInfo.HasMeteor)
+                    if (flag.HasFlag(ServerInfoComponentFlag.MeteorTimeRemaining) && (serverInfo?.HasMeteor ?? false))
                     {
                         string meteorContent = DisasterPlugin.MeteorData.MeteorDestroyed || DisasterPlugin.MeteorData.MeteorImpacted
                             ? DisasterPlugin.MeteorData.MeteorDestroyed ? "Destroyed!" : "Impacted!"
                             : DateTime.Now.AddSeconds(Lookups.SecondsLeftUntilMeteor).ToDiscordTimeStamp('R');
-                        embed.AddField("Meteor", meteorContent, inline: true);
+                        report.AddField("Meteor", meteorContent, inline: true);
                         ++fieldsAdded;
                     }
 
                     if (flag.HasFlag(ServerInfoComponentFlag.ServerTime))
                     {
-                        embed.AddField("Server Time", Shared.GetServerTimeStamp(), inline: true);
+                        report.AddField("Server Time", Shared.GetServerTimeStamp(), inline: true);
                         ++fieldsAdded;
                     }
 
                     for (int i = fieldsAdded; i < DLConstants.DISCORD_EMBED_FIELDS_PER_ROW_LIMIT; ++i)
                     {
-                        embed.AddAlignmentField();
+                        report.AddAlignmentField();
                     }
                 }
 
@@ -673,49 +673,49 @@ namespace Eco.Plugins.DiscordLink.Utilities
                     int fieldsAdded = 0;
                     if (flag.HasFlag(ServerInfoComponentFlag.ExhaustionResetTimeLeft))
                     {
-                        embed.AddField("Exhaustion Reset", DateTime.Now.AddSeconds(ExhaustionPlugin.Obj.Config.TimeUntilRefresh).ToDiscordTimeStamp('R'), inline: true);
+                        report.AddField("Exhaustion Reset", DateTime.Now.AddSeconds(ExhaustionPlugin.Obj.Config.TimeUntilRefresh).ToDiscordTimeStamp('R'), inline: true);
                         ++fieldsAdded;
                     }
 
                     if (flag.HasFlag(ServerInfoComponentFlag.ExhaustedPlayerCount))
                     {
-                        embed.AddField("Exhausted Players Count", Lookups.NumExhaustedPlayers.ToString(), inline: true);
+                        report.AddField("Exhausted Players Count", Lookups.NumExhaustedPlayers.ToString(), inline: true);
                         ++fieldsAdded;
                     }
 
                     for (int i = fieldsAdded; i < DLConstants.DISCORD_EMBED_FIELDS_PER_ROW_LIMIT; ++i)
                     {
-                        embed.AddAlignmentField();
+                        report.AddAlignmentField();
                     }
                 }
 
                 if (flag.HasFlag(ServerInfoComponentFlag.PlayerList))
                 {
-                    embed.AddField($"Online Players ({Lookups.NumOnlinePlayers})", Shared.GetOnlinePlayerList(), inline: true);
+                    report.AddField($"Online Players ({Lookups.NumOnlinePlayers})", Shared.GetOnlinePlayerList(), inline: true);
                     if (flag.HasFlag(ServerInfoComponentFlag.PlayerListLoginTime))
                     {
                         string sessionTimeList = Shared.GetPlayerSessionTimeList();
                         if (!string.IsNullOrWhiteSpace(sessionTimeList))
-                            embed.AddField("Session Time", sessionTimeList, inline: true);
+                            report.AddField("Session Time", sessionTimeList, inline: true);
                         else
-                            embed.AddAlignmentField();
+                            report.AddAlignmentField();
                     }
                     else
                     {
-                        embed.AddAlignmentField();
+                        report.AddAlignmentField();
                     }
 
                     if (flag.HasFlag(ServerInfoComponentFlag.PlayerListExhaustionTime) && DifficultySettingsConfig.Vals.ExhaustionEnabled)
                     {
                         string exhaustTimeList = Shared.GetPlayerExhaustionTimeList();
                         if (!string.IsNullOrWhiteSpace(exhaustTimeList))
-                            embed.AddField("Exhaustion Countdown", exhaustTimeList, inline: true);
+                            report.AddField("Exhaustion Countdown", exhaustTimeList, inline: true);
                         else
-                            embed.AddAlignmentField();
+                            report.AddAlignmentField();
                     }
                     else
                     {
-                        embed.AddAlignmentField();
+                        report.AddAlignmentField();
                     }
                 }
 
@@ -724,15 +724,15 @@ namespace Eco.Plugins.DiscordLink.Utilities
                     Shared.GetActiveSettlementsList(out string settlementList, out string activeCitizenCountList, out string leaderList);
                     if (!string.IsNullOrEmpty(settlementList))
                     {
-                        embed.AddField("Active Settlements", settlementList, inline: true);
-                        embed.AddField("Active Citizen & Influence", activeCitizenCountList, inline: true);
-                        embed.AddField("Leader", leaderList, inline: true);
+                        report.AddField("Active Settlements", settlementList, inline: true);
+                        report.AddField("Active Citizen & Influence", activeCitizenCountList, inline: true);
+                        report.AddField("Leader", leaderList, inline: true);
                     }
                     else
                     {
-                        embed.AddField("Active Settlements", "-- No active settlements --", inline: true);
-                        embed.AddAlignmentField();
-                        embed.AddAlignmentField();
+                        report.AddField("Active Settlements", "-- No active settlements --", inline: true);
+                        report.AddAlignmentField();
+                        report.AddAlignmentField();
                     }
                 }
 
@@ -741,15 +741,15 @@ namespace Eco.Plugins.DiscordLink.Utilities
                     Shared.GetActiveElectionsList(out string electionList, out string settlementList, out string votesAndTimeRemainingList);
                     if (!string.IsNullOrEmpty(electionList))
                     {
-                        embed.AddField("Active Elections", electionList, inline: true);
-                        embed.AddField("Settlement", settlementList, inline: true);
-                        embed.AddField("Votes & Timer", votesAndTimeRemainingList, inline: true);
+                        report.AddField("Active Elections", electionList, inline: true);
+                        report.AddField("Settlement", settlementList, inline: true);
+                        report.AddField("Votes & Timer", votesAndTimeRemainingList, inline: true);
                     }
                     else
                     {
-                        embed.AddField("Active Elections", "-- No active elections --", inline: true);
-                        embed.AddAlignmentField();
-                        embed.AddAlignmentField();
+                        report.AddField("Active Elections", "-- No active elections --", inline: true);
+                        report.AddAlignmentField();
+                        report.AddAlignmentField();
                     }
                 }
 
@@ -758,19 +758,19 @@ namespace Eco.Plugins.DiscordLink.Utilities
                     Shared.GetActiveLawsList(out string lawList, out string settlementList, out string creatorList);
                     if (!string.IsNullOrEmpty(lawList))
                     {
-                        embed.AddField("Active Laws", lawList, inline: true);
-                        embed.AddField("Settlement", settlementList, inline: true);
-                        embed.AddField("Creator", creatorList, inline: true);
+                        report.AddField("Active Laws", lawList, inline: true);
+                        report.AddField("Settlement", settlementList, inline: true);
+                        report.AddField("Creator", creatorList, inline: true);
                     }
                     else
                     {
-                        embed.AddField("Active Laws", "-- No active laws --", inline: true);
-                        embed.AddAlignmentField();
-                        embed.AddAlignmentField();
+                        report.AddField("Active Laws", "-- No active laws --", inline: true);
+                        report.AddAlignmentField();
+                        report.AddAlignmentField();
                     }
                 }
 
-                return embed;
+                return report;
             }
 
             public static async Task<DiscordLinkEmbed> GetPlayerReport(User user, PlayerReportComponentFlag flag)
@@ -783,6 +783,7 @@ namespace Eco.Plugins.DiscordLink.Utilities
 
                 DiscordLinkEmbed report = new DiscordLinkEmbed();
                 report.WithTitle($"Report for {MessageUtils.StripTags(user.Name)}");
+                report.WithFooter(GetStandardEmbedFooter());
 
                 // Online Status
                 if (flag.HasFlag(PlayerReportComponentFlag.OnlineStatus))
@@ -938,8 +939,9 @@ namespace Eco.Plugins.DiscordLink.Utilities
             {
                 var currencyTradesMap = Moose.Plugin.MooseStorage.WorldData.CurrencyToTradeCountMap;
 
-                DiscordLinkEmbed embed = new DiscordLinkEmbed();
-                embed.WithTitle(MessageUtils.StripTags(currency.Name));
+                DiscordLinkEmbed report = new DiscordLinkEmbed();
+                report.WithTitle(MessageUtils.StripTags(currency.Name));
+                report.WithFooter(GetStandardEmbedFooter());
 
                 // Find and sort relevant accounts
                 IEnumerable<BankAccount> accounts = BankAccountManager.Obj.Accounts.Where(acc => acc.GetCurrencyHoldingVal(currency) >= 1).OrderByDescending(acc => acc.GetCurrencyHoldingVal(currency));
@@ -960,7 +962,7 @@ namespace Eco.Plugins.DiscordLink.Utilities
                         continue;
                     }
                     topAccounts += $"{MessageUtils.StripTags(accountEnumerator.Current.Name)}\n";
-                    amounts += $"**{accountEnumerator.Current.GetCurrencyHoldingVal(currency):n0}**\n";
+                    amounts += $"**{accountEnumerator.Current.GetCurrencyHoldingVal(currency):N0}**\n";
                     topAccountHolders += $"{accountEnumerator.Current.Creator.Name}\n";
                 }
 
@@ -970,39 +972,39 @@ namespace Eco.Plugins.DiscordLink.Utilities
                 string backededItemName = currency.Backed ? $"{currency.BackingItem?.DisplayName ?? "Unknown"}" : "Personal";
 
                 // Build message
+                report.AddField("Total amount", currency.Circulation.ToString("N0"), inline: true);
+                report.AddField("Active circulation", Economy.CalculateActiveCurrencyCirculation(currency).ToString("N0"), inline: true);
                 if (useTradeCount)
-                    embed.AddField("Total trades", tradesCount.ToString("n0"), inline: true);
-
-                embed.AddField("Amount in circulation", currency.Circulation.ToString("n0"), inline: true);
-                embed.AddAlignmentField();
-                if (!useTradeCount)
-                    embed.AddAlignmentField();
+                    report.AddField("Total trades", tradesCount.ToString("N0"), inline: true);
+                else
+                    report.AddAlignmentField();
 
                 if (useBackingInfo && currency.Backed)
                 {
-                    embed.AddField("Backing", backededItemName, inline: true);
-                    embed.AddField("Coins per item", currency.CoinsPerItem.ToString("n0"), inline: true);
-                    embed.AddAlignmentField();
+                    report.AddField("Backing", backededItemName, inline: true);
+                    report.AddField("Coins per item", currency.CoinsPerItem.ToString("N0"), inline: true);
+                    report.AddAlignmentField();
                 }
 
                 if (!string.IsNullOrWhiteSpace(topAccounts))
                 {
-                    embed.AddField("Top Holders", topAccountHolders, inline: true);
-                    embed.AddField("Amount", amounts, inline: true);
-                    embed.AddField("Account", topAccounts, inline: true);
+                    report.AddField("Top Holders", topAccountHolders, inline: true);
+                    report.AddField("Amount", amounts, inline: true);
+                    report.AddField("Account", topAccounts, inline: true);
                 }
                 else
                 {
-                    embed.AddField("Top Holders", "-- No player holding this currency --", inline: true);
+                    report.AddField("Top Holders", "-- No player holding this currency --", inline: true);
                 }
 
-                return embed;
+                return report;
             }
 
             public static DiscordLinkEmbed GetElectionReport(Election election)
             {
                 DiscordLinkEmbed report = new DiscordLinkEmbed();
                 report.WithTitle(MessageUtils.StripTags(election.Name));
+                report.WithFooter(GetStandardEmbedFooter());
 
                 // Link
                 string webServerURL = NetworkManager.Config.WebServerUrl;
@@ -1095,6 +1097,7 @@ namespace Eco.Plugins.DiscordLink.Utilities
             {
                 DiscordLinkEmbed report = new DiscordLinkEmbed();
                 report.WithTitle(MessageUtils.StripTags(workParty.Name));
+                report.WithFooter(GetStandardEmbedFooter());
 
                 // Workers
                 string workersDesc = string.Empty;
@@ -1218,6 +1221,84 @@ namespace Eco.Plugins.DiscordLink.Utilities
                 return report;
             }
 
+            public static DiscordLinkEmbed GetSpecialtiesReport(SpecialtyAssignmentLookupResult lookup)
+            {
+                DiscordLinkEmbed report = new DiscordLinkEmbed();
+                string title = lookup.SettlementFilter == null ? "Global Skills" : $"{lookup.SettlementFilter.Name.StripTags} Skills";
+                report.WithTitle(title);
+                report.WithFooter(GetStandardEmbedFooter());
+
+                Dictionary<Skill, List<User>> skillAndUsers = lookup.PlayersPerSpecialty;
+                lookup.Specialties.Sort(
+                    delegate (Skill left, Skill right)
+                    {
+                        int leftUserCount = skillAndUsers[left].Count();
+                        int rightUserCount = skillAndUsers[right].Count();
+                        if (leftUserCount == rightUserCount)
+                        {
+                            return left.Name.StripTags().CompareTo(right.Name.StripTags());
+                        }
+                        return leftUserCount.CompareTo(rightUserCount);
+                    });
+
+                foreach (Skill specialty in lookup.Specialties)
+                {
+                    if (!specialty.IsDiscovered())
+                        continue;
+
+                    int specialtyAssignmentCount = lookup.PlayerCountPerSpecialty[specialty];
+                    report.AddField($"**{specialty.DisplayName}** ({specialtyAssignmentCount})", string.Join("\n", skillAndUsers[specialty]
+                        .OrderByDescending(user => user.Skillset.Skills.First(s => s.GetType() == specialty.GetType()).Level)
+                        .Select(user =>
+                        {
+                            int level = user.Skillset.Skills.First(s => s.GetType() == specialty.GetType()).Level;
+                            string userLine = $"{level} - {user.Name.StripTags()}";
+
+                            if (level < 1)
+                                userLine = $"_{userLine}_";
+
+                            return userLine;
+                        } )), inline: true);
+                }
+                report.AlignEndingRow();
+
+                return report;
+            }
+
+            public static DiscordLinkEmbed GetRepairBountiesReport(RepairBountyLookupResult lookup)
+            {
+                DiscordLinkEmbed report = new DiscordLinkEmbed();
+
+                string title = string.Empty;
+                if (lookup.UserFilter != null)
+                    title = $"{lookup.UserFilter.Name} Repair Bounties";
+                else if (lookup.SettlementFilter != null)
+                    title = $"{lookup.SettlementFilter.Name.StripTags()} Repair Bounties";
+                else
+                    title = "Global Repair Bounties";
+                report.WithTitle(title);
+                report.WithFooter(GetStandardEmbedFooter());
+
+                StringBuilder ownerDesc = new StringBuilder();
+                StringBuilder worldObjectDesc = new StringBuilder();
+                StringBuilder durabilityAndPaymentDesc = new StringBuilder();
+
+                foreach (RepairBountyLookupData bounty in lookup.Bounties.OrderBy(bounty => bounty.RepairObject.DisplayName))
+                {
+                    ownerDesc.AppendLine(bounty.RepairObject.Owners.Name);
+                    worldObjectDesc.AppendLine(bounty.RepairObject.DisplayName);
+
+                    string paymentDesc = bounty.PaymentAmount > 0 ? $"{bounty.PaymentAmount.ToString("N2")} {bounty.PaymentCurrency.Name}" : "No payment";
+                    durabilityAndPaymentDesc.AppendLine($"{bounty.DurabilityPercent.ToString("00")} | {paymentDesc}");
+                }
+
+                report.AddField("Owner", ownerDesc.ToString(), inline: true);
+                report.AddField("Object", worldObjectDesc.ToString(), inline: true);
+                report.AddField("Durability **|** Payment", durabilityAndPaymentDesc.ToString(), inline: true);
+
+                return report;
+            }
+
             public static DiscordLinkEmbed GetAccumulatedTradeReport(List<CurrencyTrade> tradeList)
             {
                 if (tradeList.Count <= 0)
@@ -1280,9 +1361,8 @@ namespace Eco.Plugins.DiscordLink.Utilities
 
             public static DiscordLinkEmbed GetVerificationDM(User ecoUser)
             {
-                DLConfigData PluginConfig = DLConfig.Data;
                 EcoServerConfig serverConfig = NetworkManager.Config;
-                string serverName = MessageUtils.StripTags(!string.IsNullOrWhiteSpace(PluginConfig.ServerName) ? DLConfig.Data.ServerName : serverConfig.Name.StripTags());
+                string serverName = MessageUtils.StripTags(!string.IsNullOrWhiteSpace(DiscordLinkConfig.ServerName) ? DiscordLinkConfig.ServerName : serverConfig.Name.StripTags());
 
                 DiscordLinkEmbed embed = new DiscordLinkEmbed();
                 embed.WithTitle("Account Linking Verification");
@@ -1295,7 +1375,7 @@ namespace Eco.Plugins.DiscordLink.Utilities
 
             public static string GetStandardEmbedFooter()
             {
-                string serverName = MessageUtils.FirstNonEmptyString(DLConfig.Data.ServerName, NetworkManager.Config.Name.StripTags(), "[Server Title Missing]");
+                string serverName = MessageUtils.FirstNonEmptyString(DiscordLinkConfig.ServerName, NetworkManager.Config.Name.StripTags(), "[Server Title Missing]");
                 string timestamp = Shared.GetServerTimeStamp();
                 return $"Message sent by DiscordLink @ {serverName} [{timestamp}]";
             }
@@ -1305,6 +1385,7 @@ namespace Eco.Plugins.DiscordLink.Utilities
                 // Format message
                 embedContent = new DiscordLinkEmbed();
                 embedContent.WithTitle($"Trade offers for {matchedName.StripTags()}");
+                embedContent.WithFooter(GetStandardEmbedFooter());
 
                 if (offerList.OfferCount == 0)
                 {

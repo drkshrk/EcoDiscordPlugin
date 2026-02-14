@@ -27,13 +27,13 @@ namespace Eco.Plugins.DiscordLink.Modules
 
         protected override async Task<bool> ShouldRun()
         {
-            return DiscordLink.Obj.Client.BotHasPermission(Permissions.ManageRoles) && !_hasRun;
+            return !_hasRun && DiscordLink.Obj.Client.BotHasPermission(DiscordPermissions.ManageRoles);
         }
 
         protected override async Task UpdateInternal(DiscordLink plugin, DlEventType trigger, params object[] data)
         {
             DiscordClient client = DiscordLink.Obj.Client;
-            if (!client.BotHasPermission(Permissions.ManageRoles))
+            if (!client.BotHasPermission(DiscordPermissions.ManageRoles))
                 return;
 
             if (trigger == DlEventType.WorldReset)
@@ -53,7 +53,7 @@ namespace Eco.Plugins.DiscordLink.Modules
                     }
 
                     // Special
-                    if (role == AccountLinkRole && DLConfig.Data.UseLinkedAccountRole)
+                    if (role == AccountLinkRole && DiscordLinkConfig.UseLinkedAccountRole)
                         continue;
 
                     // Demographics

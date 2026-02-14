@@ -17,7 +17,7 @@ using static Eco.Plugins.DiscordLink.Utilities.MessageBuilder;
 
 namespace Eco.Plugins.DiscordLink
 {
-    public class EcoCommandContext : CommandContext
+    public class EcoCommandContext : DiscordLinkCommandContext
     {
         public EcoCommandContext(IChatClient client)
         {
@@ -38,24 +38,26 @@ namespace Eco.Plugins.DiscordLink
 
         private delegate Task EcoCommand(IChatClient callingClient, params string[] parameters);
 
-        private static async Task ExecuteCommand(EcoCommand command, IChatClient callingClient, params string[] parameters)
+        private static async Task ExecuteCommand(EcoCommand command, EcoCommandContext ctx)
         {
-            // Trim the arguments since they often have a space at the beginning
-            for (int i = 0; i < parameters.Length; ++i)
-            {
-                parameters[i] = parameters[i].Trim();
-            }
-
             string commandName = command.Method.Name;
             try
             {
-                Logger.Debug($"{MessageUtils.StripTags(callingClient.Name)} invoked Eco command \"/{command.Method.Name}\"");
-                await command(callingClient, parameters);
+                Logger.Debug($"{MessageUtils.StripTags(ctx.ChatClient.Name)} invoked Eco command \"/{command.Method.Name}\"");
+
+                // Block commands from non-admins if the server isn't fully ready yet
+                if (ctx.ChatClient.GetChatAuthLevel() < ChatAuthorizationLevel.Admin && Plugins.DiscordLink.DiscordLink.Obj.Status != StatusState.Connected)
+                {
+                    ReportCommandError(ctx, $"DiscordLink is not in a ready state to execute commands.\nCurrent status is {Plugins.DiscordLink.DiscordLink.Obj.GetStatus()}");
+                    return;
+                }
+
+                await command(ctx.ChatClient);
             }
             catch (Exception e)
             {
-                callingClient.MsgLocStr($"Error occurred while attempting to run that command. Error message: {e}", Shared.Services.NotificationStyle.InfoBox);
-                Logger.Exception($"An exception occured while attempting to execute a command.\nCommand name: \"{commandName}\"\nCalling user: \"{MessageUtils.StripTags(callingClient.Name)}\"", e);
+                ctx.ChatClient.MsgLocStr($"Error occurred while attempting to run that command. Error message: {e}", Shared.Services.NotificationStyle.InfoBox);
+                Logger.Exception($"An exception occured while attempting to execute a command.\nCommand name: \"{commandName}\"\nCalling user: \"{MessageUtils.StripTags(ctx.ChatClient.Name)}\"", e);
             }
         }
 
@@ -100,7 +102,7 @@ namespace Eco.Plugins.DiscordLink
             await ExecuteCommand(async (lUser, args) =>
             {
                 await SharedCommands.Update(ctx);
-            }, caller);
+            }, ctx);
         }
 
         [ChatSubCommand("DiscordLink", "Restarts the plugin.", ChatAuthorizationLevel.Admin)]
@@ -110,7 +112,7 @@ namespace Eco.Plugins.DiscordLink
             await ExecuteCommand(async (lUser, args) =>
             {
                 await SharedCommands.RestartPlugin(ctx);
-            }, caller);
+            }, ctx);
         }
 
         [ChatSubCommand("DiscordLink", "Reloads the DiscordLink config.", ChatAuthorizationLevel.Admin)]
@@ -120,7 +122,7 @@ namespace Eco.Plugins.DiscordLink
             await ExecuteCommand(async (lUser, args) =>
             {
                 await SharedCommands.ReloadConfig(ctx);
-            }, caller);
+            }, ctx);
         }
 
         [ChatSubCommand("DiscordLink", "Removes all persistent storage data.", ChatAuthorizationLevel.Admin)]
@@ -130,7 +132,7 @@ namespace Eco.Plugins.DiscordLink
             await ExecuteCommand(async (lUser, args) =>
             {
                 await SharedCommands.ResetPersistentData(ctx);
-            }, caller);
+            }, ctx);
         }
 
         [ChatSubCommand("DiscordLink", "Resets world data as if a new world had been created.", ChatAuthorizationLevel.Admin)]
@@ -140,7 +142,7 @@ namespace Eco.Plugins.DiscordLink
             await ExecuteCommand(async (lUser, args) =>
             {
                 await SharedCommands.ResetWorldData(ctx);
-            }, caller);
+            }, ctx);
         }
 
         [ChatSubCommand("DiscordLink", "Deletes all Discord roles created and tracked by DiscordLink.", ChatAuthorizationLevel.Admin)]
@@ -150,9 +152,8 @@ namespace Eco.Plugins.DiscordLink
             await ExecuteCommand(async (lUser, args) =>
             {
                 await SharedCommands.ClearRoles(ctx);
-            }, caller);
+            }, ctx);
         }
-
 
         [ChatSubCommand("DiscordLink", "Displays a description of the persistent storage data.", ChatAuthorizationLevel.Admin)]
         public static async Task PersistentStorageData(User caller)
@@ -161,7 +162,7 @@ namespace Eco.Plugins.DiscordLink
             await ExecuteCommand(async (lUser, args) =>
             {
                 await SharedCommands.PersistentStorageData(ctx);
-            }, caller);
+            }, ctx);
         }
 
         [ChatSubCommand("DiscordLink", "Displays a description of the world storage data.", ChatAuthorizationLevel.Admin)]
@@ -171,7 +172,7 @@ namespace Eco.Plugins.DiscordLink
             await ExecuteCommand(async (lUser, args) =>
             {
                 await SharedCommands.WorldStorageData(ctx);
-            }, caller);
+            }, ctx);
         }
 
         #endregion
@@ -185,7 +186,7 @@ namespace Eco.Plugins.DiscordLink
             await ExecuteCommand(async (lUser, args) =>
             {
                 await SharedCommands.ServerShutdown(ctx);
-            }, caller);
+            }, ctx);
         }
 
         #endregion
@@ -199,7 +200,7 @@ namespace Eco.Plugins.DiscordLink
             await ExecuteCommand(async (lUser, args) =>
             {
                 ReportCommandInfo(ctx, MessageBuilder.Shared.GetVersionMessage());
-            }, caller);
+            }, ctx);
         }
 
         [ChatSubCommand("DiscordLink", "Displays information about the DiscordLink plugin.", ChatAuthorizationLevel.User)]
@@ -209,7 +210,7 @@ namespace Eco.Plugins.DiscordLink
             await ExecuteCommand(async (lUser, args) =>
             {
                 DisplayCommandData(ctx, DLConstants.ECO_PANEL_DL_MESSAGE_MEDIUM, $"About DiscordLink {Plugins.DiscordLink.DiscordLink.Obj.InstalledVersion.ToString(3)}", MessageBuilder.Shared.GetAboutMessage());
-            }, caller);
+            }, ctx);
         }
 
         [ChatSubCommand("DiscordLink", "Opens the documentation web page", ChatAuthorizationLevel.User)]
@@ -219,7 +220,7 @@ namespace Eco.Plugins.DiscordLink
             await ExecuteCommand(async (lUser, args) =>
             {
                 caller.OpenWebpage("https://github.com/Eco-DiscordLink/EcoDiscordPlugin");
-            }, caller);
+            }, ctx);
         }
 
         [ChatSubCommand("DiscordLink", "Shows the plugin status.", ChatAuthorizationLevel.Admin)]
@@ -229,7 +230,7 @@ namespace Eco.Plugins.DiscordLink
             await ExecuteCommand(async (lUser, args) =>
             {
                 DisplayCommandData(ctx, DLConstants.ECO_PANEL_COMPLEX_LIST, "DiscordLink Status", MessageBuilder.Shared.GetDisplayStringAsync(verbose).Result);
-            }, caller);
+            }, ctx);
         }
 
         [ChatSubCommand("DiscordLink", "Checks configuration setup and reports any errors.", ChatAuthorizationLevel.Admin)]
@@ -239,7 +240,7 @@ namespace Eco.Plugins.DiscordLink
             await ExecuteCommand(async (lUser, args) =>
             {
                 await SharedCommands.VerifyConfig(ctx);
-            }, caller);
+            }, ctx);
         }
 
         [ChatSubCommand("DiscordLink", "Checks all permissions and intents needed for the current configuration and reports any missing ones.", ChatAuthorizationLevel.Admin)]
@@ -249,7 +250,7 @@ namespace Eco.Plugins.DiscordLink
             await ExecuteCommand(async (lUser, args) =>
             {
                 await SharedCommands.VerifyPermissions(ctx, MessageBuilder.PermissionReportComponentFlag.All);
-            }, caller);
+            }, ctx);
         }
 
         [ChatSubCommand("DiscordLink", "Checks all intents needed and reports any missing ones.", ChatAuthorizationLevel.Admin)]
@@ -259,7 +260,7 @@ namespace Eco.Plugins.DiscordLink
             await ExecuteCommand(async (lUser, args) =>
             {
                 await SharedCommands.VerifyPermissions(ctx, MessageBuilder.PermissionReportComponentFlag.Intents);
-            }, caller);
+            }, ctx);
         }
 
         [ChatSubCommand("DiscordLink", "Checks all server permissions needed and reports any missing ones.", ChatAuthorizationLevel.Admin)]
@@ -269,7 +270,7 @@ namespace Eco.Plugins.DiscordLink
             await ExecuteCommand(async (lUser, args) =>
             {
                 await SharedCommands.VerifyPermissions(ctx, MessageBuilder.PermissionReportComponentFlag.ServerPermissions);
-            }, caller);
+            }, ctx);
         }
 
         [ChatSubCommand("DiscordLink", "Checks all permissions needed for the given channel and reports any missing ones.", ChatAuthorizationLevel.Admin)]
@@ -279,7 +280,7 @@ namespace Eco.Plugins.DiscordLink
             await ExecuteCommand(async (lUser, args) =>
             {
                 await SharedCommands.VerifyPermissionsForChannel(ctx, channelNameOrId);
-            }, caller);
+            }, ctx);
         }
 
         [ChatSubCommand("DiscordLink", "Presents a list of all channel links.", ChatAuthorizationLevel.Admin)]
@@ -289,32 +290,32 @@ namespace Eco.Plugins.DiscordLink
             await ExecuteCommand(async (lUser, args) =>
             {
                 await SharedCommands.ListChannelLinks(ctx);
-            }, caller);
+            }, ctx);
         }
 
         #endregion
 
         #region Lookups
 
-        [ChatSubCommand("DiscordLink", "Displays the Player Report for the given player.", ChatAuthorizationLevel.User)]
-        public static async Task PlayerReport(User caller, string playerNameOrId, string reportType = "All")
+        [ChatSubCommand("DiscordLink", "Displays information about the given player.", ChatAuthorizationLevel.User)]
+        public static async Task Player(User caller, string playerNameOrId, string component = "All")
         {
             EcoCommandContext ctx = new EcoCommandContext(caller);
             await ExecuteCommand(async (lUser, args) =>
             {
-                if (!Enum.TryParse(reportType, out PlayerReportComponentFlag reportTypeEnum))
+                if (!Enum.TryParse(component, out PlayerReportComponentFlag reportTypeEnum))
                 {
-                    ReportCommandError(ctx, $"\"{reportType}\" is not a valid report type. The available report types are: {string.Join(", ", Enum.GetNames(typeof(PlayerReportComponentFlag)))}");
+                    ReportCommandError(ctx, $"\"{component}\" is not a valid player report component type. The available types are: {string.Join(", ", Enum.GetNames(typeof(PlayerReportComponentFlag)))}");
                     return;
                 }
 
                 await SharedCommands.PlayerReport(ctx, playerNameOrId, reportTypeEnum);
-            }, caller);
+            }, ctx);
         }
 
-        [ChatSubCommand("DiscordLink", "Displays the Currency Report for the given currency.", ChatAuthorizationLevel.User)]
-        public static async Task CurrencyReport(User caller, string currencyNameOrId,
-            int maxTopHoldersCount = DLConfig.DefaultValues.MaxTopCurrencyHolderCount,
+        [ChatSubCommand("DiscordLink", "Displays information about the given currency.", ChatAuthorizationLevel.User)]
+        public static async Task Currency(User caller, string currencyNameOrId,
+            int maxTopHoldersCount = ServerConfigDefaultValues.MaxTopCurrencyHolderCount,
             bool useTradeCount = true,
             bool useBackingInfo = false)
         {
@@ -322,11 +323,11 @@ namespace Eco.Plugins.DiscordLink
             await ExecuteCommand(async (lUser, args) =>
             {
                 await SharedCommands.CurrencyReport(ctx, currencyNameOrId, maxTopHoldersCount, useTradeCount, useBackingInfo);
-            }, caller);
+            }, ctx);
         }
 
-        [ChatSubCommand("DiscordLink", "Displays a report for the top used currencies.", ChatAuthorizationLevel.User)]
-        public static async Task CurrenciesReport(User caller, string currencyType = "all",
+        [ChatSubCommand("DiscordLink", "Displays information about the top used currencies.", ChatAuthorizationLevel.User)]
+        public static async Task Currencies(User caller, string currencyType = "all",
             int maxCurrenciesPerType = DLConstants.CURRENCY_REPORT_COMMAND_MAX_CURRENCIES_PER_TYPE_DEFAULT,
             int holdersPerCurrency = DLConstants.CURRENCY_REPORT_COMMAND_MAX_TOP_HOLDERS_PER_CURRENCY_DEFAULT)
         {
@@ -341,47 +342,47 @@ namespace Eco.Plugins.DiscordLink
                 }
 
                 await SharedCommands.CurrenciesReport(ctx, type, maxCurrenciesPerType, holdersPerCurrency);
-            }, caller);
+            }, ctx);
         }
 
-        [ChatSubCommand("DiscordLink", "Displays the Election Report for the given election.", ChatAuthorizationLevel.User)]
-        public static async Task ElectionReport(User caller, string electionNameOrId)
+        [ChatSubCommand("DiscordLink", "Displays information about the given election.", ChatAuthorizationLevel.User)]
+        public static async Task Election(User caller, string electionNameOrId)
         {
             EcoCommandContext ctx = new EcoCommandContext(caller);
             await ExecuteCommand(async (lUser, args) =>
             {
                 await SharedCommands.ElectionReport(ctx, electionNameOrId);
-            }, caller);
+            }, ctx);
         }
 
-        [ChatSubCommand("DiscordLink", "Displays a report for the currently active elections.", ChatAuthorizationLevel.User)]
-        public static async Task ElectionsReport(User caller)
+        [ChatSubCommand("DiscordLink", "Displays a report about the currently active elections.", ChatAuthorizationLevel.User)]
+        public static async Task Elections(User caller)
         {
             EcoCommandContext ctx = new EcoCommandContext(caller);
             await ExecuteCommand(async (lUser, args) =>
             {
                 await SharedCommands.ElectionsReport(ctx);
-            }, caller);
+            }, ctx);
         }
 
-        [ChatSubCommand("DiscordLink", "Displays the Work Party Report for the given work party.", ChatAuthorizationLevel.User)]
-        public static async Task WorkPartyReport(User caller, string workPartyNameOrId)
+        [ChatSubCommand("DiscordLink", "Displays information about the given work party.", ChatAuthorizationLevel.User)]
+        public static async Task WorkParty(User caller, string workPartyNameOrId)
         {
             EcoCommandContext ctx = new EcoCommandContext(caller);
             await ExecuteCommand(async (lUser, args) =>
             {
                 await SharedCommands.WorkPartyReport(ctx, workPartyNameOrId);
-            }, caller);
+            }, ctx);
         }
 
-        [ChatSubCommand("DiscordLink", "Displays a report for the currently active work parties.", ChatAuthorizationLevel.User)]
-        public static async Task WorkPartiesReport(User caller)
+        [ChatSubCommand("DiscordLink", "Displays information about the currently active work parties.", ChatAuthorizationLevel.User)]
+        public static async Task WorkParties(User caller)
         {
             EcoCommandContext ctx = new EcoCommandContext(caller);
             await ExecuteCommand(async (lUser, args) =>
             {
                 await SharedCommands.WorkPartiesReport(ctx);
-            }, caller);
+            }, ctx);
         }
 
         #endregion
@@ -395,7 +396,7 @@ namespace Eco.Plugins.DiscordLink
             await ExecuteCommand(async (lUser, args) =>
             {
                 await SharedCommands.PostInviteMessage(ctx);
-            }, caller);
+            }, ctx);
         }
 
         [ChatSubCommand("DiscordLink", "Opens an invite to the Discord server.", ChatAuthorizationLevel.User)]
@@ -421,7 +422,7 @@ namespace Eco.Plugins.DiscordLink
                 string inviteCode = discordAddress.Substring(findIndex + 1);
                 caller.OpenDiscordInvite(inviteCode);
                 ReportCommandInfo(ctx, "Invite sent");
-            }, caller);
+            }, ctx);
         }
 
         #endregion
@@ -435,7 +436,7 @@ namespace Eco.Plugins.DiscordLink
             await ExecuteCommand(async (lUser, args) =>
             {
                 DisplayCommandData(ctx, DLConstants.ECO_PANEL_DL_MESSAGE_MEDIUM, $"Discord Account Linking", MessageUtils.FormatMessageForEco(MessageBuilder.Shared.GetLinkAccountInfoMessage()));
-            }, caller);
+            }, ctx);
         }
 
         [ChatSubCommand("DiscordLink", "Links the calling user account to a Discord account.", ChatAuthorizationLevel.User)]
@@ -454,14 +455,16 @@ namespace Eco.Plugins.DiscordLink
 
                 // Find the Discord user
                 DiscordMember matchingMember = null;
-                IReadOnlyCollection<DiscordMember> guildMembers = await plugin.Client.GetMembersAsync();
-                if (guildMembers == null)
-                    return;
-
-                foreach (DiscordMember member in guildMembers)
+                foreach (DiscordMember member in await plugin.Client.FetchMembersAsync())
                 {
                     if (member.HasNameOrMemberId(discordName))
                     {
+                        if(member.IsBot)
+                        {
+                            ReportCommandError(ctx, $"The discord account with name \"{discordName}\" belongs to a bot and is not a valid account link target.");
+                            return;
+                        }
+
                         matchingMember = member;
                         break;
                     }
@@ -494,13 +497,14 @@ namespace Eco.Plugins.DiscordLink
                 }
 
                 // Try to Notify the Discord account, that a link has been made and ask for verification
-                DiscordMessage message = await plugin.Client.SendDmAsync(matchingMember, null, MessageBuilder.Discord.GetVerificationDM(caller));
+                IEnumerable<DiscordMessage> messages = await plugin.Client.SendDmAsync(matchingMember, null, MessageBuilder.Discord.GetVerificationDM(caller));
 
                 // This message can be null, when the target user has blocked direct messages from guild members.
-                if (message != null)
+                if (messages != null)
                 {
-                    _ = message.CreateReactionAsync(DLConstants.ACCEPT_EMOJI);
-                    _ = message.CreateReactionAsync(DLConstants.DENY_EMOJI);
+                    DiscordMessage reactionMessage = messages.Last();
+                    _ = reactionMessage.CreateReactionAsync(DLConstants.ACCEPT_EMOJI);
+                    _ = reactionMessage.CreateReactionAsync(DLConstants.DENY_EMOJI);
                 }
                 else
                 {
@@ -514,7 +518,7 @@ namespace Eco.Plugins.DiscordLink
 
                 // Notify the Eco user that the link has been created and that verification is required
                 ReportCommandInfo(ctx, $"Your account has been linked.\nThe link requires verification before becoming active.\nInstructions have been sent to the linked Discord account.");
-            }, caller);
+            }, ctx);
         }
 
         [ChatSubCommand("DiscordLink", "Unlinks the Eco account from a linked Discord account.", ChatAuthorizationLevel.User)]
@@ -528,7 +532,7 @@ namespace Eco.Plugins.DiscordLink
                     ReportCommandInfo(ctx, $"Discord account unlinked.");
                 else
                     ReportCommandError(ctx, $"No linked Discord account could be found.");
-            }, caller);
+            }, ctx);
         }
 
         #endregion
@@ -542,7 +546,7 @@ namespace Eco.Plugins.DiscordLink
             await ExecuteCommand(async (lUser, args) =>
             {
                 Moose.Plugin.Commands.Trades(caller, searchName);
-            }, caller);
+            }, ctx);
         }
 
         [ChatSubCommand("DiscordLink", "Creates a live updated display of available trades by player, tag, item or store", ChatAuthorizationLevel.User)]
@@ -552,7 +556,7 @@ namespace Eco.Plugins.DiscordLink
             await ExecuteCommand(async (lUser, args) =>
             {
                 await SharedCommands.AddTradeWatcher(ctx, searchName, Modules.ModuleArchetype.Display);
-            }, caller);
+            }, ctx);
         }
 
         [ChatSubCommand("DiscordLink", "Removes the live updated display of available trades for the player, tag, item or store.", ChatAuthorizationLevel.User)]
@@ -562,7 +566,7 @@ namespace Eco.Plugins.DiscordLink
             await ExecuteCommand(async (lUser, args) =>
             {
                 await SharedCommands.RemoveTradeWatcher(ctx, searchName, Modules.ModuleArchetype.Display);
-            }, caller);
+            }, ctx);
         }
 
         [ChatSubCommand("DiscordLink", "Creates a feed where the bot will post trades filtered by the search query, as they occur ingame. The search query can filter by player, tag, item or store.", ChatAuthorizationLevel.User)]
@@ -572,7 +576,7 @@ namespace Eco.Plugins.DiscordLink
             await ExecuteCommand(async (lUser, args) =>
             {
                 await SharedCommands.AddTradeWatcher(ctx, searchName, Modules.ModuleArchetype.Feed);
-            }, caller);
+            }, ctx);
         }
 
         [ChatSubCommand("DiscordLink", "Removes the trade watcher feed for a player, tag, item or store.", ChatAuthorizationLevel.User)]
@@ -582,7 +586,7 @@ namespace Eco.Plugins.DiscordLink
             await ExecuteCommand(async (lUser, args) =>
             {
                 await SharedCommands.RemoveTradeWatcher(ctx, searchName, Modules.ModuleArchetype.Feed);
-            }, caller);
+            }, ctx);
         }
 
         [ChatSubCommand("DiscordLink", "Lists all trade watchers for the calling user.", ChatAuthorizationLevel.User)]
@@ -592,7 +596,7 @@ namespace Eco.Plugins.DiscordLink
             await ExecuteCommand(async (lUser, args) =>
             {
                 await SharedCommands.ListTradeWatchers(ctx);
-            }, caller);
+            }, ctx);
         }
 
         #endregion
@@ -606,7 +610,7 @@ namespace Eco.Plugins.DiscordLink
             await ExecuteCommand(async (lUser, args) =>
             {
                 await SharedCommands.Snippet(ctx, ApplicationInterfaceType.Eco, caller.Name, snippetKey);
-            }, caller);
+            }, ctx);
         }
 
         #endregion
@@ -620,7 +624,7 @@ namespace Eco.Plugins.DiscordLink
             await ExecuteCommand(async (lUser, args) =>
             {
                 Moose.Plugin.Commands.Announce(caller, message, messageType, recipient);
-            }, caller);
+            }, ctx);
         }
 
         [ChatSubCommand("DiscordLink", "Opts the calling user out of chat synchronization.", ChatAuthorizationLevel.User)]
@@ -629,7 +633,7 @@ namespace Eco.Plugins.DiscordLink
             EcoCommandContext ctx = new EcoCommandContext(caller);
             await ExecuteCommand(async (lUser, args) =>
             {
-                if (DLConfig.Data.ChatSyncMode == ChatSyncMode.OptOut)
+                if (DiscordLinkConfig.ChatSyncMode == ChatSyncMode.OptOut)
                 {
                     if (DLStorage.PersistentData.OptedOutUsers.Any(user => user.HasAnyId(caller.StrangeId, caller.SteamId)))
                     {
@@ -641,7 +645,7 @@ namespace Eco.Plugins.DiscordLink
                         ReportCommandInfo(ctx, "You have opted out of chat synchronization.");
                     }
                 }
-                else if (DLConfig.Data.ChatSyncMode == ChatSyncMode.OptIn)
+                else if (DiscordLinkConfig.ChatSyncMode == ChatSyncMode.OptIn)
                 {
                     EcoUser optedInUser;
                     if ((optedInUser = DLStorage.PersistentData.OptedInUsers.FirstOrDefault(user => user.HasAnyId(caller.StrangeId, caller.SteamId))) != null)
@@ -655,7 +659,7 @@ namespace Eco.Plugins.DiscordLink
                     }
                 }
 
-            }, caller);
+            }, ctx);
         }
 
         [ChatSubCommand("DiscordLink", "Opts the calling user into chat synchronization.", ChatAuthorizationLevel.User)]
@@ -664,7 +668,7 @@ namespace Eco.Plugins.DiscordLink
             EcoCommandContext ctx = new EcoCommandContext(caller);
             await ExecuteCommand(async (lUser, args) =>
             {
-                if (DLConfig.Data.ChatSyncMode == ChatSyncMode.OptOut)
+                if (DiscordLinkConfig.ChatSyncMode == ChatSyncMode.OptOut)
                 {
                     EcoUser optedOutUser;
                     if ((optedOutUser = DLStorage.PersistentData.OptedOutUsers.FirstOrDefault(user => user.HasAnyId(caller.StrangeId, caller.SteamId))) != null)
@@ -677,7 +681,7 @@ namespace Eco.Plugins.DiscordLink
                         ReportCommandError(ctx, "This server is configured to use opt-out by default.");
                     }
                 }
-                else if (DLConfig.Data.ChatSyncMode == ChatSyncMode.OptIn)
+                else if (DiscordLinkConfig.ChatSyncMode == ChatSyncMode.OptIn)
                 {
                     if (DLStorage.PersistentData.OptedInUsers.Any(user => user.HasAnyId(caller.StrangeId, caller.SteamId)))
                     {
@@ -689,7 +693,7 @@ namespace Eco.Plugins.DiscordLink
                         ReportCommandInfo(ctx, "You have opted into chat synchronization.");
                     }
                 }
-            }, caller);
+            }, ctx);
         }
 
         #endregion

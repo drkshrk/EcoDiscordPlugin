@@ -30,19 +30,22 @@ namespace Eco.Plugins.DiscordLink.Modules
         protected override async Task UpdateInternal(DiscordLink plugin, DlEventType trigger, params object[] data)
         {
             DiscordClient client = DiscordLink.Obj.Client;
-            if (!client.BotHasPermission(Permissions.ManageRoles))
+            if (!client.BotHasPermission(DiscordPermissions.ManageRoles))
                 return;
 
             if (trigger == DlEventType.DiscordClientConnected || trigger == DlEventType.ForceUpdate)
             {
                 ++_opsCount;
-                foreach (DiscordMember member in await client.GetMembersAsync())
+                foreach (DiscordMember member in await client.FetchMembersAsync())
                 {
+                    if (member.IsBot)
+                        continue;
+
                     LinkedUser linkedUser = UserLinkManager.LinkedUserByDiscordUser(member);
                     foreach (ElectedTitle title in Lookups.ActiveElectedTitles)
                     {
                         string titleName = title.Name;
-                        if (linkedUser == null || !DLConfig.Data.UseElectedTitleRoles || !title.ContainsUser(linkedUser.EcoUser))
+                        if (linkedUser == null || !DiscordLinkConfig.UseElectedTitleRoles || !title.ContainsUser(linkedUser.EcoUser))
                         {
                             if (member.HasRoleWithName(titleName))
                             {
@@ -58,7 +61,7 @@ namespace Eco.Plugins.DiscordLink.Modules
             }
             else if (trigger == DlEventType.AccountLinkVerified || trigger == DlEventType.AccountLinkRemoved)
             {
-                if (!DLConfig.Data.UseDemographicRoles)
+                if (!DiscordLinkConfig.UseDemographicRoles)
                     return;
 
                 if (!(data[0] is LinkedUser linkedUser))
@@ -92,7 +95,7 @@ namespace Eco.Plugins.DiscordLink.Modules
             }
             else if (trigger == DlEventType.ElectionStopped)
             {
-                if (!DLConfig.Data.UseDemographicRoles)
+                if (!DiscordLinkConfig.UseDemographicRoles)
                     return;
 
                 if (!(data[0] is Election election))
@@ -118,7 +121,7 @@ namespace Eco.Plugins.DiscordLink.Modules
             }
             else if (trigger == DlEventType.SettlementFounded)
             {
-                if (!DLConfig.Data.UseDemographicRoles)
+                if (!DiscordLinkConfig.UseDemographicRoles)
                     return;
 
                 if (!(data[0] is Settlement settlement))

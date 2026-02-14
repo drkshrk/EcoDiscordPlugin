@@ -11,13 +11,12 @@ namespace Eco.Plugins.DiscordLink.Modules
 {
     public class LayerDisplay : DisplayModule
     {
-        protected override string BaseTag { get { return "[Layer]"; } }
         protected override int TimerStartDelayMs { get { return 15000; } }
         protected override int TimerUpdateIntervalMs { get { return 3600000; } } // Once an hour as that is the update rate of layers
 
         public override string ToString() => "Layer Display";
         protected override DlEventType GetTriggers() => base.GetTriggers() | DlEventType.DiscordClientConnected | DlEventType.Timer;
-        protected override async Task<IEnumerable<DiscordTarget>> GetDiscordTargets() => DLConfig.Data.LayerDisplayChannels.Cast<DiscordTarget>();
+        public override async Task<IEnumerable<DiscordTarget>> GetDiscordTargets() => DiscordLinkConfig.LayerDisplayChannels.Cast<DiscordTarget>();
 
         protected override async Task<bool> ShouldRun() => await base.ShouldRun() && !NetworkManager.Config.WebServerUrl.IsEmpty();
 
@@ -35,12 +34,11 @@ namespace Eco.Plugins.DiscordLink.Modules
             displayContent = new List<DisplayContent>();
             if (!(target is LayerChannelLink layerTarget) || !layerTarget.IsValid())
                 return;
-                return;
 
             string output = layerTarget.UseTerrainComparison
                 ? $"{LayerUtils.GetLayerLink($"{layerTarget.LayerName}Latest")}\n{LayerUtils.GetLayerLink("TerrainLatest")}"
                 : $"{LayerUtils.GetLayerLink($"{layerTarget.LayerName}Latest")}";
-            displayContent.Add(new DisplayContent($"{BaseTag} [{layerTarget.LayerName}]", textContent: output));
+            displayContent.Add(new DisplayContent(textContent: output));
         }
     }
 }

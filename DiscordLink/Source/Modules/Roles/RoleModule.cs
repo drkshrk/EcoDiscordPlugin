@@ -1,4 +1,5 @@
 ﻿using DSharpPlus;
+using DSharpPlus.Entities;
 using Eco.Plugins.DiscordLink.Events;
 using System.Threading.Tasks;
 
@@ -13,7 +14,7 @@ namespace Eco.Plugins.DiscordLink.Modules
 
         protected override async Task<bool> ShouldRun()
         {
-            return DiscordLink.Obj.Client.BotHasPermission(Permissions.ManageRoles);
+            return DiscordLink.Obj.Client.BotHasPermission(DiscordPermissions.ManageRoles);
         }
     }
 }

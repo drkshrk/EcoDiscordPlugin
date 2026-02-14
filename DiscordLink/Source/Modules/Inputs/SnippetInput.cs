@@ -17,11 +17,11 @@ namespace Eco.Plugins.DiscordLink.Modules
             return "Snippet Input";
         }
 
-        public override string GetDisplayText(string childInfo, bool verbose)
+        public override async Task<string> GetDisplayText(string childInfo, bool verbose)
         {
             string info = $"Registered Snippets: {DLStorage.Instance.Snippets.Count}";
             info += $"\r\n{childInfo}";
-            return base.GetDisplayText(info, verbose);
+            return await base.GetDisplayText(info, verbose);
         }
 
         protected override DlEventType GetTriggers()
@@ -31,7 +31,7 @@ namespace Eco.Plugins.DiscordLink.Modules
 
         protected override async Task<bool> ShouldRun()
         {
-            foreach (ChannelLink link in DLConfig.Data.SnippetInputChannels)
+            foreach (ChannelLink link in DiscordLinkConfig.SnippetInputChannels)
             {
                 if (link.IsValid())
                     return true;
@@ -63,7 +63,7 @@ namespace Eco.Plugins.DiscordLink.Modules
             if (messageChannel.IsPrivate)
                 return;
 
-            foreach (ChannelLink link in DLConfig.Data.SnippetInputChannels)
+            foreach (ChannelLink link in DiscordLinkConfig.SnippetInputChannels)
             {
                 if (!link.IsValid())
                     continue;
@@ -79,12 +79,12 @@ namespace Eco.Plugins.DiscordLink.Modules
         private async Task ReloadSnippets()
         {
             DiscordLink plugin = DiscordLink.Obj;
-            foreach (ChannelLink snippetChannel in DLConfig.Data.SnippetInputChannels)
+            foreach (ChannelLink snippetChannel in DiscordLinkConfig.SnippetInputChannels)
             {
                 if (!snippetChannel.IsValid())
                     continue;
 
-                IReadOnlyList<DiscordMessage> snippetChannelMessages = await plugin.Client.GetMessagesAsync(snippetChannel.Channel);
+                IReadOnlyList<DiscordMessage> snippetChannelMessages = await plugin.Client.FetchMessagesAsync(snippetChannel.Channel);
                 if (snippetChannelMessages == null)
                     continue;
 

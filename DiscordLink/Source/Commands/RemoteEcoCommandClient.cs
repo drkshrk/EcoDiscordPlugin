@@ -17,15 +17,15 @@ namespace Eco.Plugins.DiscordLink
         public RemoteEcoCommandClient(DiscordCommandContext ctx)
         {
             DiscordCtx = ctx;
-            LinkedUser userLink = UserLinkManager.LinkedUserByDiscordUser(DiscordCtx.Interaction.User);
+            LinkedUser userLink = UserLinkManager.LinkedUserByDiscordUser(DiscordCtx.Command.User);
             EcoUser = userLink != null ? userLink.EcoUser : null;
         }
 
-        public string Name => EcoUser != null ? EcoUser.Name : $"DiscordLinkClient_{DiscordCtx.Interaction.User.Username}";
-        public LocString MarkedUpName => Localizer.NotLocalizedStr(EcoUser != null ? EcoUser.MarkedUpName : $"DiscordLinkClient_{DiscordCtx.Interaction.User.Username}");
+        public string Name => EcoUser != null ? EcoUser.Name : $"DiscordLinkClient_{DiscordCtx.Command.User.Username}";
+        public LocString MarkedUpName => Localizer.NotLocalizedStr(EcoUser != null ? EcoUser.MarkedUpName : $"DiscordLinkClient_{DiscordCtx.Command.User.Username}");
         public string ImplementationName => "DiscordLink Eco Command Client";
 
-        public string ReportUserId => EcoUser != null ? EcoUser.StrangeId : DiscordCtx.Interaction.User.Id.ToString();
+        public string ReportUserId => EcoUser != null ? EcoUser.StrangeId : DiscordCtx.Command.User.Id.ToString();
         public string ReportUsername => Name;
         public string ReportIpAddress => EcoUser != null ? EcoUser.ReportIpAddress : null;
 
@@ -38,7 +38,7 @@ namespace Eco.Plugins.DiscordLink
                 else if (EcoUser.IsAdmin)
                     return ChatAuthorizationLevel.Admin;
             }
-            else if (DiscordLink.Obj.Client.MemberIsAdmin(DiscordCtx.Interaction.Member))
+            else if (DiscordLink.Obj.Client.MemberIsAdmin(DiscordCtx.Command.Member))
             {
                 return ChatAuthorizationLevel.Admin;
             }

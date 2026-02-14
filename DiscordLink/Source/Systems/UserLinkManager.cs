@@ -207,7 +207,7 @@ namespace Eco.Plugins.DiscordLink
                         }
 
                         client.SendMessageAsync(channel, response).Wait();
-                        _ = client.DeleteMessageAsync(message);
+                        _ = client.DeleteMessageAsync(message, "DiscordLink removing handled link verification message");
                         break;
                     }
 
@@ -313,7 +313,7 @@ namespace Eco.Plugins.DiscordLink
             {
                 try
                 {
-                    DiscordMember = await DiscordLink.Obj.Client.GetMemberAsync(memberId, expect404: true);
+                    DiscordMember = await DiscordLink.Obj.Client.FetchMemberAsync(memberId, expectNotFound: true);
                 }
                 catch (DSharpPlus.Exceptions.NotFoundException)
                 {

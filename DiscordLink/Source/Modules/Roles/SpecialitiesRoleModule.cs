@@ -33,7 +33,7 @@ namespace Eco.Plugins.DiscordLink.Modules
         protected override async Task UpdateInternal(DiscordLink plugin, DlEventType trigger, params object[] data)
         {
             DiscordClient client = DiscordLink.Obj.Client;
-            if (!client.BotHasPermission(Permissions.ManageRoles))
+            if (!client.BotHasPermission(DiscordPermissions.ManageRoles))
                 return;
 
             if (trigger == DlEventType.DiscordClientConnected || trigger == DlEventType.ForceUpdate)
@@ -42,15 +42,18 @@ namespace Eco.Plugins.DiscordLink.Modules
                     return;
 
                 ++_opsCount;
-                foreach (DiscordMember member in await client.GetMembersAsync())
+                foreach (DiscordMember member in await client.FetchMembersAsync())
                 {
+                    if (member.IsBot)
+                        continue;
+
                     LinkedUser linkedUser = UserLinkManager.LinkedUserByDiscordUser(member);
                     foreach (Skill specialty in Lookups.Specialties)
                     {
                         if (IgnoredSpecialtyNames.Contains(specialty.Name))
                             continue;
 
-                        if (linkedUser == null || !DLConfig.Data.UseSpecialtyRoles || !linkedUser.EcoUser.HasSpecialization(specialty.Type))
+                        if (linkedUser == null || !DiscordLinkConfig.UseSpecialtyRoles || !linkedUser.EcoUser.HasSpecialization(specialty.Type))
                         {
                             if (member.HasRoleWithName(specialty.DisplayName))
                             {
@@ -66,7 +69,7 @@ namespace Eco.Plugins.DiscordLink.Modules
             }
             else if (trigger == DlEventType.AccountLinkVerified || trigger == DlEventType.AccountLinkRemoved)
             {
-                if (!DLConfig.Data.UseDemographicRoles)
+                if (!DiscordLinkConfig.UseDemographicRoles)
                     return;
 
                 if (!(data[0] is LinkedUser linkedUser))
@@ -102,7 +105,7 @@ namespace Eco.Plugins.DiscordLink.Modules
             }
             else if (trigger == DlEventType.GainedSpecialty || trigger == DlEventType.LostSpecialty)
             {
-                if (!DLConfig.Data.UseSpecialtyRoles)
+                if (!DiscordLinkConfig.UseSpecialtyRoles)
                     return;
 
                 SkillAction action = data[0] is GainSpecialty gainSpecialty ? gainSpecialty : data[0] is LoseSpecialty loseSpecialty ? loseSpecialty : null;

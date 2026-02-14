@@ -1,18 +1,49 @@
 ﻿using DSharpPlus.Entities;
+using Eco.Gameplay.Objects;
+using Eco.Plugins.DiscordLink.Events;
 using Eco.Shared.Serialization;
 using System;
 using System.ComponentModel;
+using System.Threading.Tasks;
 
 namespace Eco.Plugins.DiscordLink
 {
     public class ChannelLink : DiscordTarget, ICloneable
     {
-        [Browsable(false), JsonIgnore]
-        public DiscordChannel Channel { get; private set; } = null;
-
         [Description("Discord channel by id.")]
         [TypeConverter(typeof(DiscordChannelPropertyConverter))]
-        public ulong DiscordChannelId { get; set; } = 0;
+        public ulong DiscordChannelId
+        {
+            get { return _discordChannelId; }
+            set
+            {
+                _discordChannelId = value;
+
+                // Init can only with an active Discord connection - We handle runtime inits here and startup inits from the config system
+                if (DiscordLink.Obj.Status != StatusState.Connected)
+                    return;
+
+                if(Initialize() && OnChannelLinkVerifiedInRuntime != null)
+                {
+                    OnChannelLinkVerifiedInRuntime.Invoke(this, EventArgs.Empty);
+                }
+            }
+        }
+        private ulong _discordChannelId = 0;
+
+        [Browsable(false), JsonIgnore]
+        public DiscordChannel Channel { get; private set; }
+
+        [Browsable(false), JsonIgnore]
+        public bool Verified { get; private set; }
+
+        public delegate Task OnChannelLinkVerifiedDelegate(object sender, EventArgs e);
+        public static event OnChannelLinkVerifiedDelegate OnChannelLinkVerifiedInRuntime;
+
+        public ChannelLink()
+        {
+            Reset();
+        }
 
         public override string ToString()
         {
@@ -36,7 +67,15 @@ namespace Eco.Plugins.DiscordLink
                 return false;
 
             Channel = channel;
+            Verified = true;
+
             return true;
+        }
+
+        protected virtual void Reset()
+        {
+            Channel = null;
+            Verified = false;
         }
 
         public virtual bool MakeCorrections()

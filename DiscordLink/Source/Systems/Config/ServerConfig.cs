@@ -1,11 +1,8 @@
 ﻿using DSharpPlus.Entities;
 using Eco.Core.Plugins;
 using Eco.Moose.Tools.Logger;
-using Eco.Moose.Utils.Message;
-using Eco.Plugins.DiscordLink.Extensions;
 using Eco.Plugins.Networking;
 using Eco.Shared.Serialization;
-using Eco.Shared.Utils;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -16,101 +13,46 @@ using System.Threading.Tasks;
 
 namespace Eco.Plugins.DiscordLink
 {
-    public sealed class DLConfig
+    public sealed class ServerConfig
     {
-        public static class DefaultValues
-        {
-            public static Logger.LogLevel PluginLogLevel = Logger.LogLevel.Information;
-            public static Microsoft.Extensions.Logging.LogLevel BackendLogLevel = Microsoft.Extensions.Logging.LogLevel.None;
-            public static bool UseVerboseDisplay = false;
-            public static bool DiscordServerOwnerIsAdmin = true;
-            public static readonly string[] AdminRoles = { "Admin", "Eco Admins", "Administrator", "Moderator" };
-            public const string InviteMessage = "Join us on Discord!\\n" + DLConstants.INVITE_COMMAND_TOKEN;
-            public const ChatSyncMode ChatSynchronizationMode = ChatSyncMode.OptOut;
-            public const int MaxMintedCurrencies = 1;
-            public const int MaxPersonalCurrencies = 3;
-            public const int MaxTopCurrencyHolderCount = 3;
-            public const int MaxTradeWatcherDisplaysPerUser = 5;
-            public const DiscordLinkEmbed.EmbedSize MinEmbedSizeForFooter = DiscordLinkEmbed.EmbedSize.Medium;
-            public const bool UseTradeWatcherFeeds = true;
-            public const bool UseLinkedAccountRole = true;
-            public const bool UseDemographicRoles = true;
-            public const bool UseSpecialtyRoles = true;
-            public const bool UseElectedTitleRoles = true;
-            public static readonly string EmbedColor = "#7289da";
-            public static readonly DemographicRoleSubstitution[] DemographicRoleReplacements = { new DemographicRoleSubstitution("everyone", "Eco Everyone"), new DemographicRoleSubstitution("admins", "Eco Admins") };
-            public static readonly EmoteIconSubstitution[] EmoteSubstitutions = { new EmoteIconSubstitution("DiscordLink", "DiscordLinkLogo") };
-        }
-
-        public static readonly DLConfig Instance = new DLConfig();
-        public static DLConfigData Data { get { return Instance._config.Config; } }
-        public PluginConfig<DLConfigData> PluginConfig { get { return Instance._config; } }
-
-        public static List<ChannelLink> GetChannelLinks(bool verifiedLinksOnly = true)
-        {
-            return verifiedLinksOnly
-                ? Instance._verifiedChannelLinks
-                : Instance._allChannelLinks;
-        }
-
-        public static IEnumerable<ChatChannelLink> ChatLinksForEcoChannel(string ecoChannelName) =>
-            Data.ChatChannelLinks.Where(link
-                => link.IsValid()
-                && link.EcoChannel.EqualsCaseInsensitive(ecoChannelName));
-
-        public static IEnumerable<ChatChannelLink> ChatLinksForDiscordChannel(DiscordChannel channel) =>
-            Data.ChatChannelLinks.Where(link
-                => link.IsValid()
-                && link.DiscordChannelId == channel.Id);
+        public PluginConfig<ServerConfigData> PluginConfig { get; private set; }
+        public ServerConfigData ConfigData => PluginConfig.Config;
 
         public delegate Task OnConfigChangedDelegate(object sender, EventArgs e);
         public event OnConfigChangedDelegate OnConfigChanged;
         public event EventHandler OnConfigSaved;
 
-        public const string InviteCommandLinkToken = "[LINK]";
+        private ServerConfigData _prevConfigData; // Used to detect differences when the config is saved
 
-        private DLConfigData _prevConfig; // Used to detect differences when the config is saved
-
-        private PluginConfig<DLConfigData> _config;
         private readonly List<ChannelLink> _allChannelLinks = new List<ChannelLink>();
-        private readonly List<ChannelLink> _verifiedChannelLinks = new List<ChannelLink>();
-
-        // Explicit static constructor to tell C# compiler not to mark type as beforefieldinit
-        static DLConfig()
-        {
-        }
-
-        private DLConfig()
-        {
-        }
 
         public void Initialize()
         {
-            _config = new PluginConfig<DLConfigData>("DiscordLink");
-            _prevConfig = (DLConfigData)Data.Clone();
+            PluginConfig = new PluginConfig<ServerConfigData>("DiscordLink");
+            _prevConfigData = (ServerConfigData)ConfigData.Clone();
 
-            Data.ChatChannelLinks.CollectionChanged += (obj, args) => { HandleCollectionChanged(args); };
-            Data.TradeFeedChannels.CollectionChanged += (obj, args) => { HandleCollectionChanged(args); };
-            Data.CraftingFeedChannels.CollectionChanged += (obj, args) => { HandleCollectionChanged(args); };
-            Data.ServerStatusFeedChannels.CollectionChanged += (obj, args) => { HandleCollectionChanged(args); };
-            Data.PlayerStatusFeedChannels.CollectionChanged += (obj, args) => { HandleCollectionChanged(args); };
-            Data.ElectionFeedChannels.CollectionChanged += (obj, args) => { HandleCollectionChanged(args); };
-            Data.ServerLogFeedChannels.CollectionChanged += (obj, args) => { HandleCollectionChanged(args); };
-            Data.ServerInfoDisplayChannels.CollectionChanged += (obj, args) => { HandleCollectionChanged(args); };
-            Data.WorkPartyDisplayChannels.CollectionChanged += (obj, args) => { HandleCollectionChanged(args); };
-            Data.ElectionDisplayChannels.CollectionChanged += (obj, args) => { HandleCollectionChanged(args); };
-            Data.CurrencyDisplayChannels.CollectionChanged += (obj, args) => { HandleCollectionChanged(args); };
-            Data.MapDisplayChannels.CollectionChanged += (obj, args) => { HandleCollectionChanged(args); };
-            Data.LayerDisplayChannels.CollectionChanged += (obj, args) => { HandleCollectionChanged(args); };
-            Data.SnippetInputChannels.CollectionChanged += (obj, args) => { HandleCollectionChanged(args); };
+            ConfigData.ChatChannelLinks.CollectionChanged += (obj, args) => { HandleCollectionChanged(args); };
+            ConfigData.TradeFeedChannels.CollectionChanged += (obj, args) => { HandleCollectionChanged(args); };
+            ConfigData.CraftingFeedChannels.CollectionChanged += (obj, args) => { HandleCollectionChanged(args); };
+            ConfigData.ServerStatusFeedChannels.CollectionChanged += (obj, args) => { HandleCollectionChanged(args); };
+            ConfigData.PlayerStatusFeedChannels.CollectionChanged += (obj, args) => { HandleCollectionChanged(args); };
+            ConfigData.ElectionFeedChannels.CollectionChanged += (obj, args) => { HandleCollectionChanged(args); };
+            ConfigData.ServerLogFeedChannels.CollectionChanged += (obj, args) => { HandleCollectionChanged(args); };
+            ConfigData.ServerInfoDisplayChannels.CollectionChanged += (obj, args) => { HandleCollectionChanged(args); };
+            ConfigData.WorkPartyDisplayChannels.CollectionChanged += (obj, args) => { HandleCollectionChanged(args); };
+            ConfigData.ElectionDisplayChannels.CollectionChanged += (obj, args) => { HandleCollectionChanged(args); };
+            ConfigData.CurrencyDisplayChannels.CollectionChanged += (obj, args) => { HandleCollectionChanged(args); };
+            ConfigData.MapDisplayChannels.CollectionChanged += (obj, args) => { HandleCollectionChanged(args); };
+            ConfigData.LayerDisplayChannels.CollectionChanged += (obj, args) => { HandleCollectionChanged(args); };
+            ConfigData.SkillDisplayChannels.CollectionChanged += (obj, args) => { HandleCollectionChanged(args); };
+            ConfigData.RepairBountyDisplayChannels.CollectionChanged += (obj, args) => { HandleCollectionChanged(args); };
+            ConfigData.SnippetInputChannels.CollectionChanged += (obj, args) => { HandleCollectionChanged(args); };
         }
 
         public void PostConnectionInit()
         {
             // Channel Links
             BuildChanneLinkList();
-            VerifyLinks();
-            InitChatLinks();
         }
 
         public void HandleCollectionChanged(NotifyCollectionChangedEventArgs args)
@@ -124,9 +66,9 @@ namespace Eco.Plugins.DiscordLink
 
             // Do not verify if change occurred as this function is going to be called again in that case
             // Do not verify the config in case critical data has been changed, as the client will be restarted and that will trigger verification
-            bool tokenChanged = Data.BotToken != _prevConfig.BotToken;
-            bool guildChanged = Data.DiscordServerId != _prevConfig.DiscordServerId;
-            bool logLevelChanged = Data.LogLevel != _prevConfig.LogLevel;
+            bool tokenChanged = ConfigData.BotToken != _prevConfigData.BotToken;
+            bool guildChanged = ConfigData.DiscordServerId != _prevConfigData.DiscordServerId;
+            bool logLevelChanged = ConfigData.LogLevel != _prevConfigData.LogLevel;
             bool correctionMade = !Save();
 
             BuildChanneLinkList();
@@ -138,14 +80,12 @@ namespace Eco.Plugins.DiscordLink
 
             if (logLevelChanged)
             {
-                Logger.SetConfiguredLogLevel(Data.LogLevel);
+                Logger.SetConfiguredLogLevel(ConfigData.LogLevel);
             }
 
             if (DiscordLink.Obj.Client.ConnectionStatus == DiscordClient.ConnectionState.Connected)
             {
                 BuildChanneLinkList();
-                VerifyLinks();
-                InitChatLinks();
             }
 
             // If a correction was made, this function will be called again.
@@ -173,114 +113,94 @@ namespace Eco.Plugins.DiscordLink
             }
 
             // Max tracked trades per user
-            if (Data.MaxTradeWatcherDisplaysPerUser < 0)
+            if (ConfigData.MaxTradeWatcherDisplaysPerUser < 0)
             {
-                Data.MaxTradeWatcherDisplaysPerUser = DLConfig.DefaultValues.MaxTradeWatcherDisplaysPerUser;
+                ConfigData.MaxTradeWatcherDisplaysPerUser = ServerConfigDefaultValues.MaxTradeWatcherDisplaysPerUser;
             }
 
             // Invite Message
-            if (string.IsNullOrEmpty(Data.InviteMessage))
+            if (string.IsNullOrEmpty(ConfigData.InviteMessage))
             {
-                Data.InviteMessage = DefaultValues.InviteMessage;
+                ConfigData.InviteMessage = ServerConfigDefaultValues.InviteMessage;
                 correctionMade = true;
             }
 
             // Currency channels
-            foreach (CurrencyChannelLink link in Data.CurrencyDisplayChannels)
+            foreach (CurrencyChannelLink link in ConfigData.CurrencyDisplayChannels)
             {
                 if (link.MaxMintedCount < 0)
                 {
-                    link.MaxMintedCount = DefaultValues.MaxMintedCurrencies;
+                    link.MaxMintedCount = ServerConfigDefaultValues.MaxMintedCurrencies;
                     correctionMade = true;
                 }
 
                 if (link.MaxPersonalCount < 0)
                 {
-                    link.MaxPersonalCount = DefaultValues.MaxPersonalCurrencies;
+                    link.MaxPersonalCount = ServerConfigDefaultValues.MaxPersonalCurrencies;
                     correctionMade = true;
                 }
 
                 if (link.MaxTopCurrencyHolderCount < 0 || link.MaxTopCurrencyHolderCount > DLConstants.MAX_TOP_CURRENCY_HOLDER_DISPLAY_LIMIT)
                 {
-                    link.MaxTopCurrencyHolderCount = DefaultValues.MaxTopCurrencyHolderCount;
+                    link.MaxTopCurrencyHolderCount = ServerConfigDefaultValues.MaxTopCurrencyHolderCount;
                     correctionMade = true;
                 }
             }
 
-            _config.SaveAsync().Wait();
+            PluginConfig.SaveAsync().Wait();
             OnConfigSaved?.Invoke(this, EventArgs.Empty);
-            _prevConfig = (DLConfigData)Data.Clone();
+            _prevConfigData = (ServerConfigData)ConfigData.Clone();
 
             return !correctionMade;
-        }
-
-        private void VerifyLinks()
-        {
-            _verifiedChannelLinks.Clear();
-            foreach (ChannelLink link in _allChannelLinks)
-            {
-                if (link.Initialize())
-                    _verifiedChannelLinks.Add(link);
-            }
-        }
-
-        private void InitChatLinks()
-        {
-            foreach (ChatChannelLink chatLink in Data.ChatChannelLinks)
-            {
-                if (chatLink.IsValid())
-                {
-                    // Ensure that the chat channel exists
-                    if (!Message.ChatChannelExists(chatLink.EcoChannel))
-                    {
-                        Message.CreateChatChannel(chatLink.EcoChannel);
-                        Message.SendChatToChannel(null, chatLink.EcoChannel, "Created by DiscordLink");
-                    }
-                }
-            }
         }
 
         private void BuildChanneLinkList()
         {
             _allChannelLinks.Clear();
-            _allChannelLinks.AddRange(_config.Config.ChatChannelLinks);
-            _allChannelLinks.AddRange(_config.Config.TradeFeedChannels);
-            _allChannelLinks.AddRange(_config.Config.CraftingFeedChannels);
-            _allChannelLinks.AddRange(_config.Config.ServerStatusFeedChannels);
-            _allChannelLinks.AddRange(_config.Config.PlayerStatusFeedChannels);
-            _allChannelLinks.AddRange(_config.Config.ElectionFeedChannels);
-            _allChannelLinks.AddRange(_config.Config.ServerLogFeedChannels);
-            _allChannelLinks.AddRange(_config.Config.ServerInfoDisplayChannels);
-            _allChannelLinks.AddRange(_config.Config.WorkPartyDisplayChannels);
-            _allChannelLinks.AddRange(_config.Config.ElectionDisplayChannels);
-            _allChannelLinks.AddRange(_config.Config.CurrencyDisplayChannels);
-            _allChannelLinks.AddRange(_config.Config.MapDisplayChannels);
-            _allChannelLinks.AddRange(_config.Config.LayerDisplayChannels);
-            _allChannelLinks.AddRange(_config.Config.SnippetInputChannels);
+            _allChannelLinks.AddRange(PluginConfig.Config.ChatChannelLinks);
+            _allChannelLinks.AddRange(PluginConfig.Config.TradeFeedChannels);
+            _allChannelLinks.AddRange(PluginConfig.Config.CraftingFeedChannels);
+            _allChannelLinks.AddRange(PluginConfig.Config.ServerStatusFeedChannels);
+            _allChannelLinks.AddRange(PluginConfig.Config.PlayerStatusFeedChannels);
+            _allChannelLinks.AddRange(PluginConfig.Config.ElectionFeedChannels);
+            _allChannelLinks.AddRange(PluginConfig.Config.ServerLogFeedChannels);
+            _allChannelLinks.AddRange(PluginConfig.Config.ServerInfoDisplayChannels);
+            _allChannelLinks.AddRange(PluginConfig.Config.WorkPartyDisplayChannels);
+            _allChannelLinks.AddRange(PluginConfig.Config.ElectionDisplayChannels);
+            _allChannelLinks.AddRange(PluginConfig.Config.CurrencyDisplayChannels);
+            _allChannelLinks.AddRange(PluginConfig.Config.MapDisplayChannels);
+            _allChannelLinks.AddRange(PluginConfig.Config.LayerDisplayChannels);
+            _allChannelLinks.AddRange(PluginConfig.Config.SkillDisplayChannels);
+            _allChannelLinks.AddRange(PluginConfig.Config.RepairBountyDisplayChannels);
+            _allChannelLinks.AddRange(PluginConfig.Config.SnippetInputChannels);
         }
     }
 
-    public class DLConfigData : ICloneable
+    public class ServerConfigData : ICloneable
     {
         public object Clone() // Be careful not to change the original object here as that will trigger endless recursion.
         {
-            return new DLConfigData
+            return new ServerConfigData
             {
                 BotToken = this.BotToken,
                 DiscordServerId = this.DiscordServerId,
-                MinEmbedSizeForFooter = this.MinEmbedSizeForFooter,
                 EmbedColorHex = this.EmbedColorHex,
                 ServerName = this.ServerName,
                 ServerDescription = this.ServerDescription,
                 ConnectionInfo = this.ConnectionInfo,
+                InviteMessage = this.InviteMessage,
                 ChatSyncMode = this.ChatSyncMode,
                 LogLevel = this.LogLevel,
+                BackendLogLevel = this.BackendLogLevel,
                 MaxTradeWatcherDisplaysPerUser = this.MaxTradeWatcherDisplaysPerUser,
-                InviteMessage = this.InviteMessage,
+                DiscordServerOwnerIsAdmin = this.DiscordServerOwnerIsAdmin,
+                UseVerboseDisplay = this.UseVerboseDisplay,
                 UseLinkedAccountRole = this.UseLinkedAccountRole,
                 UseDemographicRoles = this.UseDemographicRoles,
                 UseSpecialtyRoles = this.UseSpecialtyRoles,
                 UseElectedTitleRoles = this.UseElectedTitleRoles,
+                UseTradeWatcherFeeds = this.UseTradeWatcherFeeds,
+                EnableTraceFileLogging = this.EnableTraceFileLogging,
                 AdminRoles = new ObservableCollection<string>(this.AdminRoles.Select(t => t.Clone()).Cast<string>()),
                 ChatChannelLinks = new ObservableCollection<ChatChannelLink>(this.ChatChannelLinks.Select(t => t.Clone()).Cast<ChatChannelLink>()),
                 TradeFeedChannels = new ObservableCollection<ChannelLink>(this.TradeFeedChannels.Select(t => t.Clone()).Cast<ChannelLink>()),
@@ -295,6 +215,8 @@ namespace Eco.Plugins.DiscordLink
                 CurrencyDisplayChannels = new ObservableCollection<CurrencyChannelLink>(this.CurrencyDisplayChannels.Select(t => t.Clone()).Cast<CurrencyChannelLink>()),
                 MapDisplayChannels = new ObservableCollection<MapChannelLink>(this.MapDisplayChannels.Select(t => t.Clone()).Cast<MapChannelLink>()),
                 LayerDisplayChannels = new ObservableCollection<LayerChannelLink>(this.LayerDisplayChannels.Select(t => t.Clone()).Cast<LayerChannelLink>()),
+                SkillDisplayChannels = new ObservableCollection<SpecialtiesChannelLink>(this.SkillDisplayChannels.Select(t => t.Clone()).Cast<SpecialtiesChannelLink>()),
+                RepairBountyDisplayChannels = new ObservableCollection<RepairBountyChannelLink>(this.RepairBountyDisplayChannels.Select(t => t.Clone()).Cast<RepairBountyChannelLink>()),
                 SnippetInputChannels = new ObservableCollection<ChannelLink>(this.SnippetInputChannels.Select(t => t.Clone()).Cast<ChannelLink>()),
                 DemographicReplacementRoles = new ObservableCollection<DemographicRoleSubstitution>(this.DemographicReplacementRoles.Select(t => t.Clone()).Cast<DemographicRoleSubstitution>()),
                 EmoteIconSubstitutions = new ObservableCollection<EmoteIconSubstitution>(this.EmoteIconSubstitutions.Select(t => t.Clone()).Cast<EmoteIconSubstitution>()),
@@ -308,10 +230,10 @@ namespace Eco.Plugins.DiscordLink
         public ulong DiscordServerId { get; set; }
 
         [Description("The roles recognized as having admin permissions in DiscordLink. This setting requires a plugin restart to take effect."), Category("Base Configuration - Discord")]
-        public ObservableCollection<string> AdminRoles { get; set; } = new ObservableCollection<string>(DLConfig.DefaultValues.AdminRoles);
+        public ObservableCollection<string> AdminRoles { get; set; } = new ObservableCollection<string>(ServerConfigDefaultValues.AdminRoles);
 
         [Description("Determines if the owner of the Discord server should have admin permissions in DiscordLink. This setting requires a plugin restart to take effect."), Category("Base Configuration - Discord")]
-        public bool DiscordServerOwnerIsAdmin { get; set; } = DLConfig.DefaultValues.DiscordServerOwnerIsAdmin;
+        public bool DiscordServerOwnerIsAdmin { get; set; } = ServerConfigDefaultValues.DiscordServerOwnerIsAdmin;
 
         [Description("The name of the Eco server, overriding the name configured within Eco. This setting can be changed while the server is running."), Category("Base Configuration - Eco")]
         public string ServerName { get; set; }
@@ -323,7 +245,7 @@ namespace Eco.Plugins.DiscordLink
         public string ConnectionInfo { get; set; } = $"Server Id: {NetworkManager.Config.ID.ToString()}";
 
         [Description("Whether chat message should be synchroinized by default or not. This setting can be changed while the server is running."), Category("Base Configuration - Eco")]
-        public ChatSyncMode ChatSyncMode { get; set; } = DLConfig.DefaultValues.ChatSynchronizationMode;
+        public ChatSyncMode ChatSyncMode { get; set; } = ServerConfigDefaultValues.ChatSynchronizationMode;
 
         [Description("Discord and Eco Channels to connect together for chat crossposting. This setting can be changed while the server is running."), Category("Modules - Feeds")]
         public ObservableCollection<ChatChannelLink> ChatChannelLinks { get; set; } = new ObservableCollection<ChatChannelLink>();
@@ -347,7 +269,7 @@ namespace Eco.Plugins.DiscordLink
         public ObservableCollection<ServerLogFeedChannelLink> ServerLogFeedChannels { get; set; } = new ObservableCollection<ServerLogFeedChannelLink>();
 
         [Description("Determines if users can use trade watcher feeds. This setting can be changed while the server is running."), Category("Modules - Feeds")]
-        public bool UseTradeWatcherFeeds { get; set; } = DLConfig.DefaultValues.UseTradeWatcherFeeds;
+        public bool UseTradeWatcherFeeds { get; set; } = ServerConfigDefaultValues.UseTradeWatcherFeeds;
 
         [Description("Discord channels in which to keep a Server Info display. DiscordLink will post one server info message in these channel and keep it updated through edits. This setting can be changed while the server is running."), Category("Modules - Displays")]
         public ObservableCollection<ServerInfoChannelLink> ServerInfoDisplayChannels { get; set; } = new ObservableCollection<ServerInfoChannelLink>();
@@ -367,53 +289,56 @@ namespace Eco.Plugins.DiscordLink
         [Description("Discord channels in which to keep a layer display. This setting can be changed while the server is running."), Category("Modules - Displays")]
         public ObservableCollection<LayerChannelLink> LayerDisplayChannels { get; set; } = new ObservableCollection<LayerChannelLink>();
 
+        [Description("Discord channels in which to keep a skill display. This setting can be changed while the server is running."), Category("Modules - Displays")]
+        public ObservableCollection<SpecialtiesChannelLink> SkillDisplayChannels { get; set; } = new ObservableCollection<SpecialtiesChannelLink>();
+
+        [Description("Discord channels in which to keep a repair bounty display. This setting can be changed while the server is running."), Category("Modules - Displays")]
+        public ObservableCollection<RepairBountyChannelLink> RepairBountyDisplayChannels { get; set; } = new ObservableCollection<RepairBountyChannelLink>();
+
         [Description("Discord channels in which to search for snippets for the Snippet command. This setting can be changed while the server is running."), Category("Modules - Inputs")]
         public ObservableCollection<ChannelLink> SnippetInputChannels { get; set; } = new ObservableCollection<ChannelLink>();
 
         [Description("Determines if a Discord role will be granted to users who link their Discord accounts. This setting can be changed while the server is running."), Category("Modules - Roles")]
-        public bool UseLinkedAccountRole { get; set; } = DLConfig.DefaultValues.UseLinkedAccountRole;
+        public bool UseLinkedAccountRole { get; set; } = ServerConfigDefaultValues.UseLinkedAccountRole;
 
         [Description("Determines if Discord roles matching ingame demographics will be granted to users who have linked their accounts. This setting can be changed while the server is running."), Category("Modules - Roles")]
-        public bool UseDemographicRoles { get; set; } = DLConfig.DefaultValues.UseDemographicRoles;
+        public bool UseDemographicRoles { get; set; } = ServerConfigDefaultValues.UseDemographicRoles;
 
         [Description("Roles that will be used (and created if needed) for the given demographics. This setting can be changed while the server is running."), Category("Modules - Roles")]
-        public ObservableCollection<DemographicRoleSubstitution> DemographicReplacementRoles { get; set; } = new ObservableCollection<DemographicRoleSubstitution>(DLConfig.DefaultValues.DemographicRoleReplacements);
+        public ObservableCollection<DemographicRoleSubstitution> DemographicReplacementRoles { get; set; } = new ObservableCollection<DemographicRoleSubstitution>(ServerConfigDefaultValues.DemographicRoleReplacements);
 
         [Description("Determines if Discord roles matching ingame specialties will be granted to users who have linked their accounts. This setting can be changed while the server is running."), Category("Modules - Roles")]
-        public bool UseSpecialtyRoles { get; set; } = DLConfig.DefaultValues.UseSpecialtyRoles;
+        public bool UseSpecialtyRoles { get; set; } = ServerConfigDefaultValues.UseSpecialtyRoles;
 
         [Description("Determines if Discord roles matching ingame elected titles will be granted to users who have linked their accounts. This setting can be changed while the server is running."), Category("Modules - Roles")]
-        public bool UseElectedTitleRoles { get; set; } = DLConfig.DefaultValues.UseElectedTitleRoles;
+        public bool UseElectedTitleRoles { get; set; } = ServerConfigDefaultValues.UseElectedTitleRoles;
 
         [Description("Max amount of tracked trades allowed per user. Set to 0 to disable trade watchers. This setting can be changed while the server is running, but does not apply retroactively."), Category("Commands")]
-        public int MaxTradeWatcherDisplaysPerUser { get; set; } = DLConfig.DefaultValues.MaxTradeWatcherDisplaysPerUser;
+        public int MaxTradeWatcherDisplaysPerUser { get; set; } = ServerConfigDefaultValues.MaxTradeWatcherDisplaysPerUser;
 
         [Description("The message to use for the /DiscordInvite command. The invite link is fetched from the network config and will replace the token " + DLConstants.INVITE_COMMAND_TOKEN + ". This setting can be changed while the server is running."), Category("Commands")]
-        public string InviteMessage { get; set; } = DLConfig.DefaultValues.InviteMessage;
+        public string InviteMessage { get; set; } = ServerConfigDefaultValues.InviteMessage;
 
         [Description("Determines what message types will be printed to the server log. All message types below the selected one will be printed as well. This setting can be changed while the server is running."), Category("Plugin Configuration")]
-        public Logger.LogLevel LogLevel { get; set; } = DLConfig.DefaultValues.PluginLogLevel;
+        public Logger.LogLevel LogLevel { get; set; } = ServerConfigDefaultValues.PluginLogLevel;
 
         [Description("Determines what backend message types will be printed to the server log. All message types below the selected one will be printed as well. This setting requires a plugin restart to take effect."), Category("Plugin Configuration")]
-        public Microsoft.Extensions.Logging.LogLevel BackendLogLevel { get; set; } = DLConfig.DefaultValues.BackendLogLevel;
+        public Microsoft.Extensions.Logging.LogLevel BackendLogLevel { get; set; } = ServerConfigDefaultValues.BackendLogLevel;
 
         [Description("Trace-Logs are not logged to file by default. Please only enable this to diagnose issues. Enabling this will save every single request made to the Discord API to the logfile. This will create huge logs over time. This setting requires a plugin restart to take effect."), Category("Plugin Configuration")]
-        public bool TraceFileLogging { get; set; } = false;
+        public bool EnableTraceFileLogging { get; set; } = ServerConfigDefaultValues.EnableTraceFileLogging;
 
         [Description("Determines if the output in the display tab of the server GUI should be verbose or not. This setting can be changed while the server is running."), Category("Plugin Configuration")]
-        public bool UseVerboseDisplay { get; set; } = DLConfig.DefaultValues.UseVerboseDisplay;
+        public bool UseVerboseDisplay { get; set; } = ServerConfigDefaultValues.UseVerboseDisplay;
 
         [Description("Emote keys to replace with eco icons using the value name. This setting can be changed while the server is running."), Category("Emotes")]
-        public ObservableCollection<EmoteIconSubstitution> EmoteIconSubstitutions { get; set; } = new ObservableCollection<EmoteIconSubstitution>(DLConfig.DefaultValues.EmoteSubstitutions);
-
-        [Description("Determines for what sizes of embeds to show the footer containing meta information about posted embeds. All embeds of sizes bigger than the selected one will have footers as well. This setting can be changed while the server is running."), Category("Style - Discord")]
-        public DiscordLinkEmbed.EmbedSize MinEmbedSizeForFooter { get; set; } = DLConfig.DefaultValues.MinEmbedSizeForFooter;
+        public ObservableCollection<EmoteIconSubstitution> EmoteIconSubstitutions { get; set; } = new ObservableCollection<EmoteIconSubstitution>(ServerConfigDefaultValues.EmoteSubstitutions);
 
         [Description("Determines the color of the left outline of embeds. Must be a valid hexadecimal color string. This setting can be changed while the server is running."), Category("Style - Discord")]
         public string EmbedColorHex { get { return _embedColorHex; } set { EmbedColor = new DiscordColor(value); _embedColorHex = value; } }
-        private string _embedColorHex = DLConfig.DefaultValues.EmbedColor;
+        private string _embedColorHex = ServerConfigDefaultValues.EmbedColor;
 
         [Browsable(false), JsonIgnore]
-        public DiscordColor EmbedColor { get; set; } = new DiscordColor(DLConfig.DefaultValues.EmbedColor);
+        public DiscordColor EmbedColor { get; set; } = new DiscordColor(ServerConfigDefaultValues.EmbedColor);
     }
 }

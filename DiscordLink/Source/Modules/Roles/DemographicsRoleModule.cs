@@ -30,7 +30,7 @@ namespace Eco.Plugins.DiscordLink.Modules
         protected override async Task UpdateInternal(DiscordLink plugin, DlEventType trigger, params object[] data)
         {
             DiscordClient client = DiscordLink.Obj.Client;
-            if (!client.BotHasPermission(Permissions.ManageRoles))
+            if (!client.BotHasPermission(DiscordPermissions.ManageRoles))
                 return;
 
             if (trigger == DlEventType.DiscordClientConnected || trigger == DlEventType.ForceUpdate)
@@ -39,13 +39,16 @@ namespace Eco.Plugins.DiscordLink.Modules
                     return;
 
                 ++_opsCount;
-                foreach (DiscordMember member in await client.GetMembersAsync())
+                foreach (DiscordMember member in await client.FetchMembersAsync())
                 {
+                    if (member.IsBot)
+                        continue;
+
                     LinkedUser linkedUser = UserLinkManager.LinkedUserByDiscordUser(member);
                     foreach (Demographic demographic in Lookups.ActiveDemographics)
                     {
                         string demographicName = GetDemographicRoleName(demographic);
-                        if (linkedUser == null || !DLConfig.Data.UseDemographicRoles || !demographic.ContainsUser(linkedUser.EcoUser))
+                        if (linkedUser == null || !DiscordLinkConfig.UseDemographicRoles || !demographic.ContainsUser(linkedUser.EcoUser))
                         {
                             if (member.HasRoleWithName(demographicName))
                             {
@@ -61,7 +64,7 @@ namespace Eco.Plugins.DiscordLink.Modules
             }
             else if (trigger == DlEventType.AccountLinkVerified || trigger == DlEventType.AccountLinkRemoved)
             {
-                if (!DLConfig.Data.UseDemographicRoles)
+                if (!DiscordLinkConfig.UseDemographicRoles)
                     return;
 
                 if (!(data[0] is LinkedUser linkedUser))
@@ -95,7 +98,7 @@ namespace Eco.Plugins.DiscordLink.Modules
             }
             else if (trigger == DlEventType.EnteredDemographic || trigger == DlEventType.LeftDemographic)
             {
-                if (!DLConfig.Data.UseDemographicRoles)
+                if (!DiscordLinkConfig.UseDemographicRoles)
                     return;
 
                 if (!(data[0] is DemographicChange demographicChange))
@@ -124,7 +127,7 @@ namespace Eco.Plugins.DiscordLink.Modules
 
         public static string GetDemographicRoleName(Demographic demographic)
         {
-            DemographicRoleSubstitution replacement = DLConfig.Data.DemographicReplacementRoles.FirstOrDefault(s => !string.IsNullOrEmpty(s.DemographicName)
+            DemographicRoleSubstitution replacement = DiscordLinkConfig.DemographicReplacementRoles.FirstOrDefault(s => !string.IsNullOrEmpty(s.DemographicName)
                 && !string.IsNullOrEmpty(s.RoleName) && s.DemographicName.EqualsCaseInsensitive(demographic.Name));
             return replacement != null
                 ? replacement.RoleName

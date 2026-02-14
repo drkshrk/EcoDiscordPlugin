@@ -78,12 +78,6 @@ namespace Eco.Plugins.DiscordLink.Utilities
             if (fullEmbed == null)
                 return resultEmbeds;
 
-            // Conditionally add the standard footer
-            if (string.IsNullOrWhiteSpace(fullEmbed.Footer) && fullEmbed.GetSize() <= DLConfig.Data.MinEmbedSizeForFooter)
-            {
-                fullEmbed.WithFooter(MessageBuilder.Discord.GetStandardEmbedFooter());
-            }
-
             // Count chars needed for title and footer
             int titleFooterCharCount = 0;
             if (fullEmbed.Title != null)
@@ -184,7 +178,7 @@ namespace Eco.Plugins.DiscordLink.Utilities
             builder.WithTitle(embedData.Title);
             builder.WithDescription(embedData.Description);
             builder.WithFooter(embedData.Footer);
-            builder.WithColor(DLConfig.Data.EmbedColor);
+            builder.WithColor(DiscordLinkConfig.EmbedColor);
 
             if (!string.IsNullOrEmpty(embedData.Thumbnail))
             {

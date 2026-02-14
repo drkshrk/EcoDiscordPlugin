@@ -19,7 +19,7 @@ namespace Eco.Plugins.DiscordLink.Modules
 
         protected override async Task<bool> ShouldRun()
         {
-            foreach (ChannelLink link in DLConfig.Data.CraftingFeedChannels)
+            foreach (ChannelLink link in DiscordLinkConfig.CraftingFeedChannels)
             {
                 if (link.IsValid())
                     return true;
@@ -35,7 +35,7 @@ namespace Eco.Plugins.DiscordLink.Modules
             string itemName = craftingEvent.OrderCount > 1 ? craftingEvent.CraftedItem.DisplayNamePlural : craftingEvent.CraftedItem.DisplayName;
             string message = $"**{craftingEvent.Citizen.Name}** started crafting {craftingEvent.OrderCount} `{itemName}` at {(craftingEvent.WorldObject as WorldObject).Name}.";
 
-            foreach (ChannelLink craftingLink in DLConfig.Data.CraftingFeedChannels)
+            foreach (ChannelLink craftingLink in DiscordLinkConfig.CraftingFeedChannels)
             {
                 if (!craftingLink.IsValid())
                     continue;

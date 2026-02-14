@@ -10,32 +10,6 @@ using System.Threading.Tasks;
 
 namespace Eco.Plugins.DiscordLink.Modules
 {
-    public enum ModuleType
-    {
-        CurrencyDisplay,
-        ElectionDisplay,
-        ServerInfoDisplay,
-        TradeWatcherDisplay,
-        WorkPartyDisplay,
-        MapDisplay,
-        LayerDisplay,
-        CraftingFeed,
-        DiscordChatFeed,
-        EcoChatFeed,
-        ElectionFeed,
-        PlayerStatusFeed,
-        ServerLogFeed,
-        ServerStatusFeed,
-        TradeFeed,
-        TradeWatcherFeed,
-        AccountLinkRoleModule,
-        DemographicRoleModule,
-        ElectedTitleRoleModule,
-        SpecialitiesRoleModule,
-        RoleCleanupModule,
-        SnippetInput
-    }
-
     public enum ModuleArchetype
     {
         Display,
@@ -63,7 +37,7 @@ namespace Eco.Plugins.DiscordLink.Modules
             _OpsCountTimer = new Timer(UpdateRollingAverage, null, Constants.MILLISECONDS_PER_MINUTE, Constants.MILLISECONDS_PER_MINUTE);
         }
 
-        public virtual string GetDisplayText(string childInfo, bool verbose)
+        public virtual async Task<string> GetDisplayText(string childInfo, bool verbose)
         {
             string info = $"\r\nStatus: {_status}";
             if (IsEnabled)
@@ -85,13 +59,14 @@ namespace Eco.Plugins.DiscordLink.Modules
 
         public virtual void Setup()
         {
-            DLConfig.Instance.OnConfigChanged += HandleConfigChanged; // Always listen for config changes as those may enable/disable the module
+            DiscordLink.Obj.ServerConfig.OnConfigChanged += HandleConfigChanged;    // Always listen for config changes as those may enable/disable the module
+            ChannelLink.OnChannelLinkVerifiedInRuntime += HandleConfigChanged;      // ChannelLinks added during runtime are invalid by default, so we need to listen to this event and update when they are made valid
             NetworkManager.Obj.ParamChanged.Add(async (s, e) => await HandleConfigChanged(s, new EventArgs()));
         }
 
         public virtual void Destroy()
         {
-            DLConfig.Instance.OnConfigChanged -= HandleConfigChanged;
+            DiscordLink.Obj.ServerConfig.OnConfigChanged -= HandleConfigChanged;
         }
 
         public async Task<bool> HandleStartOrStop()
@@ -117,11 +92,11 @@ namespace Eco.Plugins.DiscordLink.Modules
 
         protected abstract DlEventType GetTriggers();
 
-        protected virtual async Task<bool> ShouldRun() { throw new NotImplementedException(); }
+        protected abstract Task<bool> ShouldRun(); // Implementations should use async
 
         protected virtual async Task Initialize()
         {
-            Logger.Debug($"Starting {this}");
+            Logger.Debug($"Starting {ToString()}");
 
             IsEnabled = true;
             _status = "Running";
@@ -130,7 +105,7 @@ namespace Eco.Plugins.DiscordLink.Modules
 
         protected virtual async Task Shutdown()
         {
-            Logger.Debug($"Stopping {this}");
+            Logger.Debug($"Stopping {ToString()}");
 
             IsEnabled = false;
             _status = "Off";
@@ -161,11 +136,12 @@ namespace Eco.Plugins.DiscordLink.Modules
 
                 try
                 {
+                    Logger.Trace($"Updating the {ToString()}");
                     await UpdateInternal(plugin, trigger, data);
                 }
                 catch (Exception e)
                 {
-                    Logger.Exception($"An error occured while updating the {ToString()} module", e);
+                    Logger.Exception($"An error occured while updating the {ToString()}", e);
                 }
             }
         }

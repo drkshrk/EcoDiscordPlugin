@@ -13,10 +13,10 @@ namespace Eco.Plugins.DiscordLink.Modules
 {
     public class TradeWatcherFeed : FeedModule
     {
-        public override string GetDisplayText(string childInfo, bool verbose)
+        public override async Task<string> GetDisplayText(string childInfo, bool verbose)
         {
             string info = $"Tracked Watcher Feeds: {DLStorage.WorldData.TradeWatcherFeedCountTotal}";
-            return base.GetDisplayText($"{childInfo}{info}\r\n", verbose);
+            return await base.GetDisplayText($"{childInfo}{info}\r\n", verbose);
         }
 
         public override string ToString()
@@ -31,7 +31,7 @@ namespace Eco.Plugins.DiscordLink.Modules
 
         protected override async Task<bool> ShouldRun()
         {
-            return DLConfig.Data.UseTradeWatcherFeeds;
+            return DiscordLinkConfig.UseTradeWatcherFeeds;
         }
 
         protected override async Task UpdateInternal(DiscordLink plugin, DlEventType trigger, params object[] data)

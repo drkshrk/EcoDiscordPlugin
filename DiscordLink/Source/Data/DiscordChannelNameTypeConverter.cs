@@ -1,5 +1,4 @@
-﻿using DSharpPlus;
-using DSharpPlus.Entities;
+﻿using DSharpPlus.Entities;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -21,7 +20,7 @@ namespace Eco.Plugins.DiscordLink
 
         public override StandardValuesCollection GetStandardValues(ITypeDescriptorContext context)
         {
-            var foundChannelIds = DiscordLink.Obj?.Client?.GetChannelsOfType(ChannelType.Text)
+            var foundChannelIds = DiscordLink.Obj?.Client?.GetChannelsOfType(DiscordChannelType.Text)
                 .OrderBy(channel => channel.Position)
                 .Select(c => c.Id)
                 .ToList();
@@ -80,7 +79,7 @@ namespace Eco.Plugins.DiscordLink
                 if ((ulong)value == 0)
                     return "Select a Channel";
 
-                var channels = DiscordLink.Obj.Client.GetChannelsOfType(ChannelType.Text);
+                var channels = DiscordLink.Obj.Client.GetChannelsOfType(DiscordChannelType.Text);
                 return channels.Where(channel => channel.Id == (ulong)value).Select(FormatChannelString).FirstOrDefault() ?? $"<Unknown Channel> ({value})";
             }
             return base.ConvertFrom(context, culture, value);

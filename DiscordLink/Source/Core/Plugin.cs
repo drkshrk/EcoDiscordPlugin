@@ -17,34 +17,22 @@ using Eco.Moose.Utils.SystemUtils;
 using Eco.Moose.Utils.TextUtils;
 using Eco.Plugins.DiscordLink.Events;
 using Eco.Plugins.DiscordLink.Extensions;
-using Eco.Plugins.DiscordLink.Modules;
 using Eco.Plugins.DiscordLink.Utilities;
 using Eco.Shared.Utils;
 using Eco.WorldGenerator;
 using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
+using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using Module = Eco.Plugins.DiscordLink.Modules.Module;
 
-// TODO: Temporarily implemented outside of plugin due to vanilla bug
-public class DiscordLinkMod : IModInit
-{
-    public static ModRegistration Register() => new()
-    {
-        ModName = "DiscordLink",
-        ModDescription = "Connects the Eco server with the Discord server for seamless cross posting of chat messages, live updated server information and many useful commands!",
-        ModDisplayName = "DiscordLink",
-    };
-}
-
 namespace Eco.Plugins.DiscordLink
 {
     [Priority(PriorityAttribute.High)] // Need to start before WorldGenerator in order to listen for world generation finished event
-    public class DiscordLink : IModKitPlugin, IInitializablePlugin, IShutdownablePlugin, IConfigurablePlugin, IDisplayablePlugin, IGameActionAware, ICommandablePlugin
+    public class DiscordLink : IModKitPlugin, IModInit, IInitializablePlugin, IShutdownablePlugin, IConfigurablePlugin, IDisplayablePlugin, IGameActionAware, ICommandablePlugin
     {
         public readonly string PluginName = "DiscordLink";
         public readonly Version InstalledVersion = Assembly.GetExecutingAssembly().GetName().Version;
@@ -56,8 +44,9 @@ namespace Eco.Plugins.DiscordLink
 
         public static DiscordLink Obj { get { return PluginManager.GetPlugin<DiscordLink>(); } }
         public DiscordClient Client { get; private set; } = new DiscordClient();
-        public Module[] Modules { get; private set; } = new Module[Enum.GetNames(typeof(ModuleType)).Length];
-        public IPluginConfig PluginConfig { get { return DLConfig.Instance.PluginConfig; } }
+        public List<Module> Modules { get; private set; } = new List<Module>();
+        public ServerConfig ServerConfig { get; private set; } = new ServerConfig();
+        public IPluginConfig PluginConfig { get { return ServerConfig.PluginConfig; } }
         public ThreadSafeAction<object, string> ParamChanged { get; set; }
         public DateTime InitTime { get; private set; } = DateTime.MinValue;
         public bool CanRestart { get; private set; } = false; // False to start with as we cannot restart while the initial startup is in progress
@@ -77,9 +66,15 @@ namespace Eco.Plugins.DiscordLink
         public override string ToString() => PluginName;
         public string GetCategory() => "Mighty Moose";
         public string GetStatus() => _statusDescription;
-        public object GetEditObject() => DLConfig.Data;
-        public void OnEditObjectChanged(object o, string param) => _ = DLConfig.Instance.HandleConfigChanged();
+        public object GetEditObject() => ServerConfig.ConfigData;
+        public void OnEditObjectChanged(object o, string param) => _ = ServerConfig.HandleConfigChanged();
         public LazyResult ShouldOverrideAuth(IAlias alias, IOwned property, GameAction action) => LazyResult.FailedNoMessage;
+        public static ModRegistration Register() => new ModRegistration()
+        {
+            ModName = "DiscordLink",
+            ModDescription = "Connects the Eco server with the Discord server for seamless cross posting of chat messages, live updated server information and many useful commands!",
+            ModDisplayName = "DiscordLink",
+        };
 
         public StatusState Status
         {
@@ -93,41 +88,6 @@ namespace Eco.Plugins.DiscordLink
         }
         private StatusState _status = StatusState.Uninitialized;
         private string _statusDescription = TextUtils.GetEnumDescription(StatusState.Uninitialized);
-        public enum StatusState
-        {
-            [Description("Uninitialized")]
-            Uninitialized,
-
-            [Description("Initializing plugin")]
-            InitializingPlugin,
-
-            [Description("Initializing modules")]
-            InitializingModules,
-
-            [Description("Initialization aborted")]
-            InitializationAborted,
-
-            [Description("Awaiting guild download")]
-            AwaitingGuildDownload,
-
-            [Description("Performing post server init")]
-            PostServerInit,
-
-            [Description("Shutting down plugin")]
-            ShuttingDownPlugin,
-
-            [Description("Shutting down modules")]
-            ShuttingDownModules,
-
-            [Description("Connected and running")]
-            Connected,
-
-            [Description("Discord server connection failed")]
-            ServerConnectionFailed,
-
-            [Description("Disconnected")]
-            Disconnected,
-        }
 
         private Timer _activityUpdateTimer = null;
 
@@ -137,7 +97,7 @@ namespace Eco.Plugins.DiscordLink
         {
             try
             {
-                return MessageBuilder.Shared.GetDisplayStringAsync(DLConfig.Data.UseVerboseDisplay).Result;
+                return MessageBuilder.Shared.GetDisplayStringAsync(DiscordLinkConfig.UseVerboseDisplay).Result;
             }
             catch (ServerErrorException e)
             {
@@ -151,11 +111,12 @@ namespace Eco.Plugins.DiscordLink
             }
         }
 
-        public async void Initialize(TimedTask timer)
+        async void IInitializablePlugin.Initialize(TimedTask timer)
         {
             InitCallbacks();
-            DLConfig.Instance.Initialize();
-            Logger.RegisterLogger(PluginName, ConsoleColor.Cyan, DLConfig.Data.LogLevel);
+            ServerConfig.Initialize();
+            DiscordLinkConfig.Initialize(ServerConfig.ConfigData);
+            Logger.RegisterLogger(PluginName, ConsoleColor.Cyan, DiscordLinkConfig.PluginLogLevel);
             Status = StatusState.InitializingPlugin;
             InitTime = DateTime.Now;
 
@@ -180,7 +141,7 @@ namespace Eco.Plugins.DiscordLink
         {
             Status = StatusState.AwaitingGuildDownload;
 
-            if (string.IsNullOrEmpty(DLConfig.Data.BotToken))
+            if (string.IsNullOrEmpty(DiscordLinkConfig.BotToken))
             {
                 HandleDiscordConnectionFailed("Failed to start DiscordLink: Missing BotToken.");
                 return;
@@ -194,10 +155,12 @@ namespace Eco.Plugins.DiscordLink
                 HandleDiscordConnectionFailed("Failed to start DiscordLink. See previous errors for more Information.");
                 return;
             }
-            CanRestart = true;
+            
 
             Status = StatusState.PostServerInit;
             HandleClientConnected();
+
+            CanRestart = true;
 
             if (_triggerWorldResetEvent)
             {
@@ -244,7 +207,7 @@ namespace Eco.Plugins.DiscordLink
 
         public void GetCommands(Dictionary<string, Action> nameToFunction)
         {
-            nameToFunction.Add("Verify Config", () => { Logger.Info($"Config Verification Report:\n{MessageBuilder.Shared.GetConfigVerificationReport()}"); });
+            nameToFunction.Add("Verify Config", () => { Logger.Info($"Config Verification Report:\n{MessageBuilder.Shared.GetServerConfigVerificationReport()}"); });
             nameToFunction.Add("Verify Permissions", () =>
             {
                 if (Client.ConnectionStatus == DiscordClient.ConnectionState.Connected)
@@ -276,6 +239,11 @@ namespace Eco.Plugins.DiscordLink
                     Logger.Info("Could not restart - The plugin is not in a ready state.");
                 }
             });
+            nameToFunction.Add("Reinstall Discord Commands", () =>
+            {
+                _ = Client.ReinstallCommands();
+                Logger.Info("All commands reinstalled - Restart the discord client (ctrl+r) to re-fetch the command list");
+            });
         }
 
         public async Task<bool> Restart()
@@ -299,13 +267,15 @@ namespace Eco.Plugins.DiscordLink
 
             DLConstants.PostConnectionInit();
 
-            DLConfig.Instance.PostConnectionInit();
             if (!Client.IsConnected)
             {
                 Status = StatusState.ServerConnectionFailed;
                 CanRestart = true;
                 return;
             }
+
+            ServerConfig.PostConnectionInit();
+            DiscordLinkConfig.PostConnectionInit();
 
             UserLinkManager.Initialize();
             InitializeModules();
@@ -394,6 +364,14 @@ namespace Eco.Plugins.DiscordLink
                     _ = HandleEvent(DlEventType.LostSpecialty, loseSpecialty);
                     break;
 
+                case SpecialtyLevelUp specialtyLevelUp:
+                    _ = HandleEvent(DlEventType.LeveledUpSpecialty, specialtyLevelUp);
+                    break;
+
+                    case RepairBountyClaimed repairBountyClaimed:
+                        _ = HandleEvent(DlEventType.ClaimedRepairBounty, repairBountyClaimed);
+                    break;
+
                 default:
                     break;
             }
@@ -423,33 +401,23 @@ namespace Eco.Plugins.DiscordLink
         {
             Status = StatusState.InitializingModules;
 
-            Modules[(int)ModuleType.CurrencyDisplay] = new CurrencyDisplay();
-            Modules[(int)ModuleType.ElectionDisplay] = new ElectionDisplay();
-            Modules[(int)ModuleType.ServerInfoDisplay] = new ServerInfoDisplay();
-            Modules[(int)ModuleType.TradeWatcherDisplay] = new TradeWatcherDisplay();
-            Modules[(int)ModuleType.WorkPartyDisplay] = new WorkPartyDisplay();
-            Modules[(int)ModuleType.MapDisplay] = new MapDisplay();
-            Modules[(int)ModuleType.LayerDisplay] = new LayerDisplay();
-            Modules[(int)ModuleType.CraftingFeed] = new CraftingFeed();
-            Modules[(int)ModuleType.DiscordChatFeed] = new DiscordChatFeed();
-            Modules[(int)ModuleType.EcoChatFeed] = new EcoChatFeed();
-            Modules[(int)ModuleType.ElectionFeed] = new ElectionFeed();
-            Modules[(int)ModuleType.PlayerStatusFeed] = new PlayerStatusFeed();
-            Modules[(int)ModuleType.ServerLogFeed] = new ServerLogFeed();
-            Modules[(int)ModuleType.ServerStatusFeed] = new ServerStatusFeed();
-            Modules[(int)ModuleType.TradeFeed] = new TradeFeed();
-            Modules[(int)ModuleType.TradeWatcherFeed] = new TradeWatcherFeed();
-            Modules[(int)ModuleType.AccountLinkRoleModule] = new AccountLinkRoleModule();
-            Modules[(int)ModuleType.DemographicRoleModule] = new DemographicsRoleModule();
-            Modules[(int)ModuleType.ElectedTitleRoleModule] = new ElectedTitleRoleModule();
-            Modules[(int)ModuleType.SpecialitiesRoleModule] = new SpecialtiesRoleModule();
-            Modules[(int)ModuleType.RoleCleanupModule] = new RoleCleanupModule();
-            Modules[(int)ModuleType.SnippetInput] = new SnippetInput();
+            IEnumerable<Type> moduleTypes = AppDomain.CurrentDomain.GetAssemblies()
+             .SelectMany(domainAssembly => domainAssembly.GetTypes())
+             .Where(type => !type.IsAbstract && type.IsSubclassOf(typeof(Module)));
 
+            // Instantiate
+            foreach (Type type in moduleTypes)
+            {
+                Modules.Add((Module)Activator.CreateInstance(type));
+            }
+
+            // Initialize
             foreach (Module module in Modules)
             {
                 module.Setup();
             }
+
+            // Start
             foreach (Module module in Modules)
             {
                 await module.HandleStartOrStop();
@@ -468,7 +436,7 @@ namespace Eco.Plugins.DiscordLink
             {
                 module.Destroy();
             }
-            Modules = new Module[Enum.GetNames(typeof(ModuleType)).Length];
+            Modules = new List<Module>();
         }
 
         private async void UpdateModules(DlEventType trigger, params object[] data)
@@ -499,7 +467,7 @@ namespace Eco.Plugins.DiscordLink
                     || (trigger & (DlEventType.Join | DlEventType.Login | DlEventType.Logout | DlEventType.Timer)) == 0)
                     return;
 
-                await Client.SetActivityStringAsync(MessageBuilder.Discord.GetActivityString(), ActivityType.Watching);
+                await Client.SetActivityStringAsync(MessageBuilder.Discord.GetActivityString(), DiscordActivityType.Watching);
             }
             catch (Exception e)
             {

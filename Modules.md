@@ -6,6 +6,8 @@
 	* [Map](#Map)
 	* [Layer](#Layer)
 	* [Player List](#player-list)
+	* [Skills](#skills)
+	* [Repair Bounties](#repair-bounties)
 	* [Work Parties](#work-parties)
 	* [Elections](#elections)
 * [Feeds](#feeds)
@@ -35,6 +37,19 @@ Displays a single message that contains customizable information about the serve
 Displays a link to the map preview image. Updates once an hour (same rate as the server updates the images)  
 ![Map Display](images/features/displays/map.png)
 
+### Player List
+Displays a simple list of online players. This is the same list as can be enabled in the server info display.  
+
+### Skills
+Displays a list of the discovered skills, which players have them and what level they are at.  
+It is possible to configure whether the list should include inactive players and if it should include players who have only consumed a skill scroll but not a star.  
+![Work Party Display](images/features/displays/skills.png)
+
+### Repair Bounties
+Displays a list of available repair bounties.  
+It is possible to configure whether the list should include repair bounties for objects belonging to inactive players.  
+![Repair Bounty Display](images/features/displays/bounties.png)
+
 ### Layer
 Displays a link to a layer preview image. Updates once an hour (same rate as the server updates the images)  
 ![Layer Display](images/features/displays/layer.png)
@@ -51,7 +66,7 @@ Note that in the case of a non-boolean election, only the highest ranked option 
 ### Currencies
 Displays one message per existing currency up to a configurable limit and ordered by the amount of trades made in the currency during the current cycle.
 For each currency, a configurable amount of users holding the highest amounts of the currency will be shown.
-Can be configured to only show minted or credit currencies based on the existance of a minted currency.
+Can be configured to only show minted or credit currencies based on the existence of a minted currency.
 ![Currency Display](images/features/displays/currencies.png)
 
 ## Feeds

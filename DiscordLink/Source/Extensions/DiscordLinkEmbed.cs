@@ -10,14 +10,6 @@ namespace Eco.Plugins.DiscordLink.Extensions
     // This class is used to get around that by deferring the embed building to a place where the character limits can be handled.
     public sealed class DiscordLinkEmbed
     {
-        public enum EmbedSize
-        {
-            Large,
-            Medium,
-            Small,
-            None // For config option to not have any footers
-        }
-
         public string Title { get; private set; }
         public string Description { get; private set; }
         public string Footer { get; private set; }
@@ -27,17 +19,19 @@ namespace Eco.Plugins.DiscordLink.Extensions
         public DiscordLinkEmbed()
         { }
 
-        public DiscordLinkEmbed(DiscordLinkEmbed RHS)
+        public DiscordLinkEmbed(DiscordLinkEmbed rhs)
         {
-            this.Title = RHS.Title;
-            this.Description = RHS.Description;
-            this.Footer = RHS.Footer;
-            this.Thumbnail = RHS.Thumbnail;
-            foreach (DiscordLinkEmbedField field in RHS.Fields)
+            this.Title = rhs.Title;
+            this.Description = rhs.Description;
+            this.Footer = rhs.Footer;
+            this.Thumbnail = rhs.Thumbnail;
+            foreach (DiscordLinkEmbedField field in rhs.Fields)
             {
                 Fields.Add(new DiscordLinkEmbedField(field));
             }
         }
+
+        public string GetLogName() => $"\"{Title}\" ({Fields.Count()} fields)";
 
         public DiscordLinkEmbed WithTitle(string title)
         {
@@ -105,6 +99,16 @@ namespace Eco.Plugins.DiscordLink.Extensions
             return this;
         }
 
+        public DiscordLinkEmbed AlignEndingRow()
+        {
+            int emptyFieldsCount = Fields.Count % DISCORD_EMBED_FIELDS_PER_ROW_LIMIT;
+            for (int i = 0; i < emptyFieldsCount; ++i)
+            {
+                AddAlignmentField();
+            }
+            return this;
+        }
+
         public DiscordLinkEmbed ClearFields()
         {
             Fields.Clear();
@@ -150,16 +154,6 @@ namespace Eco.Plugins.DiscordLink.Extensions
             }
 
             return result.Trim();
-        }
-
-        public EmbedSize GetSize()
-        {
-            if (Fields.Count <= DLConstants.DISCORD_EMBED_SIZE_SMALL_FIELD_LIMIT)
-                return EmbedSize.Small;
-            else if (Fields.Count <= DLConstants.DISCORD_EMBED_SIZE_MEDIUM_FIELD_LIMIT)
-                return EmbedSize.Medium;
-            else
-                return EmbedSize.Large;
         }
     }
 

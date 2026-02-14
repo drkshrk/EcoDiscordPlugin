@@ -3,6 +3,7 @@ using Eco.Plugins.DiscordLink.Events;
 using Eco.Plugins.DiscordLink.Extensions;
 using Eco.Plugins.DiscordLink.Utilities;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Eco.Plugins.DiscordLink.Modules
@@ -21,7 +22,7 @@ namespace Eco.Plugins.DiscordLink.Modules
 
         protected override async Task<bool> ShouldRun()
         {
-            foreach (ChannelLink link in DLConfig.Data.TradeFeedChannels)
+            foreach (ChannelLink link in DiscordLinkConfig.TradeFeedChannels)
             {
                 if (link.IsValid())
                     return true;
@@ -31,7 +32,7 @@ namespace Eco.Plugins.DiscordLink.Modules
 
         protected override async Task UpdateInternal(DiscordLink plugin, DlEventType trigger, params object[] data)
         {
-            if (DLConfig.Data.TradeFeedChannels.Count <= 0)
+            if (!DiscordLinkConfig.TradeFeedChannels.Any())
                 return;
 
             if (!(data[0] is List<CurrencyTrade>[] accumulatedTrades))
@@ -41,7 +42,7 @@ namespace Eco.Plugins.DiscordLink.Modules
             foreach (List<CurrencyTrade> accumulatedTradeList in accumulatedTrades)
             {
                 DiscordLinkEmbed content = MessageBuilder.Discord.GetAccumulatedTradeReport(accumulatedTradeList);
-                foreach (ChannelLink tradeLink in DLConfig.Data.TradeFeedChannels)
+                foreach (ChannelLink tradeLink in DiscordLinkConfig.TradeFeedChannels)
                 {
                     if (!tradeLink.IsValid())
                         continue;
