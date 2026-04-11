@@ -146,6 +146,7 @@ namespace Eco.Plugins.DiscordLink.Modules
             foreach(DiscordTarget target in targets)
             {
                 GetDisplayContent(target, out List<DisplayContent> displayContent);
+                Logger.Trace($"{this} update - Got {displayContent.Count()} display content pieces");
 
                 ChannelLink channelLink = target as ChannelLink;
                 UserLink userLink = target as UserLink;
@@ -169,10 +170,12 @@ namespace Eco.Plugins.DiscordLink.Modules
                     Logger.Warning($"Failed to update display module \"{this}\". Could not resolve discord channel type of Discord target with ID: {target.Id}");
                     continue;
                 }
-                
+                Logger.Trace($"{this} update - target channel identified as {targetChannel.GetLogName()}");
+
                 // Update the display if it already exists
                 if (DLStorage.PersistentData.Displays.TryGetValue(target.Id, out DisplayTracker tracker))
                 {
+                    Logger.Trace($"{this} update - Found stored tracking information");
                     foreach (DisplayContent content in displayContent)
                     {
                         SendReadyMessage messageData = plugin.Client.FormatMessageForSending(targetChannel, content.TextContent, content.EmbedContent);
@@ -195,6 +198,7 @@ namespace Eco.Plugins.DiscordLink.Modules
                                     --i;
                                     continue;
                                 }
+                                Logger.Trace($"{this} update - Found Discord message in target channel");
 
                                 if (i < messageData.StringParts.Count)
                                     createdMessages = await plugin.Client.ModifyMessageAsync(message, new SendReadyMessage(messageData.StringParts.ElementAt(i)));
@@ -202,6 +206,7 @@ namespace Eco.Plugins.DiscordLink.Modules
                                     createdMessages = await plugin.Client.ModifyMessageAsync(message, new SendReadyMessage(messageData.EmbedParts.ElementAt(i - messageData.StringParts.Count)));
                                 ++_opsCount;
                                 tracker.MessageIds.AddRange(createdMessages.Select(message => message.Id));
+                                Logger.Trace($"{this} update - Created {createdMessages.Count()} new messages while modifying target message");
                             }
                             else
                             {
@@ -211,6 +216,7 @@ namespace Eco.Plugins.DiscordLink.Modules
                                     createdMessages = await plugin.Client.SendMessageAsync(targetChannel, new SendReadyMessage(messageData.EmbedParts.ElementAt(i - messageData.StringParts.Count)));
                                 ++_opsCount;
                                 tracker.MessageIds.AddRange(createdMessages.Select(message => message.Id));
+                                Logger.Trace($"{this} update - Created {createdMessages.Count()} new messages while modifying target message");
                             }
                         }
 
@@ -218,6 +224,7 @@ namespace Eco.Plugins.DiscordLink.Modules
                         int messagesLeft = existingMessageCount - targetMessageCount;
                         if(messagesLeft > 0)
                         {
+                            Logger.Trace($"{this} update - Deleting {messagesLeft} obsolete messages while modifying target message");
                             for (int i = targetMessageCount; i < existingMessageCount; ++i)
                             {
                                 DiscordMessage message = await plugin.Client.FetchMessageAsync(targetChannel, tracker.MessageIds[i], expectNotFound: true);
@@ -234,8 +241,10 @@ namespace Eco.Plugins.DiscordLink.Modules
                 }
                 else // Create the display if it does not already exist
                 {
+                    Logger.Trace($"{this} update - Did not find stored tracking information");
                     foreach (DisplayContent content in displayContent)
                     {
+                        Logger.Trace($"Creating display for \"{this}\" in channel {targetChannel.GetLogName()}");
                         SendReadyMessage messageData = plugin.Client.FormatMessageForSending(targetChannel, content.TextContent, content.EmbedContent);
                         IEnumerable<DiscordMessage> createdMessages = await plugin.Client.SendMessageAsync(targetChannel, content.TextContent, content.EmbedContent);
                         ++_opsCount;
