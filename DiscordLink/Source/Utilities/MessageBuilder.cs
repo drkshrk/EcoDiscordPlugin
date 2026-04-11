@@ -295,7 +295,7 @@ namespace Eco.Plugins.DiscordLink.Utilities
 
                 if (flag.HasFlag(PermissionReportComponentFlag.ServerPermissions))
                 {
-                    foreach (DiscordPermissions permission in DLConstants.REQUESTED_GUILD_PERMISSIONS)
+                    foreach (DiscordPermission permission in DLConstants.REQUESTED_GUILD_PERMISSIONS)
                     {
                         if (!client.BotHasPermission(permission))
                         {
@@ -308,7 +308,7 @@ namespace Eco.Plugins.DiscordLink.Utilities
                 {
                     foreach (ChannelLink link in DiscordLinkConfig.ChannelLinks().GroupBy(link => link.Channel.Id).Select(group => group.First())) // Only perform the check once per link
                     {
-                        foreach (DiscordPermissions permission in DLConstants.REQUESTED_CHANNEL_PERMISSIONS)
+                        foreach (DiscordPermission permission in DLConstants.REQUESTED_CHANNEL_PERMISSIONS)
                         {
                             if (!client.ChannelHasPermission(link.Channel, permission))
                             {
@@ -333,7 +333,7 @@ namespace Eco.Plugins.DiscordLink.Utilities
             public static string GetPermissionsReportForChannel(DiscordChannel channel)
             {
                 StringBuilder builder = new StringBuilder();
-                foreach (DiscordPermissions permission in DLConstants.REQUESTED_CHANNEL_PERMISSIONS)
+                foreach (DiscordPermission permission in DLConstants.REQUESTED_CHANNEL_PERMISSIONS)
                 {
                     if (!DiscordLink.Obj.Client.ChannelHasPermission(channel, permission))
                     {

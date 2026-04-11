@@ -10,8 +10,8 @@ namespace Eco.Plugins.DiscordLink
 {
     public static class DLConstants
     {
-        public static readonly DiscordPermissions[] REQUESTED_GUILD_PERMISSIONS = { DiscordPermissions.AccessChannels, DiscordPermissions.ManageRoles };
-        public static readonly DiscordPermissions[] REQUESTED_CHANNEL_PERMISSIONS = { DiscordPermissions.AccessChannels, DiscordPermissions.SendMessages, DiscordPermissions.EmbedLinks, DiscordPermissions.AddReactions, DiscordPermissions.MentionEveryone, DiscordPermissions.ManageMessages, DiscordPermissions.ReadMessageHistory };
+        public static readonly DiscordPermission[] REQUESTED_GUILD_PERMISSIONS = { DiscordPermission.ViewChannel, DiscordPermission.ManageRoles };
+        public static readonly DiscordPermission[] REQUESTED_CHANNEL_PERMISSIONS = { DiscordPermission.ViewChannel, DiscordPermission.SendMessages, DiscordPermission.EmbedLinks, DiscordPermission.AddReactions, DiscordPermission.MentionEveryone, DiscordPermission.ManageMessages, DiscordPermission.ReadMessageHistory };
         public static readonly DiscordIntents[] REQUESTED_INTENTS = { DiscordIntents.AllUnprivileged, DiscordIntents.GuildMembers, DiscordIntents.MessageContents };
 
         public const string DISCORD_COLOR = "7289DAFF";

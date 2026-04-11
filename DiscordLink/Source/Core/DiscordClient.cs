@@ -2,7 +2,7 @@
 using DSharpPlus.Clients;
 using DSharpPlus.Commands;
 using DSharpPlus.Commands.Processors.SlashCommands;
-using DSharpPlus.Commands.Processors.SlashCommands.NamingPolicies;
+using DSharpPlus.Commands.Processors.SlashCommands.InteractionNamingPolicies;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using DSharpPlus.Exceptions;
@@ -438,7 +438,7 @@ namespace Eco.Plugins.DiscordLink
 
         public async Task<DiscordMessage> FetchMessageAsync(DiscordChannel channel, ulong messageId, bool expectNotFound = false)
         {
-            if (!ChannelHasPermission(channel, DiscordPermissions.ReadMessageHistory))
+            if (!ChannelHasPermission(channel, DiscordPermission.ReadMessageHistory))
             {
                 Logger.Error($"Failed to fetch specific message from channel {channel.GetLogName()} as the bot lacks permission for reading message history");
                 return null;
@@ -478,7 +478,7 @@ namespace Eco.Plugins.DiscordLink
                 return null;
             }
 
-            if (!ChannelHasPermission(channel, DiscordPermissions.ReadMessageHistory))
+            if (!ChannelHasPermission(channel, DiscordPermission.ReadMessageHistory))
             {
                 Logger.Error($"Failed to fetch messages from channel {channel.GetLogName()} as the bot lacks permission for reading message history");
                 return null;
@@ -575,7 +575,7 @@ namespace Eco.Plugins.DiscordLink
             return hasPermission;
         }
 
-        public bool ChannelHasPermission(DiscordChannel channel, DiscordPermissions permission)
+        public bool ChannelHasPermission(DiscordChannel channel, DiscordPermission permission)
         {
             if (BotMember == null)
             {
@@ -608,7 +608,7 @@ namespace Eco.Plugins.DiscordLink
         public IEnumerable<DiscordPermissions> FindMissingChannelPermissions(DiscordChannel channel)
         {
             List<DiscordPermissions> missingPermissions = new List<DiscordPermissions>();
-            foreach (DiscordPermissions permission in DLConstants.REQUESTED_CHANNEL_PERMISSIONS)
+            foreach (DiscordPermission permission in DLConstants.REQUESTED_CHANNEL_PERMISSIONS)
             {
                 if (!ChannelHasPermission(channel, permission))
                     missingPermissions.Add(permission);
@@ -649,7 +649,7 @@ namespace Eco.Plugins.DiscordLink
             }
 
             // Either make sure we have permission to use embeds or convert the embed to text
-            string fullTextContent = (embedContent == null || ChannelHasPermission(channel, DiscordPermissions.EmbedLinks)) ? textContent : $"{textContent}\n{embedContent.AsDiscordText()}";
+            string fullTextContent = (embedContent == null || ChannelHasPermission(channel, DiscordPermission.EmbedLinks)) ? textContent : $"{textContent}\n{embedContent.AsDiscordText()}";
 
             // If needed; split the message into multiple parts
             ICollection<string> stringParts = MessageUtils.SplitStringBySize(fullTextContent, DLConstants.DISCORD_MESSAGE_CHARACTER_LIMIT);
@@ -678,7 +678,7 @@ namespace Eco.Plugins.DiscordLink
                 return null;
             }
 
-            if (!ChannelHasPermission(channel, DiscordPermissions.SendMessages))
+            if (!ChannelHasPermission(channel, DiscordPermission.SendMessages))
             {
                 Logger.Warning($"Attempted to send message to channel `{channel}` but the bot user is lacking permissions for this action");
                 return null;
@@ -764,7 +764,7 @@ namespace Eco.Plugins.DiscordLink
             try
             {
                 DiscordChannel channel = message.GetChannel();
-                if (!ChannelHasPermission(channel, DiscordPermissions.ManageMessages))
+                if (!ChannelHasPermission(channel, DiscordPermission.ManageMessages))
                 {
                     Logger.Error($"Attempted to modify message {message.GetLogId()} in channel {channel.GetLogName()} but the bot user is lacking permissions for this action");
                     return null;
@@ -864,7 +864,7 @@ namespace Eco.Plugins.DiscordLink
             }
 
             DiscordChannel channel = message.GetChannel();
-            if (!ChannelHasPermission(channel, DiscordPermissions.ManageMessages))
+            if (!ChannelHasPermission(channel, DiscordPermission.ManageMessages))
             {
                 Logger.Warning($"Attempted to delete message in channel {channel.GetLogName()} but the bot user is lacking permissions for this action");
                 return false;

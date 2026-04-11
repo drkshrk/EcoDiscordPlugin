@@ -27,13 +27,13 @@ namespace Eco.Plugins.DiscordLink.Modules
 
         protected override async Task<bool> ShouldRun()
         {
-            return !_hasRun && DiscordLink.Obj.Client.BotHasPermission(DiscordPermissions.ManageRoles);
+            return !_hasRun && DiscordLink.Obj.Client.BotHasPermission(DiscordPermission.ManageRoles);
         }
 
         protected override async Task UpdateInternal(DiscordLink plugin, DlEventType trigger, params object[] data)
         {
             DiscordClient client = DiscordLink.Obj.Client;
-            if (!client.BotHasPermission(DiscordPermissions.ManageRoles))
+            if (!client.BotHasPermission(DiscordPermission.ManageRoles))
                 return;
 
             if (trigger == DlEventType.WorldReset)

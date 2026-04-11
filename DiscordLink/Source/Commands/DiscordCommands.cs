@@ -166,7 +166,7 @@ namespace Eco.Plugins.DiscordLink
             try
             {
                 DiscordClient client = DiscordLink.Obj.Client;
-                if (!client.ChannelHasPermission(ctx.Command.Channel, DiscordPermissions.SendMessages) || !client.ChannelHasPermission(ctx.Command.Channel, DiscordPermissions.ReadMessageHistory))
+                if (!client.ChannelHasPermission(ctx.Command.Channel, DiscordPermission.SendMessages) || !client.ChannelHasPermission(ctx.Command.Channel, DiscordPermission.ReadMessageHistory))
                 {
                     Logger.Error($"Failed to respond to command \"{ctx.Command.Command.Name}\" in channel \"{ctx.Command.Channel}\" as the bot lacks permissions for sending and/or reading messages in this channel.");
                     return;
@@ -180,7 +180,7 @@ namespace Eco.Plugins.DiscordLink
                 else
                 {
                     // Either make sure we have permission to use embeds or convert the embed to text
-                    if (client.ChannelHasPermission(ctx.Command.Channel, DiscordPermissions.EmbedLinks))
+                    if (client.ChannelHasPermission(ctx.Command.Channel, DiscordPermission.EmbedLinks))
                     {
                         await Respond(ctx, fullTextContent, embedContent);
                     }
