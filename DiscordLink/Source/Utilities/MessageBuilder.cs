@@ -574,7 +574,7 @@ namespace Eco.Plugins.DiscordLink.Utilities
 
                 if (flag.HasFlag(ServerInfoComponentFlag.Description))
                 {
-                    report.WithDescription(MessageUtils.FirstNonEmptyString(DiscordLinkConfig.ServerDescription, MessageUtils.StripTags(serverInfo?.Description ?? "[Missing StrangeWorld Data]"), "No server description is available."));
+                    report.WithDescription(MessageUtils.FirstNonEmptyString(DiscordLinkConfig.ServerDescription, MessageUtils.StripTags(serverInfo?.DetailedDescription ?? "[Missing StrangeWorld Data]"), "No server description is available."));
                 }
 
                 if (flag.HasFlag(ServerInfoComponentFlag.ConnectionInfo))
