@@ -1395,11 +1395,11 @@ namespace Eco.Plugins.DiscordLink.Utilities
 
                 Func<Tuple<StoreComponent, TradeOffer>, string> getLabel = lookupType switch
                 {
-                    LookupTypes.Item => t => $"@ *{t.Item1.Parent.Name.StripTags()}*",
-                    LookupTypes.Tag => t => $"{t.Item2.Stack.Item.DisplayName} @ *{t.Item1.Parent.Name.StripTags()}*",
-                    LookupTypes.User => t => t.Item2.Stack.Item.DisplayName,
-                    LookupTypes.Store => t => t.Item2.Stack.Item.DisplayName,
-                    _ => t => string.Empty,
+                LookupTypes.Item => t => $"{t.Item2.GetOfferContentName().StripTags()} @ {t.Item1.Parent.MarkedUpName.ToString().StripTags()}",
+                LookupTypes.Tag => t => $"{t.Item2.GetOfferContentName().StripTags()} @ {t.Item1.Parent.MarkedUpName.ToString().StripTags()}",
+                LookupTypes.User => t => $"{t.Item2.GetOfferContentName().StripTags()}",
+                LookupTypes.Store => t => $"{t.Item2.GetOfferContentName().StripTags()}",
+                _ => t => string.Empty,
                 };
                 ICollection<StoreOffer> Offers = TradeOffersToFields(offerList, getLabel);
 
