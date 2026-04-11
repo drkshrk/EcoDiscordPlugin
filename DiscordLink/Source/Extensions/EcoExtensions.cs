@@ -1,5 +1,6 @@
 ﻿using Eco.Gameplay.GameActions;
 using Eco.Plugins.DiscordLink.Utilities;
+using Eco.Shared.Utils;
 
 namespace Eco.Plugins.DiscordLink.Extensions
 {
@@ -7,7 +8,7 @@ namespace Eco.Plugins.DiscordLink.Extensions
     {
         #region ChatMessage
 
-        public static string FormatForLog(this ChatSent message) => $"Author: {MessageUtils.StripTags(message.Citizen.Name)}\nChannel: {message.Tag}\nMessage: {message.Message}";
+        public static string FormatForLog(this ChatSent message) => $"Author: {MessageUtils.StripTags(message.MarkedUpName.ToString().StripTags())}\nChannel: {message.Tag}\nMessage: {message.Message}";
 
         #endregion
     }

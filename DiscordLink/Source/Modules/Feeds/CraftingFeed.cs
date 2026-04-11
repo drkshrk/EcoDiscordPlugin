@@ -33,7 +33,7 @@ namespace Eco.Plugins.DiscordLink.Modules
                 return;
 
             string itemName = craftingEvent.OrderCount > 1 ? craftingEvent.CraftedItem.DisplayNamePlural : craftingEvent.CraftedItem.DisplayName;
-            string message = $"**{craftingEvent.Citizen.Name}** started crafting {craftingEvent.OrderCount} `{itemName}` at {(craftingEvent.WorldObject as WorldObject).Name}.";
+            string message = $"**{craftingEvent.Citizen.MarkedUpName}** started crafting {craftingEvent.OrderCount} `{itemName}` at {(craftingEvent.WorldObject as WorldObject).Name}.";
 
             foreach (ChannelLink craftingLink in DiscordLinkConfig.CraftingFeedChannels)
             {

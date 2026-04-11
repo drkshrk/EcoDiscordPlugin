@@ -1105,7 +1105,7 @@ namespace Eco.Plugins.DiscordLink.Utilities
                 {
                     if (laborer.Citizen == null) continue;
                     string creator = (laborer.Citizen == workParty.Creator) ? "(Creator)" : string.Empty;
-                    workersDesc += $"{laborer.Citizen.Name} {creator}\n";
+                    workersDesc += $"{laborer.Citizen.MarkedUpName} {creator}\n";
                 }
 
                 if (string.IsNullOrWhiteSpace(workersDesc))
@@ -1306,7 +1306,7 @@ namespace Eco.Plugins.DiscordLink.Utilities
 
                 CurrencyTrade firstTrade = tradeList[0];
                 DiscordLinkEmbed embed = new DiscordLinkEmbed();
-                string leftName = firstTrade.Citizen.Name;
+                string leftName = firstTrade.Citizen.MarkedUpName;
                 string rightName = (firstTrade.WorldObject as WorldObject).Name;
                 embed.WithTitle($"{leftName} traded at {MessageUtils.StripTags(rightName)}");
 
@@ -1366,7 +1366,7 @@ namespace Eco.Plugins.DiscordLink.Utilities
 
                 DiscordLinkEmbed embed = new DiscordLinkEmbed();
                 embed.WithTitle("Account Linking Verification");
-                embed.AddField("Initiator", MessageUtils.StripTags(ecoUser.Name));
+                embed.AddField("Initiator", MessageUtils.StripTags(ecoUser.MarkedUpName));
                 embed.AddField("Description", $"Your Eco account has been linked to your Discord account on the server \"{serverName}\".");
                 embed.AddField("Action Required", $"If you initiated this action, click the {DLConstants.ACCEPT_EMOJI} below to verify that these accounts should be linked.");
                 embed.WithFooter($"If you did not initiate this action, click the {DLConstants.DENY_EMOJI} and notify a server admin.\nThe account link cannot be used until verified.");

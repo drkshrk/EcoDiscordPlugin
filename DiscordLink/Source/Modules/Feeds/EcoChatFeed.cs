@@ -76,7 +76,7 @@ namespace Eco.Plugins.DiscordLink.Modules
             bool allowGlobalMention = globalMentionPermission == GlobalMentionPermission.AnyUser
                 || globalMentionPermission == GlobalMentionPermission.Admin && chatMessage.Citizen.IsAdmin;
 
-            await DiscordLink.Obj.Client.SendMessageAsync(channel, MessageUtils.FormatChatMessageForDiscord(forwardedMessage, channel, chatMessage.Citizen.Name, useTimestamp, allowGlobalMention, chatlinkPermissions));
+            await DiscordLink.Obj.Client.SendMessageAsync(channel, MessageUtils.FormatChatMessageForDiscord(forwardedMessage, channel, chatMessage.Citizen.MarkedUpName.ToString().StripTags(), useTimestamp, allowGlobalMention, chatlinkPermissions));
             ++_opsCount;
         }
     }

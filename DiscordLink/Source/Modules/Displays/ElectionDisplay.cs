@@ -81,7 +81,7 @@ namespace Eco.Plugins.DiscordLink.Modules
             DisplayTracker tracker = DLStorage.PersistentData.Displays.Values.FirstOrDefault(tracker => tracker.MessageIds.Contains(message.Id));
             if (tracker == null)
             {
-                Logger.Error($"Failed to find tracker for election display message in channel {message.ChannelId}");
+                Logger.Error($"Failed to find tracker for election display message in channel {message.Channel.GetLogName()}");
                 return null;
             }
 
