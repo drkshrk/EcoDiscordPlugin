@@ -62,12 +62,10 @@ namespace Eco.Plugins.DiscordLink
         public void Write()
         {
             PersistentStorageData persistentData = PersistentData;
-            if (Persistance.WriteJsonToFile<PersistentStorageData>(PersistentData, DLConstants.STORAGE_PATH_ABS, PERSISANT_STORAGE_FILE_NAME))
-                PersistentData = persistentData;
+            Persistance.WriteJsonToFile<PersistentStorageData>(PersistentData, DLConstants.STORAGE_PATH_ABS, PERSISANT_STORAGE_FILE_NAME);
 
             WorldStorageData worldData = WorldData;
-            if (Persistance.WriteJsonToFile<WorldStorageData>(WorldData, DLConstants.STORAGE_PATH_ABS, WORLD_STORAGE_FILE_NAME))
-                WorldData = worldData;
+            Persistance.WriteJsonToFile<WorldStorageData>(WorldData, DLConstants.STORAGE_PATH_ABS, WORLD_STORAGE_FILE_NAME);
         }
 
         public void Read()

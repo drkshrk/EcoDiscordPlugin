@@ -2,6 +2,7 @@
 using Eco.Moose.Tools.Logger;
 using Eco.Moose.Utils.SystemUtils;
 using Eco.Plugins.DiscordLink.Events;
+using Eco.Plugins.DiscordLink.Extensions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -95,6 +96,8 @@ namespace Eco.Plugins.DiscordLink.Modules
 
         protected sealed override async Task UpdateInternal(DiscordLink plugin, DlEventType trigger, params object[] data)
         {
+            bool modifiedDisplayTrackingData = false;
+
             // Handle deleted messages first to avoid exceptions
             if (trigger == DlEventType.DiscordMessageDeleted)
             {
@@ -116,6 +119,7 @@ namespace Eco.Plugins.DiscordLink.Modules
                 }
 
                 DLStorage.PersistentData.Displays.Remove(IdAndTracker.Key);
+                modifiedDisplayTrackingData = true;
             }
             else if (trigger == DlEventType.DiscordReactionAdded || trigger == DlEventType.DiscordReactionRemoved)
             {
@@ -214,12 +218,16 @@ namespace Eco.Plugins.DiscordLink.Modules
                         int messagesLeft = existingMessageCount - targetMessageCount;
                         if(messagesLeft > 0)
                         {
-                            for(int i = targetMessageCount; i < existingMessageCount; ++i)
+                            for (int i = targetMessageCount; i < existingMessageCount; ++i)
                             {
                                 DiscordMessage message = await plugin.Client.FetchMessageAsync(targetChannel, tracker.MessageIds[i], expectNotFound: true);
-                                tracker.MessageIds.Remove(message.Id);
-                                await plugin.Client.DeleteMessageAsync(message);
-                                ++_opsCount;
+                                if (message != null)
+                                {
+                                    // Message may have been removed manually by user
+                                    await plugin.Client.DeleteMessageAsync(message);
+                                    ++_opsCount;
+                                }
+                                tracker.MessageIds.Remove(tracker.MessageIds[i]);
                             }
                         }
                     }
@@ -233,13 +241,20 @@ namespace Eco.Plugins.DiscordLink.Modules
                         ++_opsCount;
 
                         if (!createdMessages.Any())
+                        {
+                            Logger.Error($"Failed to create Display message for \"{this}\" in {targetChannel.GetLogName()}");
                             continue;
+                        }
 
                         DLStorage.PersistentData.Displays.Add(target.Id, new DisplayTracker(targetChannel.Id, createdMessages.Select(message => message.Id)));
+                        modifiedDisplayTrackingData = true;
                         await PostDisplayCreated(createdMessages);
                     }
                 }
             }
+
+            if (modifiedDisplayTrackingData)
+                DLStorage.Instance.Write();
 
             LastUpdateTime = DateTime.Now;
         }
