@@ -276,7 +276,20 @@ namespace Eco.Plugins.DiscordLink
 
         #region Plugin Management
 
-        [Command("ForceUpdate")]
+        [Command("ModuleStatus")]
+        [Description("Displays the status of the given module or all modules if no module name is supplied.")]
+        public async Task ModuleStatus(CommandContext command,
+            [Parameter("ModuleName")][Description("The name of the module to display the status of. Case insensitive. Empty = All.")][SlashAutoCompleteProvider<ModuleTargetAutoCompleteProvider>] string moduleName = "",
+            [Parameter("Verbose")] [Description("Wheter or not the displayed status should display verbose information")] bool verbose = false)
+        {
+            DiscordCommandContext ctx = new DiscordCommandContext(command, ResponseTiming.Delayed);
+            await ExecuteCommand<object>(PermissionType.Admin, ctx, async (lCtx, args) =>
+            {
+                await SharedCommands.ModuleStatus(ctx, moduleName, verbose);
+            });
+        }
+
+        [Command("UpdateModule")]
         [Description("Forces an update of the given module or all modules if no module name is supplied.")]
         public async Task UpdateModule(CommandContext command,
             [Parameter("ModuleName")][Description("The name of the module to update. Empty = All.")][SlashAutoCompleteProvider<ModuleTargetAutoCompleteProvider>] string moduleName = "")

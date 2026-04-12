@@ -95,6 +95,16 @@ namespace Eco.Plugins.DiscordLink
 
         #region Plugin Management
 
+        [ChatSubCommand("DiscordLink", "Displays the status of the given module or all modules if no module name is supplied.", ChatAuthorizationLevel.Admin)]
+        public static async Task ModuleStatus(IChatClient caller, string moduleName = "", bool verbose = false)
+        {
+            EcoCommandContext ctx = new EcoCommandContext(caller);
+            await ExecuteCommand(async (lUser, args) =>
+            {
+                await SharedCommands.ModuleStatus(ctx, moduleName, verbose);
+            }, ctx);
+        }
+
         [ChatSubCommand("DiscordLink", "Forces an update of the given module or all modules if no module name is supplied.", ChatAuthorizationLevel.Admin)]
         public static async Task UpdateModule(IChatClient caller, string moduleName = "")
         {

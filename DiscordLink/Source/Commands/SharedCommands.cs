@@ -91,6 +91,31 @@ namespace Eco.Plugins.DiscordLink
 
         #region Plugin Management
 
+        public static async Task<bool> ModuleStatus(DiscordLinkCommandContext ctx, string moduleName, bool verbose)
+        {
+            DiscordLink plugin = DiscordLink.Obj;
+            if (moduleName.IsEmpty())
+            {
+                string moduleDisplayText = plugin.Modules.Select(async module => await module.GetDisplayText(string.Empty, verbose)).Select(task => task.Result).DoubleNewlineList();
+                await DisplayCommandData(ctx, $"Full module status", moduleDisplayText);
+            }
+            else
+            {
+                Module module = plugin.Modules.First(module => module.ToString().ToLower() == moduleName.ToLower());
+                if (module == null)
+                {
+                    await ReportCommandError(ctx, $"Failed to display module status - Module \"{moduleName}\" could not be found");
+                    return false;
+                }
+
+                string moduleDisplayText = await module.GetDisplayText(string.Empty, verbose);
+                await DisplayCommandData(ctx, $"{module} module status", moduleDisplayText);
+            }
+
+            return true;
+        }
+
+        public static async Task<bool> UpdateModule(DiscordLinkCommandContext ctx, string moduleName)
         {
             if (DiscordLink.Obj.Client.ConnectionStatus != DiscordClient.ConnectionState.Connected)
             {
