@@ -527,7 +527,7 @@ namespace Eco.Plugins.DiscordLink.Utilities
                 if (onlinePlayers > 0)
                 {
                     string playerDesc = onlinePlayers == 1 ? "player" : "players";
-                    activityString = $"{onlinePlayers} {playerDesc} play Eco";
+                    activityString = $"Watching {onlinePlayers} {playerDesc} play Eco";
                 }
                 else
                 {
@@ -542,12 +542,12 @@ namespace Eco.Plugins.DiscordLink.Utilities
                         else
                             movementDesc = "run";
 
-                        activityString = $"{animalName} {movementDesc} around";
+                        activityString = $"Watching {animalName} {movementDesc} around";
                     }
                     else
                     {
                         string plantName = Simulation.EcoSim.AllSpecies.Where(species => species.GetType().DerivesFrom(typeof(PlantSpecies)) || species.GetType().DerivesFrom(typeof(TreeSpecies))).Random().DisplayName.ToLower();
-                        activityString = $"{plantName} grow";
+                        activityString = $"Watching {plantName} grow";
                     }
                 }
                 return activityString;
