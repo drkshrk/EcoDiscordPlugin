@@ -276,14 +276,15 @@ namespace Eco.Plugins.DiscordLink
 
         #region Plugin Management
 
-        [Command("Update")]
-        [Description("Forces an update of most internal systems.")]
-        public async Task Update(CommandContext command)
+        [Command("ForceUpdate")]
+        [Description("Forces an update of the given module or all modules if no module name is supplied.")]
+        public async Task UpdateModule(CommandContext command,
+            [Parameter("ModuleName")][Description("The name of the module to update. Empty = All.")][SlashAutoCompleteProvider<ModuleTargetAutoCompleteProvider>] string moduleName = "")
         {
             DiscordCommandContext ctx = new DiscordCommandContext(command, ResponseTiming.Delayed);
             await ExecuteCommand<object>(PermissionType.Admin, ctx, async (lCtx, args) =>
             {
-                await SharedCommands.Update(ctx);
+                await SharedCommands.UpdateModule(ctx, moduleName);
             });
         }
 
@@ -935,7 +936,7 @@ namespace Eco.Plugins.DiscordLink
         [Command("Trades")]
         [Description("Displays available trades by player, tag, item or store.")]
         public async Task Trades(CommandContext command,
-            [Parameter("SearchName")][Description("The player name or item name for which to display trades. Case insensitive and auto completed.")][SlashAutoCompleteProvider<TradeTargetAutoCompleteProvider>] string searchName)
+            [Parameter("SearchName")][Description("The player name or item name for which to display trades. Case insensitive.")][SlashAutoCompleteProvider<TradeTargetAutoCompleteProvider>] string searchName)
         {
             DiscordCommandContext ctx = new DiscordCommandContext(command, ResponseTiming.Delayed);
             await ExecuteCommand<object>(PermissionType.User, ctx, async (lCtx, args) =>
@@ -968,7 +969,7 @@ namespace Eco.Plugins.DiscordLink
         [Command("dlt")]
         [Description("Shorthand for the Trades command.")]
         public async Task DLT(CommandContext command,
-            [Parameter("SearchName")][Description("The player name or item name for which to display trades. Case insensitive and auto completed.")][SlashAutoCompleteProvider<TradeTargetAutoCompleteProvider>] string searchName)
+            [Parameter("SearchName")][Description("The player name or item name for which to display trades. Case insensitive.")][SlashAutoCompleteProvider<TradeTargetAutoCompleteProvider>] string searchName)
         {
             await Trades(command, searchName);
         }

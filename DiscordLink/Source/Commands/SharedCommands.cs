@@ -13,6 +13,7 @@ using Eco.Moose.Utils.Lookups;
 using Eco.Moose.Utils.Message;
 using Eco.Moose.Utils.Plugin;
 using Eco.Plugins.DiscordLink.Extensions;
+using Eco.Plugins.DiscordLink.Modules;
 using Eco.Plugins.DiscordLink.Utilities;
 using Eco.Plugins.Networking;
 using Eco.Shared.Utils;
@@ -90,18 +91,34 @@ namespace Eco.Plugins.DiscordLink
 
         #region Plugin Management
 
-        public static async Task<bool> Update(DiscordLinkCommandContext ctx)
         {
             if (DiscordLink.Obj.Client.ConnectionStatus != DiscordClient.ConnectionState.Connected)
             {
-                await ReportCommandError(ctx, "Failed to force update - Discord client not connected");
+                await ReportCommandError(ctx, "Failed to force update module - Discord client not connected");
                 return false;
             }
 
             DiscordLink plugin = DiscordLink.Obj;
-            plugin.Modules.ForEach(async module => await module.HandleStartOrStop());
-            await plugin.HandleEvent(Events.DlEventType.ForceUpdate);
-            await ReportCommandInfo(ctx, "Forced update");
+            if (moduleName.IsEmpty())
+            {
+                plugin.Modules.ForEach(async module => await module.HandleStartOrStop());
+                await plugin.HandleEvent(Events.DlEventType.ForceUpdate);
+                await ReportCommandInfo(ctx, "Forced update of all modules");
+            }
+            else
+            {
+                Module module = plugin.Modules.First(module => module.ToString().ToLower() == moduleName.ToLower());
+                if(module == null)
+                {
+                    await ReportCommandError(ctx, $"Failed to force update module - Module \"{moduleName}\" could not be found");
+                    return false;
+                }
+
+                await module.HandleStartOrStop();
+                await module.Update(plugin, Events.DlEventType.ForceUpdate);
+                await ReportCommandInfo(ctx, $"Forced update of {module} module");
+            }
+            
             return true;
         }
 

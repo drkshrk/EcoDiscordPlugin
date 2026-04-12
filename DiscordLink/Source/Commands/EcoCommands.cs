@@ -95,13 +95,13 @@ namespace Eco.Plugins.DiscordLink
 
         #region Plugin Management
 
-        [ChatSubCommand("DiscordLink", "Forces an update.", ChatAuthorizationLevel.Admin)]
-        public static async Task Update(IChatClient caller)
+        [ChatSubCommand("DiscordLink", "Forces an update of the given module or all modules if no module name is supplied.", ChatAuthorizationLevel.Admin)]
+        public static async Task UpdateModule(IChatClient caller, string moduleName = "")
         {
             EcoCommandContext ctx = new EcoCommandContext(caller);
             await ExecuteCommand(async (lUser, args) =>
             {
-                await SharedCommands.Update(ctx);
+                await SharedCommands.UpdateModule(ctx, moduleName);
             }, ctx);
         }
 
