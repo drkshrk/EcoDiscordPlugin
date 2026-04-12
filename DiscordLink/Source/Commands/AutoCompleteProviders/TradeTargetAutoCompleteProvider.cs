@@ -1,6 +1,7 @@
 ﻿using DSharpPlus.Commands.Processors.SlashCommands;
 using DSharpPlus.Commands.Processors.SlashCommands.ArgumentModifiers;
 using DSharpPlus.Entities;
+using Eco.Moose.Extensions;
 using Eco.Moose.Tools.Logger;
 using Eco.Moose.Utils.Lookups;
 using Eco.Moose.Utils.TextUtils;
@@ -37,11 +38,11 @@ namespace Eco.Plugins.DiscordLink
                         break;
 
                     case LookupTypes.User:
-                        tradeTargetList.AddUniqueRange(Lookups.Users.Select(user => user.Name.StripTags()));
+                        tradeTargetList.AddUniqueRange(Lookups.Users.Select(user => user.GetTagStrippedName()));
                         break;
 
                     case LookupTypes.Store:
-                        tradeTargetList.AddUniqueRange(Lookups.StoresComponents.Select(store => store.Parent.Name.StripTags()));
+                        tradeTargetList.AddUniqueRange(Lookups.StoresComponents.Select(store => store.Parent.GetTagStrippedName()));
                         break;
 
                     default:

@@ -374,7 +374,7 @@ namespace Eco.Plugins.DiscordLink.Utilities
 
             public static string GetOnlinePlayerList()
             {
-                string playerList = string.Join("\n", Lookups.OnlineUsersAlphabetical.Select(user => MessageUtils.StripTags(user.Name)));
+                string playerList = string.Join("\n", Lookups.OnlineUsersAlphabetical.Select(user => user.GetTagStrippedName()));
                 if (string.IsNullOrEmpty(playerList))
                     playerList = "-- No players online --";
 
@@ -388,8 +388,8 @@ namespace Eco.Plugins.DiscordLink.Utilities
                 VoteAndtimeRemainingList = string.Empty;
                 foreach (Election election in Lookups.ActiveElections.OrderByDescending(election => election.Settlement.CachedData.CultureRecursiveTotal))
                 {
-                    electionList += $"{MessageUtils.StripTags(election.Name)}\n";
-                    settlementList += election.Settlement != null ? $"{MessageUtils.StripTags(election.Settlement.Name)}\n" : "None";
+                    electionList += $"{election.Name.StripTags()}\n";
+                    settlementList += election.Settlement != null ? $"{election.Settlement.Name.StripTags()}\n" : "None";
                     VoteAndtimeRemainingList += $"{election.TotalVotes} | {TimeFormatter.FormatSpan(election.TimeLeft)}\n";
                 }
             }
@@ -401,9 +401,9 @@ namespace Eco.Plugins.DiscordLink.Utilities
                 creatorList = string.Empty;
                 foreach (Law law in Lookups.ActiveLaws.OrderByDescending(law => law.Settlement.CachedData.CultureRecursiveTotal))
                 {
-                    lawList += $"{MessageUtils.StripTags(law.Name)}\n";
-                    settlementList += law.Settlement != null ? $"{MessageUtils.StripTags(law.Settlement.Name)}\n" : "None";
-                    creatorList += law.Creator != null ? $"{MessageUtils.StripTags(law.Creator.Name)}\n" : "Unknown\n";
+                    lawList += $"{law.Name.StripTags()}\n";
+                    settlementList += law.Settlement != null ? $"{law.Settlement.Name.StripTags()}\n" : "None";
+                    creatorList += law.Creator != null ? $"{law.Creator.GetTagStrippedName()}\n" : "Unknown\n";
                 }
             }
 
@@ -414,9 +414,9 @@ namespace Eco.Plugins.DiscordLink.Utilities
                 leaderList = string.Empty;
                 foreach (Settlement settlement in Lookups.ActiveSettlements.OrderByDescending(settlement => settlement.CachedData.CultureRecursiveTotal))
                 {
-                    settlementList += $"{MessageUtils.StripTags(settlement.Name)}\n";
+                    settlementList += $"{settlement.Name.StripTags()}\n";
                     activeCitizenCountAndInfluenceList += $"{settlement.Citizens.Count(user => user.IsActive)} | {settlement.CachedData.CultureRecursiveTotal.ToString("0")}\n";
-                    leaderList += settlement.Leader != null && settlement.Leader.Occupied ? $"{MessageUtils.StripTags(settlement.Leader.UserSet.First().Name)}\n" : "None\n";
+                    leaderList += settlement.Leader != null && settlement.Leader.Occupied ? $"{settlement.Leader.UserSet.First().GetTagStrippedName()}\n" : "None\n";
                 }
             }
 
@@ -565,7 +565,7 @@ namespace Eco.Plugins.DiscordLink.Utilities
 
                 if (flag.HasFlag(ServerInfoComponentFlag.Name))
                 {
-                    report.WithTitle($"**{MessageUtils.FirstNonEmptyString(DiscordLinkConfig.ServerName, MessageUtils.StripTags(serverInfo?.Description ?? "[Missing StrangeWorld Data]"), "[Server Title Missing]")} Server Status**");
+                    report.WithTitle($"**{MessageUtils.FirstNonEmptyString(DiscordLinkConfig.ServerName, serverInfo?.Description.StripTags() ?? "[Missing StrangeWorld Data]", "[Server Title Missing]")} Server Status**");
                 }
                 else
                 {
@@ -574,7 +574,7 @@ namespace Eco.Plugins.DiscordLink.Utilities
 
                 if (flag.HasFlag(ServerInfoComponentFlag.Description))
                 {
-                    report.WithDescription(MessageUtils.FirstNonEmptyString(DiscordLinkConfig.ServerDescription, MessageUtils.StripTags(serverInfo?.DetailedDescription ?? "[Missing StrangeWorld Data]"), "No server description is available."));
+                    report.WithDescription(MessageUtils.FirstNonEmptyString(DiscordLinkConfig.ServerDescription, serverInfo?.DetailedDescription.StripTags() ?? "[Missing StrangeWorld Data]", "No server description is available."));
                 }
 
                 if (flag.HasFlag(ServerInfoComponentFlag.ConnectionInfo))
@@ -782,7 +782,7 @@ namespace Eco.Plugins.DiscordLink.Utilities
                     discordMember = linkedUser.DiscordMember;
 
                 DiscordLinkEmbed report = new DiscordLinkEmbed();
-                report.WithTitle($"Report for {MessageUtils.StripTags(user.Name)}");
+                report.WithTitle($"Report for {user.GetTagStrippedName()}");
                 report.WithFooter(GetStandardEmbedFooter());
 
                 // Online Status
@@ -902,10 +902,10 @@ namespace Eco.Plugins.DiscordLink.Utilities
                 if (flag.HasFlag(PlayerReportComponentFlag.Titles))
                 {
                     StringBuilder titlesDesc = new StringBuilder();
-                    IEnumerable<Title> userTitles = Lookups.ActiveElectedTitles.Where(title => title.UserSet.Contains(user)).Cast<Title>().Concat(Lookups.ActiveAppointedTitles.Where(title => title.UserSet.Contains(user)).Cast<Title>()).OrderBy(title => title.Name);
+                    IEnumerable<Title> userTitles = Lookups.ActiveElectedTitles.Where(title => title.UserSet.Contains(user)).Cast<Title>().Concat(Lookups.ActiveAppointedTitles.Where(title => title.UserSet.Contains(user)).Cast<Title>()).OrderBy(title => title.MarkedUpName.ToString().StripTags());
                     foreach (Title title in userTitles)
                     {
-                        titlesDesc.AppendLine(title.Name + (title.Creator == user ? " (Creator)" : string.Empty));
+                        titlesDesc.AppendLine(title.MarkedUpName.ToString().StripTags() + (title.Creator == user ? " (Creator)" : string.Empty));
                     }
                     report.AddField("Titles", userTitles.Count() > 0 ? titlesDesc.ToString() : "No Titles", inline: true);
                     report.AddAlignmentField();
@@ -922,7 +922,7 @@ namespace Eco.Plugins.DiscordLink.Utilities
                     foreach (Deed deed in userDeeds)
                     {
                         propertiessDesc.AppendLine(deed.Name.TrimEndString(" Deed"));
-                        propertiessSizeOrVehicleDesc.AppendLine(deed.IsVehicle() ? deed.GetVehicle().Parent.DisplayName : $"{deed.GetTotalPlotSize()}m²");
+                        propertiessSizeOrVehicleDesc.AppendLine(deed.IsVehicle() ? deed.GetVehicle().Parent.GetTagStrippedName() : $"{deed.GetTotalPlotSize()}m²");
                         propertiessLocationDesc.AppendLine(deed.IsVehicle() ? deed.GetVehicle().Parent.Position3i.ToString() : deed.CachedCenterPos == null ? deed.CachedCenterPos.ToString() : "Unknown");
                     }
 
@@ -940,7 +940,7 @@ namespace Eco.Plugins.DiscordLink.Utilities
                 var currencyTradesMap = Moose.Plugin.MooseStorage.WorldData.CurrencyToTradeCountMap;
 
                 DiscordLinkEmbed report = new DiscordLinkEmbed();
-                report.WithTitle(MessageUtils.StripTags(currency.Name));
+                report.WithTitle(currency.MarkedUpName.ToString().StripTags());
                 report.WithFooter(GetStandardEmbedFooter());
 
                 // Find and sort relevant accounts
@@ -961,9 +961,9 @@ namespace Eco.Plugins.DiscordLink.Utilities
                         --i;
                         continue;
                     }
-                    topAccounts += $"{MessageUtils.StripTags(accountEnumerator.Current.Name)}\n";
+                    topAccounts += $"{accountEnumerator.Current.Name.StripTags()}\n";
                     amounts += $"**{accountEnumerator.Current.GetCurrencyHoldingVal(currency):N0}**\n";
-                    topAccountHolders += $"{accountEnumerator.Current.Creator.Name}\n";
+                    topAccountHolders += $"{accountEnumerator.Current.Creator.GetTagStrippedName()}\n";
                 }
 
                 if (tradesCount <= 0 && string.IsNullOrWhiteSpace(topAccounts))
@@ -1003,7 +1003,7 @@ namespace Eco.Plugins.DiscordLink.Utilities
             public static DiscordLinkEmbed GetElectionReport(Election election)
             {
                 DiscordLinkEmbed report = new DiscordLinkEmbed();
-                report.WithTitle(MessageUtils.StripTags(election.Name));
+                report.WithTitle(election.Name.StripTags());
                 report.WithFooter(GetStandardEmbedFooter());
 
                 // Link
@@ -1012,13 +1012,13 @@ namespace Eco.Plugins.DiscordLink.Utilities
                 report.AddField("URL", fieldText);
 
                 // Settlement juristiction
-                report.AddField("Settlement", election.Settlement.Name, inline: true);
+                report.AddField("Settlement", election.Settlement.Name.StripTags(), inline: true);
 
                 // Proposer name
-                report.AddField("Proposer", election.Creator.Name, inline: true);
+                report.AddField("Proposer", election.Creator.GetTagStrippedName(), inline: true);
 
                 // Process
-                report.AddField("Process", MessageUtils.StripTags(election.Process.Name), inline: true);
+                report.AddField("Process", election.Process.Name.StripTags(), inline: true);
 
                 // Time Remaining
                 report.AddField("Time Remaining", TimeFormatter.FormatSpan(election.TimeLeft), inline: true);
@@ -1036,11 +1036,11 @@ namespace Eco.Plugins.DiscordLink.Utilities
                         {
                             if (choice.ID == topChoiceId)
                             {
-                                topChoiceName = choice.Name;
+                                topChoiceName = choice.MarkedUpName.ToString().StripTags();
                                 break;
                             }
                         }
-                        voteDesc += $"{vote.Voter.Name}\n";
+                        voteDesc += $"{vote.Voter.GetTagStrippedName()}\n";
                         choiceDesc += $"{topChoiceName}\n";
                     }
 
@@ -1052,7 +1052,7 @@ namespace Eco.Plugins.DiscordLink.Utilities
                         {
                             if (choice.ID == topChoiceId)
                             {
-                                topChoiceName = choice.Name;
+                                topChoiceName = choice.MarkedUpName.ToString().StripTags();
                                 break;
                             }
                         }
@@ -1081,7 +1081,7 @@ namespace Eco.Plugins.DiscordLink.Utilities
                     string optionsDesc = string.Empty;
                     foreach (ElectionChoice choice in election.Choices)
                     {
-                        optionsDesc += $"{choice.Name}\n";
+                        optionsDesc += $"{choice.MarkedUpName.ToString().StripTags()}\n";
                     }
                     report.AddField("Options", optionsDesc, inline: true);
                 }
@@ -1096,7 +1096,7 @@ namespace Eco.Plugins.DiscordLink.Utilities
             public static DiscordLinkEmbed GetWorkPartyReport(WorkParty workParty)
             {
                 DiscordLinkEmbed report = new DiscordLinkEmbed();
-                report.WithTitle(MessageUtils.StripTags(workParty.Name));
+                report.WithTitle(workParty.Name.StripTags());
                 report.WithFooter(GetStandardEmbedFooter());
 
                 // Workers
@@ -1105,7 +1105,7 @@ namespace Eco.Plugins.DiscordLink.Utilities
                 {
                     if (laborer.Citizen == null) continue;
                     string creator = (laborer.Citizen == workParty.Creator) ? "(Creator)" : string.Empty;
-                    workersDesc += $"{laborer.Citizen.MarkedUpName} {creator}\n";
+                    workersDesc += $"{laborer.Citizen.MarkedUpName.ToString().StripTags()} {creator}\n";
                 }
 
                 if (string.IsNullOrWhiteSpace(workersDesc))
@@ -1127,7 +1127,7 @@ namespace Eco.Plugins.DiscordLink.Utilities
                                 if (!string.IsNullOrEmpty(laborWork.ShortDescriptionRemaining))
                                 {
                                     workType = $"Labor for {laborWork.Order.Recipe.RecipeName}";
-                                    workEntries.Add(MessageUtils.StripTags(laborWork.ShortDescriptionRemaining));
+                                    workEntries.Add(laborWork.ShortDescriptionRemaining.StripTags());
                                 }
                                 break;
                             }
@@ -1187,21 +1187,21 @@ namespace Eco.Plugins.DiscordLink.Utilities
 
                         case GrantTitlePayment titlePayment:
                             {
-                                desc = $"Receive title `{MessageUtils.StripTags(titlePayment.Title.Name)}` if work contributed is at least *{titlePayment.MinContributedPercent.ToString("F1")}%*.";
+                                desc = $"Receive title `{titlePayment.Title.Name.StripTags()}` if work contributed is at least *{titlePayment.MinContributedPercent.ToString("F1")}%*.";
                                 break;
                             }
 
                         case KnowledgeSharePayment knowledgePayment:
                             {
                                 if (knowledgePayment.Skills.Entries.Count > 0)
-                                    desc = $"Receive knowledge of `{MessageUtils.StripTags(knowledgePayment.ShortDescription())}` if work contributed is at least *{knowledgePayment.MinContributedPercent.ToString("F1")}%*.";
+                                    desc = $"Receive knowledge of `{knowledgePayment.ShortDescription().StripTags()}` if work contributed is at least *{knowledgePayment.MinContributedPercent.ToString("F1")}%*.";
                                 break;
                             }
 
                         case ReputationPayment reputationPayment:
                             {
                                 float reputationAmountLeft = reputationPayment.Amount - reputationPayment.AmountPaid;
-                                desc = $"Receive **{reputationAmountLeft.ToString("F1")} reputation** from *{workParty.Creator.Name}*"
+                                desc = $"Receive **{reputationAmountLeft.ToString("F1")} reputation** from *{workParty.Creator.GetTagStrippedName()}*"
                                     + (reputationPayment.PayType == PayType.SplitByWorkPercent ? ", split based on work performed" : ", split evenly")
                                     + (reputationPayment.PayAsYouGo ? ", paid as work is performed." : ", paid when the project finishes.");
                                 break;
@@ -1271,7 +1271,7 @@ namespace Eco.Plugins.DiscordLink.Utilities
 
                 string title = string.Empty;
                 if (lookup.UserFilter != null)
-                    title = $"{lookup.UserFilter.Name} Repair Bounties";
+                    title = $"{lookup.UserFilter.GetTagStrippedName()} Repair Bounties";
                 else if (lookup.SettlementFilter != null)
                     title = $"{lookup.SettlementFilter.Name.StripTags()} Repair Bounties";
                 else
@@ -1283,12 +1283,12 @@ namespace Eco.Plugins.DiscordLink.Utilities
                 StringBuilder worldObjectDesc = new StringBuilder();
                 StringBuilder durabilityAndPaymentDesc = new StringBuilder();
 
-                foreach (RepairBountyLookupData bounty in lookup.Bounties.OrderBy(bounty => bounty.RepairObject.DisplayName))
+                foreach (RepairBountyLookupData bounty in lookup.Bounties.OrderBy(bounty => bounty.RepairObject.GetTagStrippedName()))
                 {
-                    ownerDesc.AppendLine(bounty.RepairObject.Owners.Name);
-                    worldObjectDesc.AppendLine(bounty.RepairObject.DisplayName);
+                    ownerDesc.AppendLine(bounty.RepairObject.Owners.MarkedUpName.ToString().StripTags());
+                    worldObjectDesc.AppendLine(bounty.RepairObject.GetTagStrippedName());
 
-                    string paymentDesc = bounty.PaymentAmount > 0 ? $"{bounty.PaymentAmount.ToString("N2")} {bounty.PaymentCurrency.Name}" : "No payment";
+                    string paymentDesc = bounty.PaymentAmount > 0 ? $"{bounty.PaymentAmount.ToString("N2")} {bounty.PaymentCurrency.MarkedUpName.ToString().StripTags()}" : "No payment";
                     durabilityAndPaymentDesc.AppendLine($"{bounty.DurabilityPercent.ToString("00")} | {paymentDesc}");
                 }
 
@@ -1306,9 +1306,9 @@ namespace Eco.Plugins.DiscordLink.Utilities
 
                 CurrencyTrade firstTrade = tradeList[0];
                 DiscordLinkEmbed embed = new DiscordLinkEmbed();
-                string leftName = firstTrade.Citizen.MarkedUpName;
-                string rightName = (firstTrade.WorldObject as WorldObject).Name;
-                embed.WithTitle($"{leftName} traded at {MessageUtils.StripTags(rightName)}");
+                string leftName = firstTrade.Citizen.GetTagStrippedName();
+                string rightName = (firstTrade.WorldObject as WorldObject).GetTagStrippedName();
+                embed.WithTitle($"{leftName} traded at {rightName}");
 
                 // Go through all acumulated trade events and create a summary
                 string boughtItemsDesc = string.Empty;
@@ -1352,7 +1352,7 @@ namespace Eco.Plugins.DiscordLink.Utilities
                 else
                 {
                     string paidOrGained = subTotal < 0.0f ? "paid" : "gained";
-                    resultDesc = $"*{leftName}* {paidOrGained} {MathF.Round(Math.Abs(subTotal), 2)} *{MessageUtils.StripTags(firstTrade.Currency.Name)}*.";
+                    resultDesc = $"*{leftName}* {paidOrGained} {MathF.Round(Math.Abs(subTotal), 2)} *{firstTrade.Currency.Name.StripTags()}*.";
                 }
 
                 embed.AddField("Result", resultDesc, allowAutoLineBreak: true);
@@ -1362,11 +1362,11 @@ namespace Eco.Plugins.DiscordLink.Utilities
             public static DiscordLinkEmbed GetVerificationDM(User ecoUser)
             {
                 EcoServerConfig serverConfig = NetworkManager.Config;
-                string serverName = MessageUtils.StripTags(!string.IsNullOrWhiteSpace(DiscordLinkConfig.ServerName) ? DiscordLinkConfig.ServerName : serverConfig.Name.StripTags());
+                string serverName = !string.IsNullOrWhiteSpace(DiscordLinkConfig.ServerName) ? DiscordLinkConfig.ServerName : serverConfig.Name.StripTags();
 
                 DiscordLinkEmbed embed = new DiscordLinkEmbed();
                 embed.WithTitle("Account Linking Verification");
-                embed.AddField("Initiator", MessageUtils.StripTags(ecoUser.MarkedUpName));
+                embed.AddField("Initiator", ecoUser.GetTagStrippedName());
                 embed.AddField("Description", $"Your Eco account has been linked to your Discord account on the server \"{serverName}\".");
                 embed.AddField("Action Required", $"If you initiated this action, click the {DLConstants.ACCEPT_EMOJI} below to verify that these accounts should be linked.");
                 embed.WithFooter($"If you did not initiate this action, click the {DLConstants.DENY_EMOJI} and notify a server admin.\nThe account link cannot be used until verified.");
@@ -1395,11 +1395,11 @@ namespace Eco.Plugins.DiscordLink.Utilities
 
                 Func<Tuple<StoreComponent, TradeOffer>, string> getLabel = lookupType switch
                 {
-                LookupTypes.Item => t => $"{t.Item2.GetOfferContentName().StripTags()} @ {t.Item1.Parent.MarkedUpName.ToString().StripTags()}",
-                LookupTypes.Tag => t => $"{t.Item2.GetOfferContentName().StripTags()} @ {t.Item1.Parent.MarkedUpName.ToString().StripTags()}",
-                LookupTypes.User => t => $"{t.Item2.GetOfferContentName().StripTags()}",
-                LookupTypes.Store => t => $"{t.Item2.GetOfferContentName().StripTags()}",
-                _ => t => string.Empty,
+                    LookupTypes.Item => t => $"{t.Item2.GetOfferContentName().StripTags()} @ {t.Item1.Parent.MarkedUpName.ToString().StripTags()}",
+                    LookupTypes.Tag => t => $"{t.Item2.GetOfferContentName().StripTags()} @ {t.Item1.Parent.MarkedUpName.ToString().StripTags()}",
+                    LookupTypes.User => t => $"{t.Item2.GetOfferContentName().StripTags()}",
+                    LookupTypes.Store => t => $"{t.Item2.GetOfferContentName().StripTags()}",
+                    _ => t => string.Empty,
                 };
                 ICollection<StoreOffer> Offers = TradeOffersToFields(offerList, getLabel);
 

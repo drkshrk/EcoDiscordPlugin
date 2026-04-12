@@ -7,6 +7,7 @@ using Eco.Gameplay.Economy;
 using Eco.Gameplay.Economy.WorkParties;
 using Eco.Gameplay.Players;
 using Eco.Moose.Data;
+using Eco.Moose.Extensions;
 using Eco.Moose.Features;
 using Eco.Moose.Tools.Logger;
 using Eco.Moose.Utils.Lookups;
@@ -308,7 +309,7 @@ namespace Eco.Plugins.DiscordLink
             if (ctx is EcoCommandContext ecoCtx)
                 await DisplayCommandData(ctx, $"Player report for {user.MarkedUpName}", report, DLConstants.ECO_PANEL_REPORT);
             else if (ctx is DiscordCommandContext discordCtx)
-                await DisplayCommandData(ctx, $"Player report for {MessageUtils.StripTags(user.Name)}", report);
+                await DisplayCommandData(ctx, $"Player report for {user.GetTagStrippedName()}", report);
             return true;
         }
 
@@ -331,7 +332,7 @@ namespace Eco.Plugins.DiscordLink
             if (ctx is EcoCommandContext ecoCtx)
                 await DisplayCommandData(ecoCtx, $"Currency report for {currency.MarkedUpName}", report, DLConstants.ECO_PANEL_REPORT);
             else if (ctx is DiscordCommandContext discordCtx)
-                await DisplayCommandData(discordCtx, $"Currency report for {currency}", report);
+                await DisplayCommandData(discordCtx, $"Currency report for {currency.MarkedUpName.ToString().StripTags()}", report);
             return true;
         }
 
@@ -408,7 +409,7 @@ namespace Eco.Plugins.DiscordLink
             if (ctx is EcoCommandContext ecoCtx)
                 await DisplayCommandData(ecoCtx, $"Election report for {election.MarkedUpName}", report, DLConstants.ECO_PANEL_REPORT);
             else if (ctx is DiscordCommandContext discordCtx)
-                await DisplayCommandData(discordCtx, $"Election report for {election}", report);
+                await DisplayCommandData(discordCtx, $"Election report for {election.Name.ToString().StripTags()}", report);
             return true;
         }
 
@@ -456,7 +457,7 @@ namespace Eco.Plugins.DiscordLink
             if (ctx is EcoCommandContext ecoCtx)
                 await DisplayCommandData(ecoCtx, $"Work party report for {workParty}", report.AsEcoText(), DLConstants.ECO_PANEL_REPORT);
             else if (ctx is DiscordCommandContext discordCtx)
-                await DisplayCommandData(ctx, $"Work party report for {workParty}", report);
+                await DisplayCommandData(ctx, $"Work party report for {workParty.Name.ToString().StripTags()}", report);
 
             return true;
         }
@@ -477,7 +478,7 @@ namespace Eco.Plugins.DiscordLink
             }
 
             if (ctx is EcoCommandContext ecoCtx)
-                await DisplayCommandData(ecoCtx, $"Work Parties Report", string.Join("\n\n", reports.Select(r => r.AsEcoText())), DLConstants.ECO_PANEL_REPORT);
+                await DisplayCommandData(ecoCtx, $"Work Parties Report", string.Join("\n\n", reports.Select(report => report.AsEcoText())), DLConstants.ECO_PANEL_REPORT);
             else if (ctx is DiscordCommandContext discordCtx)
                 await DisplayCommandData(discordCtx, "Work Parties Report", reports);
 

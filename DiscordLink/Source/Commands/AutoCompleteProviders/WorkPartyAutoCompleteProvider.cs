@@ -22,7 +22,7 @@ namespace Eco.Plugins.DiscordLink
                 workParties = workParties.OrderByDescending(workParty => workParty.PercentDone).ThenBy(workParty => workParty.Name.StripTags());
 
             workParties = workParties.Take(DLConstants.DISCORD_AUTOCORRECT_CHOICE_COUNT_LIMIT); // Avoid triggering warnings about unsupported amount of choices
-            IEnumerable<DiscordAutoCompleteChoice> choices = workParties.Select(workParty => new DiscordAutoCompleteChoice(workParty.Name, workParty.Id.ToString()));
+            IEnumerable<DiscordAutoCompleteChoice> choices = workParties.Select(workParty => new DiscordAutoCompleteChoice(workParty.Name.StripTags(), workParty.Id.ToString()));
             return ValueTask.FromResult(choices);
         }
     }

@@ -6,6 +6,7 @@ using Eco.Moose.Utils.Lookups;
 using Eco.Plugins.DiscordLink.Events;
 using Eco.Plugins.DiscordLink.Extensions;
 using Eco.Plugins.DiscordLink.Utilities;
+using Eco.Shared.Utils;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -60,7 +61,7 @@ namespace Eco.Plugins.DiscordLink.Modules
 
             if (!election.CanVote(linkedUser.EcoUser))
             {
-                await linkedUser.DiscordMember.SendMessageAsync($"Your vote in election \"{election.Name}\" has not been registered as you are not an eligable voter for this election.");
+                await linkedUser.DiscordMember.SendMessageAsync($"Your vote in election \"{election.Name.StripTags()}\" has not been registered as you are not an eligable voter for this election.");
                 return;
             }
 

@@ -1,9 +1,11 @@
 ﻿using Eco.Gameplay.Players;
 using Eco.Gameplay.Systems.Chat;
 using Eco.Gameplay.Systems.Messaging.Chat.Commands;
+using Eco.Moose.Extensions;
 using Eco.Plugins.DiscordLink.Utilities;
 using Eco.Shared.Localization;
 using Eco.Shared.Services;
+using Eco.Shared.Utils;
 using System;
 using System.Threading.Tasks;
 
@@ -21,7 +23,7 @@ namespace Eco.Plugins.DiscordLink
             EcoUser = userLink != null ? userLink.EcoUser : null;
         }
 
-        public string Name => EcoUser != null ? EcoUser.Name : $"DiscordLinkClient_{DiscordCtx.Command.User.Username}";
+        public string Name => EcoUser != null ? EcoUser.GetTagStrippedName() : $"DiscordLinkClient_{DiscordCtx.Command.User.Username}";
         public LocString MarkedUpName => Localizer.NotLocalizedStr(EcoUser != null ? EcoUser.MarkedUpName : $"DiscordLinkClient_{DiscordCtx.Command.User.Username}");
         public string ImplementationName => "DiscordLink Eco Command Client";
 
@@ -69,9 +71,9 @@ namespace Eco.Plugins.DiscordLink
         private async Task SendMessage(string msg, NotificationStyle style)
         {
             if (style == NotificationStyle.Error)
-                await DiscordCommands.ReportCommandError(DiscordCtx, MessageUtils.StripTags(msg));
+                await DiscordCommands.ReportCommandError(DiscordCtx, msg.StripTags());
             else
-                await DiscordCommands.ReportCommandInfo(DiscordCtx, MessageUtils.StripTags(msg));
+                await DiscordCommands.ReportCommandInfo(DiscordCtx, msg.StripTags());
         }
     }
 }

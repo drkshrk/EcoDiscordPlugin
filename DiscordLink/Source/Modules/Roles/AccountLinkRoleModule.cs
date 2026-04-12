@@ -1,5 +1,6 @@
 ﻿using DSharpPlus;
 using DSharpPlus.Entities;
+using Eco.Moose.Extensions;
 using Eco.Moose.Tools.Logger;
 using Eco.Plugins.DiscordLink.Events;
 using Eco.Plugins.DiscordLink.Extensions;
@@ -80,7 +81,7 @@ namespace Eco.Plugins.DiscordLink.Modules
                 DiscordMember member = linkedUser.DiscordMember;
                 if (member == null)
                 {
-                    Logger.Error($"Failed to handle role change for Eco user \"{linkedUser.EcoUser.Name}\". Linked Discord member was not loaded.");
+                    Logger.Error($"Failed to handle role change for Eco user \"{linkedUser.EcoUser.GetTagStrippedName()}\". Linked Discord member was not loaded.");
                     return;
                 }
 

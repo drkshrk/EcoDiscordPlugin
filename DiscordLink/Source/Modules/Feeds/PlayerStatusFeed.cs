@@ -1,4 +1,5 @@
 ﻿using Eco.Gameplay.Players;
+using Eco.Moose.Extensions;
 using Eco.Moose.Tools.Logger;
 using Eco.Plugins.DiscordLink.Events;
 using Eco.Plugins.DiscordLink.Extensions;
@@ -38,15 +39,15 @@ namespace Eco.Plugins.DiscordLink.Modules
             switch (trigger)
             {
                 case DlEventType.Join:
-                    message = $":tada:  {MessageUtils.StripTags(user.Name)} Joined The Server!  :tada:";
+                    message = $":tada:  {user.GetTagStrippedName()} Joined The Server!  :tada:";
                     break;
 
                 case DlEventType.Login:
-                    message = $":arrow_up:  {MessageUtils.StripTags(user.Name)} Logged In  :arrow_up:";
+                    message = $":arrow_up:  {user.GetTagStrippedName()} Logged In  :arrow_up:";
                     break;
 
                 case DlEventType.Logout:
-                    message = $":arrow_down:  {MessageUtils.StripTags(user.Name)} Logged Out  :arrow_down:";
+                    message = $":arrow_down:  {user.GetTagStrippedName()} Logged Out  :arrow_down:";
                     break;
 
                 default:

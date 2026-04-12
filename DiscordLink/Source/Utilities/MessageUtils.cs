@@ -204,14 +204,6 @@ namespace Eco.Plugins.DiscordLink.Utilities
 
         #region Eco --> Discord
 
-        public static string StripTags(string toStrip)
-        {
-            if (toStrip == null)
-                return string.Empty;
-
-            return HTMLTagRegex.Replace(toStrip, string.Empty);
-        }
-
         public static string StripGlobalMentions(string toStrip)
         {
             if (toStrip == null)
@@ -239,7 +231,7 @@ namespace Eco.Plugins.DiscordLink.Utilities
 
         public static string FormatChatMessageForDiscord(string message, DiscordChannel channel, string username, bool useTimestamp, bool allowGlobalMentions, ChatLinkMentionPermissions linkMentionPermissions)
         {
-            string formattedMessage = (username.IsEmpty() ? "" : $"**{username.Replace("@", "")}**: ") + StripTags(message); // All @ characters are removed from the name in order to avoid unintended mentions of the sender
+            string formattedMessage = (username.IsEmpty() ? "" : $"**{username.Replace("@", "")}**: ") + message.StripTags(); // All @ characters are removed from the name in order to avoid unintended mentions of the sender
             if (!allowGlobalMentions)
                 formattedMessage = StripGlobalMentions(formattedMessage);
             if (useTimestamp)

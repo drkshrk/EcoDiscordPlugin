@@ -43,7 +43,7 @@ namespace Eco.Plugins.DiscordLink
             string commandName = command.Method.Name;
             try
             {
-                Logger.Debug($"{MessageUtils.StripTags(ctx.ChatClient.Name)} invoked Eco command \"/{command.Method.Name}\"");
+                Logger.Debug($"{ctx.ChatClient.Name.StripTags()} invoked Eco command \"/{command.Method.Name}\"");
 
                 // Block commands from non-admins if the server isn't fully ready yet
                 if (ctx.ChatClient.GetChatAuthLevel() < ChatAuthorizationLevel.Admin && Plugins.DiscordLink.DiscordLink.Obj.Status != StatusState.Connected)
@@ -57,7 +57,7 @@ namespace Eco.Plugins.DiscordLink
             catch (Exception e)
             {
                 ctx.ChatClient.MsgLocStr($"Error occurred while attempting to run that command. Error message: {e}", Shared.Services.NotificationStyle.InfoBox);
-                Logger.Exception($"An exception occured while attempting to execute a command.\nCommand name: \"{commandName}\"\nCalling user: \"{MessageUtils.StripTags(ctx.ChatClient.Name)}\"", e);
+                Logger.Exception($"An exception occured while attempting to execute a command.\nCommand name: \"{commandName}\"\nCalling user: \"{ctx.ChatClient.Name.StripTags()}\"", e);
             }
         }
 

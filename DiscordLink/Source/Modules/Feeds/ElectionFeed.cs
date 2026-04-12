@@ -1,4 +1,5 @@
 ﻿using Eco.Gameplay.Civics.Elections;
+using Eco.Moose.Extensions;
 using Eco.Moose.Tools.Logger;
 using Eco.Plugins.DiscordLink.Events;
 using Eco.Plugins.DiscordLink.Extensions;
@@ -39,20 +40,20 @@ namespace Eco.Plugins.DiscordLink.Modules
             switch (trigger)
             {
                 case DlEventType.ElectionStarted:
-                    embed.WithTitle($":ballot_box:  {MessageUtils.StripTags(election.Creator.Name)} Started An Election :ballot_box: ");
-                    embed.AddField("Title", MessageUtils.StripTags(election.Name), inline: true);
-                    embed.AddField("Process", MessageUtils.StripTags(election.Process.Name), inline: true);
+                    embed.WithTitle($":ballot_box:  {election.Creator.GetTagStrippedName()} Started An Election :ballot_box: ");
+                    embed.AddField("Title", election.Name.StripTags(), inline: true);
+                    embed.AddField("Process", election.Process.Name.StripTags(), inline: true);
                     embed.AddField("Time", TimeFormatter.FormatSpan(election.TimeLeft), inline: true);
                     break;
 
                 case DlEventType.ElectionStopped:
                     ElectionResult results = election.CurrentResults;
                     embed.WithTitle($":ballot_box:  Election Has Ended  :ballot_box: ");
-                    embed.AddField("Title", MessageUtils.StripTags(election.Name));
+                    embed.AddField("Title", election.Name.StripTags());
                     if (results.Vetoed)
                     {
                         embed.AddField("Result", "Vetoed", inline: true);
-                        embed.AddField("Vetoer", MessageUtils.StripTags(results.Vetoer.Name), inline: true);
+                        embed.AddField("Vetoer", results.Vetoer.GetTagStrippedName(), inline: true);
                         embed.AddField("Time left when vetoed", TimeFormatter.FormatSpan(election.TimeLeft), inline: true);
                     }
                     else
@@ -74,12 +75,12 @@ namespace Eco.Plugins.DiscordLink.Modules
                             if (singleWinner)
                             {
                                 title = "Winner";
-                                winningUsers = MessageUtils.StripTags(results.WinningUsers[0].Name);
+                                winningUsers = results.WinningUsers[0].GetTagStrippedName();
                             }
                             else
                             {
                                 title = "Winners";
-                                winningUsers = MessageUtils.StripTags(string.Join("\n", (object[])results.WinningUsers));
+                                winningUsers = string.Join("\n", (object[])results.WinningUsers).StripTags();
                             }
                             embed.AddField(title, winningUsers, inline: true);
                         }

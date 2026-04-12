@@ -92,7 +92,7 @@ namespace Eco.Plugins.DiscordLink.Events
 
         public void AccumulateLogEvent(string logEventText)
         {
-            string strippedEventText = MessageUtils.StripTags(logEventText);
+            string strippedEventText = logEventText.StripTags();
             Logger.LogLevel eventLevel = Logger.LogLevel.Silent;
             string[] parts = strippedEventText.Split(':', 2);
             if (parts.Length == 0)

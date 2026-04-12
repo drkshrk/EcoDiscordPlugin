@@ -22,7 +22,7 @@ namespace Eco.Plugins.DiscordLink
                 settlements = settlements.OrderByDescending(settlement => settlement.SettlementType).ThenByDescending(settlement => settlement.Citizens.Where(citizen => citizen.IsActive).Count());
 
             settlements = settlements.Take(DLConstants.DISCORD_AUTOCORRECT_CHOICE_COUNT_LIMIT); // Avoid triggering warnings about unsupported amount of choices
-            IEnumerable<DiscordAutoCompleteChoice> choices = settlements.Select(settlement => new DiscordAutoCompleteChoice(settlement.Name, settlement.Id.ToString()));
+            IEnumerable<DiscordAutoCompleteChoice> choices = settlements.Select(settlement => new DiscordAutoCompleteChoice(settlement.Name.StripTags(), settlement.Id.ToString()));
             return ValueTask.FromResult(choices);
         }
     }

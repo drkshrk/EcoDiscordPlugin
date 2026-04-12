@@ -22,7 +22,7 @@ namespace Eco.Plugins.DiscordLink
                 currencies = currencies.OrderByDescending(currency => currency.Backed).ThenByDescending(currency => Moose.Plugin.MooseStorage.WorldData.CurrencyToTradeCountMap.GetOrDefault(currency.Id)).ThenBy(currency => currency.Name.StripTags());
 
             currencies = currencies.Take(DLConstants.DISCORD_AUTOCORRECT_CHOICE_COUNT_LIMIT); // Avoid triggering warnings about unsupported amount of choices
-            IEnumerable<DiscordAutoCompleteChoice> choices = currencies.Select(currency => new DiscordAutoCompleteChoice(currency.Name, currency.Id.ToString()));
+            IEnumerable<DiscordAutoCompleteChoice> choices = currencies.Select(currency => new DiscordAutoCompleteChoice(currency.Name.StripTags(), currency.Id.ToString()));
             return ValueTask.FromResult(choices);
         }
     }
