@@ -393,6 +393,10 @@ namespace Eco.Plugins.DiscordLink
             _triggerWorldResetEvent = true;
         }
 
+        private async Task HandleConfigChanged(object sender, EventArgs e)
+        {
+        }
+
         #endregion
 
         #region Module Management
@@ -492,6 +496,8 @@ namespace Eco.Plugins.DiscordLink
 
         private void RegisterCallbacks()
         {
+            ServerConfig.OnConfigChanged += HandleConfigChanged;
+
             UserManager.NewUserJoinedEvent.Add(OnNewUserJoined);
             UserManager.OnUserLoggedIn.Add(OnNewUserLoggedIn);
             UserManager.OnUserLoggedOut.Add(OnUserLoggedOut);
@@ -505,6 +511,8 @@ namespace Eco.Plugins.DiscordLink
 
         private void DeregisterCallbacks()
         {
+            ServerConfig.OnConfigChanged -= HandleConfigChanged;
+
             UserManager.NewUserJoinedEvent.Remove(OnNewUserJoined);
             UserManager.OnUserLoggedIn.Remove(OnNewUserLoggedIn);
             UserManager.OnUserLoggedOut.Remove(OnUserLoggedOut);
