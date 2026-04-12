@@ -155,7 +155,6 @@ namespace Eco.Plugins.DiscordLink
                 HandleDiscordConnectionFailed("Failed to start DiscordLink. See previous errors for more Information.");
                 return;
             }
-            
 
             Status = StatusState.PostServerInit;
             HandleClientConnected();
@@ -385,7 +384,7 @@ namespace Eco.Plugins.DiscordLink
             DLStorage.Instance.HandleEvent(eventType, data);
             await UserLinkManager.HandleEvent(eventType, data);
             UpdateModules(eventType, data);
-            UpdateActivityString(eventType);
+            await UpdateActivityString(eventType);
         }
 
         public void HandleWorldReset()
@@ -395,6 +394,7 @@ namespace Eco.Plugins.DiscordLink
 
         private async Task HandleConfigChanged(object sender, EventArgs e)
         {
+            await UpdateActivityString(DlEventType.ForceUpdate);
         }
 
         #endregion
@@ -460,18 +460,21 @@ namespace Eco.Plugins.DiscordLink
 
         private void TriggerActivityStringUpdate(object stateInfo)
         {
-            UpdateActivityString(DlEventType.Timer);
+            _ = UpdateActivityString(DlEventType.Timer);
         }
 
-        private async void UpdateActivityString(DlEventType trigger)
+        private async Task UpdateActivityString(DlEventType trigger)
         {
             try
             {
                 if (!Client.IsConnected
-                    || (trigger & (DlEventType.Join | DlEventType.Login | DlEventType.Logout | DlEventType.Timer)) == 0)
+                    || (trigger & (DlEventType.Join | DlEventType.Login | DlEventType.Logout | DlEventType.Timer | DlEventType.ForceUpdate)) == 0)
                     return;
 
-                await Client.SetActivityStringAsync(MessageBuilder.Discord.GetActivityString(), DiscordActivityType.Watching);
+                if (DiscordLinkConfig.EnableBotStatus)
+                    await Client.SetStatusStringAsync(MessageBuilder.Discord.GetActivityString(), DiscordActivityType.Custom);
+                else
+                    await Client.RemoveStatusStringAsync();
             }
             catch (Exception e)
             {

@@ -12,6 +12,7 @@
   "ServerDescription": "",
   "ConnectionInfo": "",
   "ChatSyncMode": "OptOut",
+  "EnableBotStatus": false,
   "ChatChannelLinks": [],
   "TradeFeedChannels": [],
   "CraftingFeedChannels": [],

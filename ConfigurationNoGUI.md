@@ -37,6 +37,7 @@ The config data needs to match your Eco server, Discord server and Discord bot.
   "ServerDescription": "The place to play Eco!",  
   "ConnectionInfo": "xxx.xxx.xxx.xx",  
   "ChatSyncMode": "OptOut",  
+  "EnableBotStatus": false,  
   "ChatChannelLinks": [  
    {  
     "AllowUserMentions": true,  

@@ -37,6 +37,7 @@ namespace Eco.Plugins.DiscordLink
         public static string ConnectionInfo => _serverConfig.ConnectionInfo;
         public static string InviteMessage => _serverConfig.InviteMessage;
         public static ChatSyncMode ChatSyncMode => _serverConfig.ChatSyncMode;
+        public static bool EnableBotStatus => _serverConfig.EnableBotStatus;
         public static Logger.LogLevel PluginLogLevel => _serverConfig.LogLevel;
         public static Microsoft.Extensions.Logging.LogLevel BackendLogLevel => _serverConfig.BackendLogLevel;
         public static int MaxTradeWatcherDisplaysPerUser => _serverConfig.MaxTradeWatcherDisplaysPerUser;

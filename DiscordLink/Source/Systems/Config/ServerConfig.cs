@@ -190,6 +190,7 @@ namespace Eco.Plugins.DiscordLink
                 ConnectionInfo = this.ConnectionInfo,
                 InviteMessage = this.InviteMessage,
                 ChatSyncMode = this.ChatSyncMode,
+                EnableBotStatus = this.EnableBotStatus,
                 LogLevel = this.LogLevel,
                 BackendLogLevel = this.BackendLogLevel,
                 MaxTradeWatcherDisplaysPerUser = this.MaxTradeWatcherDisplaysPerUser,
@@ -246,6 +247,9 @@ namespace Eco.Plugins.DiscordLink
 
         [Description("Whether chat message should be synchroinized by default or not. This setting can be changed while the server is running."), Category("Base Configuration - Eco")]
         public ChatSyncMode ChatSyncMode { get; set; } = ServerConfigDefaultValues.ChatSynchronizationMode;
+
+        [Description("Whether the Discord bot should display a status message. This setting can be changed while the server is running."), Category("Bot features")]
+        public bool EnableBotStatus { get; set; } = ServerConfigDefaultValues.EnableBotStatus;
 
         [Description("Discord and Eco Channels to connect together for chat crossposting. This setting can be changed while the server is running."), Category("Modules - Feeds")]
         public ObservableCollection<ChatChannelLink> ChatChannelLinks { get; set; } = new ObservableCollection<ChatChannelLink>();

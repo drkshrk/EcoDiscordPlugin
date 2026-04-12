@@ -1085,10 +1085,16 @@ namespace Eco.Plugins.DiscordLink
             }
         }
 
-        public async Task SetActivityStringAsync(string activityString, DiscordActivityType activityType)
+        public async Task SetStatusStringAsync(string activityString, DiscordActivityType activityType)
         {
             Logger.Trace($"Updating bot status message to {Enum.GetNames(typeof(DiscordActivityType))[(int)activityType]} {activityString}");
             await DSharpClient.UpdateStatusAsync(new DiscordActivity(activityString, activityType));
+        }
+
+        public async Task RemoveStatusStringAsync()
+        {
+            Logger.Trace($"Removing bot status message");
+            await DSharpClient.UpdateStatusAsync();
         }
 
         #endregion
